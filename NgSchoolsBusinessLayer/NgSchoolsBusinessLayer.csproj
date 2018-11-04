@@ -8,4 +8,14 @@
     <ProjectReference Include="..\NgSchoolsDataLayer\NgSchoolsDataLayer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Utilities\Automapper\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Extensions.Identity.Core">
+      <HintPath>C:\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.extensions.identity.core\2.1.0\lib\netstandard2.0\Microsoft.Extensions.Identity.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

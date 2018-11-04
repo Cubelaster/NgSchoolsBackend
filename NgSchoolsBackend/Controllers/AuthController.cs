@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
-using NgSchoolsDataLayer.Models;
+using NgSchoolsBusinessLayer.Models.Requests;
+using NgSchoolsBusinessLayer.Services.Contracts;
 using System.Threading.Tasks;
 
 namespace NgSchoolsWebApi.Controllers
@@ -9,11 +10,22 @@ namespace NgSchoolsWebApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        [HttpPost]
-        public async Task<ActionResponse<User>> Login()
+        #region Ctors and Members
+
+        private readonly IAuthService authService;
+
+        public AuthController(IAuthService authService)
         {
-            var result = ActionResponse<User>.ReturnSuccess();
-            return await Task.FromResult(result);
+            this.authService = authService;
+        }
+
+        #endregion Ctors and Members
+
+        [HttpPost]
+        public async Task<ActionResponse<LoginRequest>> Login([FromBody] LoginRequest loginRequest)
+        {
+            var result = authService.Login(loginRequest);
+            return await result;
         }
     }
 }
