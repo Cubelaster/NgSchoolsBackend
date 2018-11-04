@@ -23,7 +23,7 @@ namespace NgSchoolsBackend
             services.AddCors(options =>
             {
                 // TODO: Add right Origin
-                options.AddPolicy("Policy",
+                options.AddPolicy("DevelopmentPolicy",
                     builder => builder
                     .AllowAnyMethod()
                     .AllowAnyHeader()
@@ -45,7 +45,7 @@ namespace NgSchoolsBackend
                 app.UseHsts();
             }
 
-            app.UseCors("Policy");
+            app.UseCors("DevelopmentPolicy");
 
             app.UseHttpsRedirection();
             app.UseMvc();
