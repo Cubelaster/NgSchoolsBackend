@@ -4,10 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NgSchoolsWebApi", "NgSchoolsBackend\NgSchoolsWebApi.csproj", "{B3F0C0B3-AF5D-4FE5-9E24-72CB374ED7EF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3890313C-917B-4AF4-B024-C6D19E98CB2B} = {3890313C-917B-4AF4-B024-C6D19E98CB2B}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NgSchoolsBusinessLayer", "NgSchoolsBusinessLayer\NgSchoolsBusinessLayer.csproj", "{3890313C-917B-4AF4-B024-C6D19E98CB2B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NgSchoolsBusinessLayer", "NgSchoolsBusinessLayer\NgSchoolsBusinessLayer.csproj", "{3890313C-917B-4AF4-B024-C6D19E98CB2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NgSchoolsDataLayer", "NgSchoolsDataLayer\NgSchoolsDataLayer.csproj", "{2661BEFA-10B3-4D32-A200-CFE1D72D948E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NgSchoolsDataLayer", "NgSchoolsDataLayer\NgSchoolsDataLayer.csproj", "{2661BEFA-10B3-4D32-A200-CFE1D72D948E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
