@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsBackend
 {
@@ -18,6 +20,9 @@ namespace NgSchoolsBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<NgSchoolsContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"), opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddCors(options =>
