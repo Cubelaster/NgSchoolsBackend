@@ -21,7 +21,8 @@ namespace NgSchoolsBackend
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<NgSchoolsContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"), opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
+                options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"), 
+                opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -44,13 +45,12 @@ namespace NgSchoolsBackend
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseCors("DevelopmentPolicy");
             }
             else
             {
                 app.UseHsts();
             }
-
-            app.UseCors("DevelopmentPolicy");
 
             app.UseHttpsRedirection();
             app.UseMvc();
