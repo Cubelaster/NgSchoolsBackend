@@ -17,5 +17,25 @@ namespace NgSchoolsBusinessLayer.Models.Common
                 ActionResponseType = ActionResponseTypeEnum.Success
             };
         }
+
+        public static ActionResponse<T> ReturnError(string Message = null, object Data = null)
+        {
+            return new ActionResponse<T>()
+            {
+                Data = (T)Data,
+                Message = Message,
+                ActionResponseType = ActionResponseTypeEnum.Error
+            };
+        }
+
+        public static ActionResponse<T> ReturnWarning(string Message = null, object Data = null)
+        {
+            return new ActionResponse<T>()
+            {
+                Data = (T)Data,
+                Message = Message,
+                ActionResponseType = ActionResponseTypeEnum.Warning
+            };
+        }
     }
 }
