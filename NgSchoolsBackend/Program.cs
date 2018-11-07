@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using System;
 
 namespace NgSchoolsBackend
 {
@@ -8,6 +9,8 @@ namespace NgSchoolsBackend
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
+
+            Console.WriteLine("Running NhSchools WebApi!");
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

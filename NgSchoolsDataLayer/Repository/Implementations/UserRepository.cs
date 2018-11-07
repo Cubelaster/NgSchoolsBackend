@@ -21,7 +21,7 @@ namespace NgSchoolsDataLayer.Repository.Implementations
 
         public User GetUserById(Guid Id)
         {
-            return context.Users.FirstOrDefault(u => u.Id == Id.ToString());
+            return context.Users.FirstOrDefault(u => u.Id == Id);
         }
 
         public User GetUserByName(string name)

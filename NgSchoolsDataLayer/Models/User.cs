@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
 {
-    public class User : IdentityUser
+    public class User : IdentityUser<Guid>
     {
         [Required]
         public string FirstName { get; set; }

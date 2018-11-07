@@ -17,7 +17,7 @@ namespace NgSchoolsWebApi.Controllers
                 Version = Environment.Version,
                 Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
             });
-            return await Task.FromResult(result);
+            return await result;
         }
     }
 }

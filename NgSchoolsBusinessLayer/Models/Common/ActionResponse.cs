@@ -1,4 +1,5 @@
 ﻿using NgSchoolsBusinessLayer.Enums.Common;
+using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Models.Common
 {
@@ -8,34 +9,34 @@ namespace NgSchoolsBusinessLayer.Models.Common
         public string Message { get; set; }
         public ActionResponseTypeEnum ActionResponseType { get; set; }
 
-        public static ActionResponse<T> ReturnSuccess(object Data = null, string Message = null)
+        public async static Task<ActionResponse<T>> ReturnSuccess(object Data = null, string Message = null)
         {
-            return new ActionResponse<T>()
+            return await Task.FromResult(new ActionResponse<T>
             {
                 Data = (T)Data,
                 Message = Message,
                 ActionResponseType = ActionResponseTypeEnum.Success
-            };
+            });
         }
 
-        public static ActionResponse<T> ReturnError(string Message = null, object Data = null)
+        public async static Task<ActionResponse<T>> ReturnError(string Message = null, object Data = null)
         {
-            return new ActionResponse<T>()
+            return await Task.FromResult(new ActionResponse<T>
             {
                 Data = (T)Data,
                 Message = Message,
                 ActionResponseType = ActionResponseTypeEnum.Error
-            };
+            });
         }
 
-        public static ActionResponse<T> ReturnWarning(string Message = null, object Data = null)
+        public async static Task<ActionResponse<T>> ReturnWarning(string Message = null, object Data = null)
         {
-            return new ActionResponse<T>()
+            return await Task.FromResult(new ActionResponse<T>
             {
                 Data = (T)Data,
                 Message = Message,
                 ActionResponseType = ActionResponseTypeEnum.Warning
-            };
+            });
         }
     }
 }

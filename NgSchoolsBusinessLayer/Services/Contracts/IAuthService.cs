@@ -6,6 +6,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
 {
     public interface IAuthService
     {
-        Task<ActionResponse<LoginRequest>> Login(LoginRequest loginRequest);
+        Task<ActionResponse<object>> Login(LoginRequest loginRequest);
     }
 }

@@ -12,8 +12,7 @@ namespace NgSchoolsBackend.Controllers
         [HttpPost]
         public async Task<ActionResponse<User>> GetAll()
         {
-            var result = ActionResponse<User>.ReturnSuccess();
-            return await Task.FromResult(result);
+            return await ActionResponse<User>.ReturnSuccess();
         }
     }
 }
