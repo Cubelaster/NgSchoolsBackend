@@ -3,16 +3,12 @@ using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsDataLayer.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Extensions;
-using System.Collections.Generic;
-using System.Security.Claims;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
-using System.Linq;
+using NgSchoolsBusinessLayer.Models.Responses;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -38,27 +34,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         #endregion Ctors and Members
 
-        public async Task<ActionResponse<object>> Login(LoginRequest loginRequest)
+        public async Task<ActionResponse<LoginResponse>> Login(LoginRequest loginRequest)
         {
             var result = await signInManager.PasswordSignInAsync(loginRequest.UserName, loginRequest.Password, true, true);
             if (result.Succeeded)
             {
                 var userToVerify = await userManager.FindByNameAsync(loginRequest.UserName);
-                //var user = mapper.Map<UserDto>(userToVerify);
-                var user = new UserDto
-                {
-                    Id = userToVerify.Id,
-                    UserName = userToVerify.UserName
-                };
+                var user = mapper.Map<UserDto>(userToVerify);
                 user.Claims = (await userService.GetUserClaims(user)).GetData();
                 var jwtToken = await jwtFactory.GenerateSecurityToken(user, loginRequest.RememberMe);
-                return await ActionResponse<object>.ReturnSuccess(new
+
+                return await ActionResponse<LoginResponse>.ReturnSuccess(new LoginResponse
                 {
-                    id = user.Claims.Single(c => c.Type == "Id").Value,
-                    auth_token = jwtToken
+                    UserId = user.Id,
+                    JwtToken = jwtToken
                 });
             }
-            return await ActionResponse<object>.ReturnError("Wrong username or password");
+            return await ActionResponse<LoginResponse>.ReturnError("Wrong username or password");
         }
     }
 }

@@ -51,5 +51,10 @@ namespace NgSchoolsBusinessLayer.Security.Jwt
         /// The signing key to use when generating tokens.
         /// </summary>
         public SigningCredentials SigningCredentials { get; set; }
+
+        /// <summary>
+        /// Implemetation to support Microsoft Jwt Tokens
+        /// </summary>
+        public SymmetricSecurityKey SecurityKey { get; set; }
     }
 }

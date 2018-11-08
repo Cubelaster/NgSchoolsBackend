@@ -13,27 +13,42 @@ namespace NgSchoolsBusinessLayer.Security.Jwt.Implementations
 {
     public class JwtFactory : IJwtFactory
     {
-        private readonly JwtIssuerOptions jwtOptions;
+        private readonly JwtIssuerOptions jwtIssuerOptions;
 
         public JwtFactory(IOptions<JwtIssuerOptions> jwtOptions)
         {
-            this.jwtOptions = jwtOptions.Value;
-            ThrowIfInvalidOptions(this.jwtOptions);
+            this.jwtIssuerOptions = jwtOptions.Value;
+            ThrowIfInvalidOptions(this.jwtIssuerOptions);
         }
 
-        public async Task<string> GenerateEncodedToken(List<Claim> userClaims)
+        public async Task<string> GenerateEncodedToken(List<Claim> userClaims, bool rememberMe = false)
         {
-            // Create the JWT security token and encode it.
-            var jwt = new JwtSecurityToken(
-                issuer: jwtOptions.Issuer,
-                audience: jwtOptions.Audience,
-                claims: userClaims,
-                notBefore: jwtOptions.NotBefore,
-                expires: jwtOptions.Expiration,
-                signingCredentials: jwtOptions.SigningCredentials);
+            JwtSecurityToken jwtSecurityToken;
 
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+            if (rememberMe)
+            {
+                // Don't put expiration date
+                jwtSecurityToken = new JwtSecurityToken(
+                    issuer: jwtIssuerOptions.Issuer,
+                    audience: jwtIssuerOptions.Audience,
+                    claims: userClaims,
+                    notBefore: jwtIssuerOptions.NotBefore,
+                    signingCredentials: jwtIssuerOptions.SigningCredentials
+                );
+            }
+            else
+            {
+                jwtSecurityToken = new JwtSecurityToken(
+                    issuer: jwtIssuerOptions.Issuer,
+                    audience: jwtIssuerOptions.Audience,
+                    claims: userClaims,
+                    notBefore: jwtIssuerOptions.NotBefore,
+                    expires: jwtIssuerOptions.Expiration,
+                    signingCredentials: jwtIssuerOptions.SigningCredentials
+                );
+            }
 
+            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
             return await Task.FromResult(encodedJwt);
         }
 
@@ -43,7 +58,12 @@ namespace NgSchoolsBusinessLayer.Security.Jwt.Implementations
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(user.Claims),
-                SigningCredentials = jwtOptions.SigningCredentials
+                SigningCredentials = jwtIssuerOptions.SigningCredentials,
+                Audience = jwtIssuerOptions.Audience,
+                //EncryptingCredentials = new EncryptingCredentials(jwtIssuerOptions.SecurityKey, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256),
+                Issuer = jwtIssuerOptions.Issuer,
+                IssuedAt = DateTime.UtcNow,
+                NotBefore = DateTime.UtcNow
             };
 
             if (!rememberMe)
@@ -62,8 +82,8 @@ namespace NgSchoolsBusinessLayer.Security.Jwt.Implementations
             {
                  new Claim(JwtClaimIdentifiersEnum.Id.ToString(), user.Id.ToString()),
                  new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                 new Claim(JwtRegisteredClaimNames.Jti, await jwtOptions.JtiGenerator()),
-                 new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64)
+                 new Claim(JwtRegisteredClaimNames.Jti, await jwtIssuerOptions.JtiGenerator()),
+                 new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(jwtIssuerOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64)
             };
 
             return await Task.FromResult(claims);

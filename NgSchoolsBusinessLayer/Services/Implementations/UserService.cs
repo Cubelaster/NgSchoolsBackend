@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Dto;
@@ -22,14 +23,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly RoleManager<IdentityRole<Guid>> roleManager;
         private readonly IJwtFactory jwtFactory;
         private readonly JsonSerializerSettings serializerSettings;
+        private readonly IMapper mapper;
 
         public UserService(IUserRepository userRepository, UserManager<User> userManager, 
-            IJwtFactory jwtFactory, RoleManager<IdentityRole<Guid>> roleManager)
+            IJwtFactory jwtFactory, RoleManager<IdentityRole<Guid>> roleManager, IMapper mapper)
         {
             this.userRepository = userRepository;
             this.userManager = userManager;
             this.jwtFactory = jwtFactory;
             this.roleManager = roleManager;
+            this.mapper = mapper;
 
             serializerSettings = new JsonSerializerSettings
             {
@@ -55,7 +58,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                return await ActionResponse<UserDto>.ReturnSuccess(userRepository.GetUserByName(name));
+                return await ActionResponse<UserDto>
+                    .ReturnSuccess(mapper.Map<User, UserDto>(userRepository.GetUserByName(name)));
             }
             catch (Exception ex)
             {
@@ -72,9 +76,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 IdentityOptions identityOptions = new IdentityOptions();
                 allClaims.AddRange(new List<Claim>() {
-                    new Claim(ClaimTypes.Name, user.Id.ToString()),
-                    new Claim(identityOptions.ClaimsIdentity.UserIdClaimType, user.Id.ToString()),
-                    new Claim(identityOptions.ClaimsIdentity.UserNameClaimType, user.UserName)
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                 });
 
                 // Get additional claims linked to user, without role and get roles as well

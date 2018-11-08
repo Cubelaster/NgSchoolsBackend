@@ -41,18 +41,6 @@ namespace NgSchoolsBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(options =>
-            {
-                // TODO: Add right Origin
-                options.AddPolicy("DevelopmentPolicy",
-                    builder => builder
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials()
-                    .AllowAnyOrigin()
-                );
-            });
-
             services.AddDbContext<NgSchoolsContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"),
                 opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
@@ -66,44 +54,6 @@ namespace NgSchoolsBackend
                 .AddRoles<IdentityRole<Guid>>()
                 .AddDefaultTokenProviders();
 
-            var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions));
-            var secretKey = jwtAppSettingOptions.GetValue<string>("SecretKey");
-            signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
-
-            ConfigureAuthorization(services);
-
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(config =>
-            {
-                config.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = async context =>
-                    {
-                        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                        UserDto user = (await userService.GetUserByName(context.Principal.Identity.Name)).GetData();
-                        if (user == null)
-                        {
-                            // return unauthorized if user no longer exists
-                            context.Fail("Unauthorized");
-                        }
-                        context.Success();
-                    }
-                };
-                config.RequireHttpsMetadata = false;
-                config.SaveToken = true;
-                config.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = signingKey,
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-            });
-
             services.AddAutoMapper();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -115,20 +65,26 @@ namespace NgSchoolsBackend
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseCors("DevelopmentPolicy");
             }
             else
             {
                 app.UseHsts();
             }
 
+            app.UseCors(options =>
+            {
+                options.AllowCredentials();
+                options.AllowAnyHeader();
+                options.WithMethods(new string[] { "POST", "GET", "OPTIONS" });
+                options.WithOrigins(Configuration.GetValue<string>("CorsOrigin"));
+            });
+
             app.UseHttpsRedirection();
-            app.UseCors();
             app.UseAuthentication();
             app.UseMvc();
 
-            CreateDefaultRoles(serviceProvider).Wait();
-            CreateDefaultUsers(serviceProvider).Wait();
+            //CreateDefaultRoles(serviceProvider).Wait();
+            //CreateDefaultUsers(serviceProvider).Wait();
         }
 
         private void ConfigureServicesDI(IServiceCollection services)
@@ -145,23 +101,46 @@ namespace NgSchoolsBackend
             var secretKey = jwtAppSettingOptions.GetValue<string>("SecretKey");
             signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
 
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = signingKey,
+                    
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+                // This is in case the user has been deleted, but such thing shouldn't be possible
+                //options.Events = new JwtBearerEvents
+                //{
+                //    OnTokenValidated = async context =>
+                //    {
+                //        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                //        UserDto user = (await userService.GetUserByName(context.Principal.Identity.Name)).GetData();
+                //        if (user == null)
+                //        {
+                //            // return unauthorized if user no longer exists
+                //            context.Fail("Unauthorized");
+                //        }
+                //        context.Success();
+                //    }
+                //};
+                //options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+            });
+
             // Configure JwtIssuerOptions
             services.Configure<JwtIssuerOptions>(options =>
             {
                 options.Issuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
                 options.Audience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)];
                 options.SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-            });
-        }
-
-        private void ConfigureAuthorization(IServiceCollection services)
-        {
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("Administrator", policy => policy.RequireRole("Admin")
-                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-                .RequireAuthenticatedUser()
-                .Build());
             });
         }
 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Requests;
+using NgSchoolsBusinessLayer.Models.Responses;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using System;
@@ -28,14 +29,14 @@ namespace NgSchoolsWebApi.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<ActionResponse<object>> Login([FromBody] LoginRequest loginRequest)
+        public async Task<ActionResponse<LoginResponse>> Login([FromBody] LoginRequest loginRequest)
         {
             var result = authService.Login(loginRequest);
             return await result;
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles ="Admin")]
         public async Task<ActionResponse<object>> ForgotPassword()
         {
             Console.WriteLine("Kita");
