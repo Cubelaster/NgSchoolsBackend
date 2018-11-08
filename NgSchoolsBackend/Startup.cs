@@ -111,10 +111,12 @@ namespace NgSchoolsBackend
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = signingKey,
-                    
-                    ValidateIssuer = false,
-                    ValidateAudience = false
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)],
+                    ValidAudience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)],
+                    IssuerSigningKey = signingKey
                 };
                 // This is in case the user has been deleted, but such thing shouldn't be possible
                 //options.Events = new JwtBearerEvents
@@ -131,7 +133,7 @@ namespace NgSchoolsBackend
                 //        context.Success();
                 //    }
                 //};
-                //options.RequireHttpsMetadata = false;
+                options.RequireHttpsMetadata = true;
                 options.SaveToken = true;
             });
 

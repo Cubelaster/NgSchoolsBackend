@@ -21,37 +21,6 @@ namespace NgSchoolsBusinessLayer.Security.Jwt.Implementations
             ThrowIfInvalidOptions(this.jwtIssuerOptions);
         }
 
-        public async Task<string> GenerateEncodedToken(List<Claim> userClaims, bool rememberMe = false)
-        {
-            JwtSecurityToken jwtSecurityToken;
-
-            if (rememberMe)
-            {
-                // Don't put expiration date
-                jwtSecurityToken = new JwtSecurityToken(
-                    issuer: jwtIssuerOptions.Issuer,
-                    audience: jwtIssuerOptions.Audience,
-                    claims: userClaims,
-                    notBefore: jwtIssuerOptions.NotBefore,
-                    signingCredentials: jwtIssuerOptions.SigningCredentials
-                );
-            }
-            else
-            {
-                jwtSecurityToken = new JwtSecurityToken(
-                    issuer: jwtIssuerOptions.Issuer,
-                    audience: jwtIssuerOptions.Audience,
-                    claims: userClaims,
-                    notBefore: jwtIssuerOptions.NotBefore,
-                    expires: jwtIssuerOptions.Expiration,
-                    signingCredentials: jwtIssuerOptions.SigningCredentials
-                );
-            }
-
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            return await Task.FromResult(encodedJwt);
-        }
-
         public async Task<string> GenerateSecurityToken(UserDto user, bool rememberMe)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -76,7 +45,7 @@ namespace NgSchoolsBusinessLayer.Security.Jwt.Implementations
             return await Task.FromResult(tokenString);
         }
 
-        public async Task<List<Claim>> GetJWTClaims(UserDto user)
+        public async Task<List<Claim>> GetJwtClaims(UserDto user)
         {
             var claims = new List<Claim>()
             {

@@ -72,7 +72,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var userToVerify = await userManager.FindByNameAsync(user.UserName);
-                var allClaims = await jwtFactory.GetJWTClaims(user);
+                var allClaims = await jwtFactory.GetJwtClaims(user);
 
                 IdentityOptions identityOptions = new IdentityOptions();
                 allClaims.AddRange(new List<Claim>() {
