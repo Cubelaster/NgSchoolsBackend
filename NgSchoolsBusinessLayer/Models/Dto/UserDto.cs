@@ -1,9 +1,12 @@
-﻿using System;
+﻿using NgSchoolsBusinessLayer.Enums;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
+    [Cached(CacheKeysEnum.User)]
     public class UserDto
     {
         public Guid Id { get; set; }

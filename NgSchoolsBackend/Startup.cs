@@ -22,6 +22,9 @@ using NgSchoolsBusinessLayer.Security.Jwt;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Security.Jwt.Implementations;
 using Newtonsoft.Json.Serialization;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.EventLog;
+using NgSchoolsBusinessLayer.Services.Implementations.Common;
 
 namespace NgSchoolsBackend
 {
@@ -40,6 +43,8 @@ namespace NgSchoolsBackend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMemoryCache();
+
             services.AddDbContext<NgSchoolsContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"),
                 opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
@@ -52,6 +57,16 @@ namespace NgSchoolsBackend
                 .AddEntityFrameworkStores<NgSchoolsContext>()
                 .AddRoles<IdentityRole<Guid>>()
                 .AddDefaultTokenProviders();
+
+            services.AddLogging(options => {
+                var eventLogSettings = new EventLogSettings
+                {
+                    LogName = "NgSchools",
+                    SourceName = "NgSchools",
+                    
+                };
+                options.AddEventLog(eventLogSettings);
+            });
 
             services.AddAutoMapper();
 
@@ -99,6 +114,8 @@ namespace NgSchoolsBackend
         private void ConfigureServicesDI(IServiceCollection services)
         {
             services.AddSingleton<IJwtFactory, JwtFactory>();
+            services.AddSingleton<ICacheService, CacheService>();
+            services.AddSingleton<ILoggerService, LoggerService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserService, UserService>();

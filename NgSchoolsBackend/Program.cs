@@ -9,8 +9,6 @@ namespace NgSchoolsBackend
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
-
-            Console.WriteLine("Running NhSchools WebApi!");
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
