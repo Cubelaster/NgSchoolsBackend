@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using NgSchoolsBusinessLayer.Extensions;
-using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Services.Implementations;
 using NgSchoolsDataLayer.Context;
@@ -23,6 +21,7 @@ using AutoMapper;
 using NgSchoolsBusinessLayer.Security.Jwt;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Security.Jwt.Implementations;
+using Newtonsoft.Json.Serialization;
 
 namespace NgSchoolsBackend
 {
@@ -56,7 +55,17 @@ namespace NgSchoolsBackend
 
             services.AddAutoMapper();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .AddJsonOptions(options =>
+                {
+                    var resolver = options.SerializerSettings.ContractResolver;
+                    if (resolver != null)
+                    {
+                        var res = resolver as DefaultContractResolver;
+                        res.NamingStrategy = null;  // <<!-- this removes the camelcasing
+                    }
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -83,8 +92,8 @@ namespace NgSchoolsBackend
             app.UseAuthentication();
             app.UseMvc();
 
-            //CreateDefaultRoles(serviceProvider).Wait();
-            //CreateDefaultUsers(serviceProvider).Wait();
+            CreateDefaultRoles(serviceProvider).Wait();
+            CreateDefaultUsers(serviceProvider).Wait();
         }
 
         private void ConfigureServicesDI(IServiceCollection services)
@@ -118,21 +127,6 @@ namespace NgSchoolsBackend
                     ValidAudience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)],
                     IssuerSigningKey = signingKey
                 };
-                // This is in case the user has been deleted, but such thing shouldn't be possible
-                //options.Events = new JwtBearerEvents
-                //{
-                //    OnTokenValidated = async context =>
-                //    {
-                //        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
-                //        UserDto user = (await userService.GetUserByName(context.Principal.Identity.Name)).GetData();
-                //        if (user == null)
-                //        {
-                //            // return unauthorized if user no longer exists
-                //            context.Fail("Unauthorized");
-                //        }
-                //        context.Success();
-                //    }
-                //};
                 options.RequireHttpsMetadata = true;
                 options.SaveToken = true;
             });
@@ -151,7 +145,7 @@ namespace NgSchoolsBackend
             //initializing custom roles 
             var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
             var UserManager = serviceProvider.GetRequiredService<UserManager<User>>();
-            string[] roleNames = { "Admin", "Professor", "Student" };
+            string[] roleNames = { "Admin" };
             IdentityResult roleResult;
 
             foreach (var roleName in roleNames)

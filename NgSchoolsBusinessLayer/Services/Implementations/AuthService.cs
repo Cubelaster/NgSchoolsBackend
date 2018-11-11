@@ -47,8 +47,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<LoginResponse>.ReturnSuccess(new LoginResponse
                 {
                     UserId = user.Id,
-                    JwtToken = jwtToken
-                });
+                    JwtToken = jwtToken.Token,
+                    ValidUntil = jwtToken.ValidUntil
+                }, "Successfully logged in!");
             }
             return await ActionResponse<LoginResponse>.ReturnError("Wrong username or password");
         }

@@ -2,10 +2,9 @@
 
 namespace NgSchoolsBusinessLayer.Models.Responses
 {
-    public class LoginResponse
+    public class GenerateJwtTokenResponse
     {
-        public Guid UserId { get; set; }
-        public string JwtToken { get; set; }
+        public string Token { get; set; }
         public DateTime ValidUntil { get; set; }
     }
 }

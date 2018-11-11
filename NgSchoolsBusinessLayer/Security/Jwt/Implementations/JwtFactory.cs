@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.Responses;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Security.Jwt.Enums;
 using System;
@@ -21,7 +22,7 @@ namespace NgSchoolsBusinessLayer.Security.Jwt.Implementations
             ThrowIfInvalidOptions(this.jwtIssuerOptions);
         }
 
-        public async Task<string> GenerateSecurityToken(UserDto user, bool rememberMe)
+        public async Task<GenerateJwtTokenResponse> GenerateSecurityToken(UserDto user, bool rememberMe)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -42,7 +43,10 @@ namespace NgSchoolsBusinessLayer.Security.Jwt.Implementations
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
-            return await Task.FromResult(tokenString);
+            return await Task.FromResult(new GenerateJwtTokenResponse {
+                Token = tokenString,
+                ValidUntil = tokenDescriptor.Expires ?? DateTime.MaxValue
+            });
         }
 
         public async Task<List<Claim>> GetJwtClaims(UserDto user)
