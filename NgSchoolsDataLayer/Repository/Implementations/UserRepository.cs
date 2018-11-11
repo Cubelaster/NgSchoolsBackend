@@ -1,7 +1,9 @@
 ﻿using NgSchoolsDataLayer.Context;
+using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.Contracts;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NgSchoolsDataLayer.Repository.Implementations
@@ -27,6 +29,11 @@ namespace NgSchoolsDataLayer.Repository.Implementations
         public User GetUserByName(string name)
         {
             return context.Users.FirstOrDefault(u => u.UserName == name);
+        }
+
+        public List<User> GetAllUsers()
+        {
+            return context.Users.Where(u => u.Status == DatabaseEntityStatusEnum.Active).ToList();
         }
     }
 }

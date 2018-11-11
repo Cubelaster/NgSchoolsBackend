@@ -114,8 +114,9 @@ namespace NgSchoolsBackend
         private void ConfigureServicesDI(IServiceCollection services)
         {
             services.AddSingleton<IJwtFactory, JwtFactory>();
-            services.AddSingleton<ICacheService, CacheService>();
             services.AddSingleton<ILoggerService, LoggerService>();
+
+            services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserService, UserService>();

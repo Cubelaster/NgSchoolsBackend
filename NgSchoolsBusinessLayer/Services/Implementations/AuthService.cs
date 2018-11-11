@@ -9,7 +9,6 @@ using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Models.Responses;
-using Microsoft.Extensions.Logging;
 using System;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
@@ -46,7 +45,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var result = await signInManager.PasswordSignInAsync(loginRequest.UserName, loginRequest.Password, true, true);
-                throw new Exception("Kita");
                 if (result.Succeeded)
                 {
                     var userToVerify = await userManager.FindByNameAsync(loginRequest.UserName);
@@ -54,7 +52,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     user.Claims = (await userService.GetUserClaims(user)).GetData();
                     var jwtToken = await jwtFactory.GenerateSecurityToken(user, loginRequest.RememberMe);
 
-                    await cacheService.SetInCache<UserDto>(user);
+                    await cacheService.SetInCache(user);
 
                     return await ActionResponse<LoginResponse>.ReturnSuccess(new LoginResponse
                     {
@@ -67,7 +65,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             catch (Exception ex)
             {
-                loggerService.LogErrorToEventLog<LoginRequest>(ex, loginRequest);
+                loggerService.LogErrorToEventLog(ex, loginRequest);
                 return await ActionResponse<LoginResponse>.ReturnError("Some sort of fuckup. Try again.");
             }
         }

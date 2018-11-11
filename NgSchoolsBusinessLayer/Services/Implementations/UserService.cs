@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
-using Newtonsoft.Json;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Services.Contracts;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.Contracts;
 using System;
@@ -22,22 +22,21 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly UserManager<User> userManager;
         private readonly RoleManager<IdentityRole<Guid>> roleManager;
         private readonly IJwtFactory jwtFactory;
-        private readonly JsonSerializerSettings serializerSettings;
         private readonly IMapper mapper;
+        private readonly ICacheService cacheService;
+        private readonly ILoggerService loggerService;
 
-        public UserService(IUserRepository userRepository, UserManager<User> userManager, 
-            IJwtFactory jwtFactory, RoleManager<IdentityRole<Guid>> roleManager, IMapper mapper)
+        public UserService(IUserRepository userRepository, UserManager<User> userManager,
+            IJwtFactory jwtFactory, RoleManager<IdentityRole<Guid>> roleManager, IMapper mapper,
+            ICacheService cacheService, ILoggerService loggerService)
         {
             this.userRepository = userRepository;
             this.userManager = userManager;
             this.jwtFactory = jwtFactory;
             this.roleManager = roleManager;
             this.mapper = mapper;
-
-            serializerSettings = new JsonSerializerSettings
-            {
-                Formatting = Formatting.Indented
-            };
+            this.cacheService = cacheService;
+            this.loggerService = loggerService;
         }
 
         #endregion Ctors and Members
@@ -46,6 +45,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                var bla = await cacheService.GetFromCache<List<UserDto>>();
                 return await ActionResponse<UserDto>.ReturnSuccess(userRepository.GetUserById(Id));
             }
             catch (Exception ex)
@@ -104,6 +104,21 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 return await ActionResponse<List<Claim>>.ReturnError(ex.Message);
+            }
+        }
+
+        [CacheRefreshSource(typeof(UserDto))]
+        public async Task<ActionResponse<List<UserDto>>> GetAllUsersForCache()
+        {
+            try
+            {
+                return await ActionResponse<List<UserDto>>.ReturnSuccess(
+                    mapper.Map<List<User>, List<UserDto>>(userRepository.GetAllUsers()));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<UserDto>>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
     }

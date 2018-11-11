@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NgSchoolsDataLayer.Models;
 
 namespace NgSchoolsDataLayer.Repository.Contracts
@@ -7,5 +8,6 @@ namespace NgSchoolsDataLayer.Repository.Contracts
     {
         User GetUserById(Guid Id);
         User GetUserByName(string name);
+        List<User> GetAllUsers();
     }
 }
