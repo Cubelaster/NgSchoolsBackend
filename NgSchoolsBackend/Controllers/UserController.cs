@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
+using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Services.Contracts;
-using NgSchoolsDataLayer.Models;
-using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBackend.Controllers
@@ -19,10 +19,9 @@ namespace NgSchoolsBackend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResponse<User>> GetAll()
+        public async Task<ActionResponse<List<UserDto>>> GetAll()
         {
-            var user = userService.GetUserById(Guid.Empty);
-            return await ActionResponse<User>.ReturnSuccess();
+            return await userService.GetAllUsers();
         }
     }
 }

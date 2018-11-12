@@ -12,5 +12,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<UserDto>> GetUserById(Guid Id);
         Task<ActionResponse<UserDto>> GetUserByEmail(string name);
         Task<ActionResponse<List<Claim>>> GetUserClaims(UserDto user);
+        Task<ActionResponse<List<UserDto>>> GetAllUsers();
     }
 }

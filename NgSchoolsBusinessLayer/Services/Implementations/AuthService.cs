@@ -44,15 +44,18 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var result = await signInManager.PasswordSignInAsync(loginRequest.UserName, loginRequest.Password, true, true);
+                var userToLogin = await userManager.FindByEmailAsync(loginRequest.Email);
+                if (userToLogin == null)
+                {
+                    return await ActionResponse<LoginResponse>.ReturnError("No one with that email exists in our database!");
+                }
+
+                var result = await signInManager.PasswordSignInAsync(userToLogin, loginRequest.Password, true, true);
                 if (result.Succeeded)
                 {
-                    var userToVerify = await userManager.FindByNameAsync(loginRequest.UserName);
-                    var user = mapper.Map<UserDto>(userToVerify);
+                    var user = mapper.Map<UserDto>(userToLogin);
                     user.Claims = (await userService.GetUserClaims(user)).GetData();
                     var jwtToken = await jwtFactory.GenerateSecurityToken(user, loginRequest.RememberMe);
-
-                    await cacheService.SetInCache(user);
 
                     return await ActionResponse<LoginResponse>.ReturnSuccess(new LoginResponse
                     {

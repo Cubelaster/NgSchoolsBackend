@@ -4,6 +4,7 @@ using NgSchoolsDataLayer.Repository.Provider;
 
 namespace NgSchoolsDataLayer.Repository.UnitOfWork
 {
+    // https://offering.solutions/blog/articles/2014/07/01/asp-net-mvc-generic-repositories-and-unitofwork/
     public class UnitOfWork : IUnitOfWork
     {
         private readonly NgSchoolsContext context;

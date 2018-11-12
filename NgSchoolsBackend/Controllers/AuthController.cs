@@ -31,8 +31,7 @@ namespace NgSchoolsWebApi.Controllers
         [HttpPost]
         public async Task<ActionResponse<LoginResponse>> Login([FromBody] LoginRequest loginRequest)
         {
-            var result = authService.Login(loginRequest);
-            return await result;
+            return await authService.Login(loginRequest);
         }
 
         [HttpPost]

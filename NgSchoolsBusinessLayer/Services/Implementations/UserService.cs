@@ -6,7 +6,6 @@ using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
-using NgSchoolsDataLayer.Repository.Contracts;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
@@ -118,6 +117,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var allUsers = unitOfWork.GetGenericRepository<User>().GetAll();
                 return await ActionResponse<List<UserDto>>.ReturnSuccess(
                     mapper.Map<List<User>, List<UserDto>>(allUsers));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<UserDto>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<List<UserDto>>> GetAllUsers()
+        {
+            try
+            {
+                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll();
+                return await ActionResponse<List<UserDto>>.ReturnSuccess(mapper.Map<List<User>, List<UserDto>>(allUsers));
             }
             catch (Exception ex)
             {
