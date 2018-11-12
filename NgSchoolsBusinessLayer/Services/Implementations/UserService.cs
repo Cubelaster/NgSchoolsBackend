@@ -7,6 +7,7 @@ using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.Contracts;
+using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -18,25 +19,25 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
     {
         #region Ctors and Members
 
-        private readonly IUserRepository userRepository;
         private readonly UserManager<User> userManager;
         private readonly RoleManager<IdentityRole<Guid>> roleManager;
         private readonly IJwtFactory jwtFactory;
         private readonly IMapper mapper;
         private readonly ICacheService cacheService;
         private readonly ILoggerService loggerService;
+        private readonly IUnitOfWork unitOfWork;
 
-        public UserService(IUserRepository userRepository, UserManager<User> userManager,
-            IJwtFactory jwtFactory, RoleManager<IdentityRole<Guid>> roleManager, IMapper mapper,
-            ICacheService cacheService, ILoggerService loggerService)
+        public UserService(UserManager<User> userManager, IJwtFactory jwtFactory, 
+            RoleManager<IdentityRole<Guid>> roleManager, IMapper mapper,
+            ICacheService cacheService, ILoggerService loggerService, IUnitOfWork unitOfWork)
         {
-            this.userRepository = userRepository;
             this.userManager = userManager;
             this.jwtFactory = jwtFactory;
             this.roleManager = roleManager;
             this.mapper = mapper;
             this.cacheService = cacheService;
             this.loggerService = loggerService;
+            this.unitOfWork = unitOfWork;
         }
 
         #endregion Ctors and Members
@@ -45,24 +46,26 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var bla = await cacheService.GetFromCache<List<UserDto>>();
-                return await ActionResponse<UserDto>.ReturnSuccess(userRepository.GetUserById(Id));
+                var user = unitOfWork.GetGenericRepository<User>().FindSingle(Id);
+                return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
             }
             catch (Exception ex)
             {
+                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<UserDto>.ReturnError(ex.Message);
             }
         }
 
-        public async Task<ActionResponse<UserDto>> GetUserByName(string name)
+        public async Task<ActionResponse<UserDto>> GetUserByEmail(string email)
         {
             try
             {
-                return await ActionResponse<UserDto>
-                    .ReturnSuccess(mapper.Map<User, UserDto>(userRepository.GetUserByName(name)));
+                var user = unitOfWork.GetGenericRepository<User>().FindBy(u => u.Email == email);
+                return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
             }
             catch (Exception ex)
             {
+                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<UserDto>.ReturnError(ex.Message);
             }
         }
@@ -112,8 +115,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll();
                 return await ActionResponse<List<UserDto>>.ReturnSuccess(
-                    mapper.Map<List<User>, List<UserDto>>(userRepository.GetAllUsers()));
+                    mapper.Map<List<User>, List<UserDto>>(allUsers));
             }
             catch (Exception ex)
             {

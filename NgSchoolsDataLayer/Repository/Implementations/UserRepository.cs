@@ -26,9 +26,9 @@ namespace NgSchoolsDataLayer.Repository.Implementations
             return context.Users.FirstOrDefault(u => u.Id == Id);
         }
 
-        public User GetUserByName(string name)
+        public User GetUserByEmail(string email)
         {
-            return context.Users.FirstOrDefault(u => u.UserName == name);
+            return context.Users.FirstOrDefault(u => u.Email == email);
         }
 
         public List<User> GetAllUsers()

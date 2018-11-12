@@ -12,8 +12,6 @@ using NgSchoolsBusinessLayer.Services.Implementations;
 using NgSchoolsDataLayer.Context;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
-using NgSchoolsDataLayer.Repository.Contracts;
-using NgSchoolsDataLayer.Repository.Implementations;
 using System;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +23,7 @@ using Newtonsoft.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
 using NgSchoolsBusinessLayer.Services.Implementations.Common;
+using NgSchoolsDataLayer.Repository.UnitOfWork;
 
 namespace NgSchoolsBackend
 {
@@ -116,9 +115,10 @@ namespace NgSchoolsBackend
             services.AddSingleton<IJwtFactory, JwtFactory>();
             services.AddSingleton<ILoggerService, LoggerService>();
 
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
             services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IAuthService, AuthService>();
-            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserService, UserService>();
         }
 

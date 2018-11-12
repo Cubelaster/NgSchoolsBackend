@@ -81,6 +81,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
             return result;
         }
 
+        /// <summary>
+        /// Should be used with lists: await cacheService.GetFromCache<List<UserDto>>();
+        /// </summary>
+        /// <typeparam name="T">List of T</typeparam>
+        /// <returns>List of T</returns>
         public async Task<ActionResponse<T>> GetFromCache<T>()
         {
             try

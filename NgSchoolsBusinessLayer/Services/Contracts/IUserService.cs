@@ -10,7 +10,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
     public interface IUserService
     {
         Task<ActionResponse<UserDto>> GetUserById(Guid Id);
-        Task<ActionResponse<UserDto>> GetUserByName(string name);
+        Task<ActionResponse<UserDto>> GetUserByEmail(string name);
         Task<ActionResponse<List<Claim>>> GetUserClaims(UserDto user);
     }
 }
