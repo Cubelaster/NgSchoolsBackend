@@ -161,7 +161,7 @@ namespace NgSchoolsBackend
         private async Task CreateDefaultRoles(IServiceProvider serviceProvider)
         {
             //initializing custom roles 
-            var RoleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+            var RoleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
             var UserManager = serviceProvider.GetRequiredService<UserManager<User>>();
             string[] roleNames = { "Admin" };
             IdentityResult roleResult;
@@ -172,7 +172,7 @@ namespace NgSchoolsBackend
                 if (!roleExist)
                 {
                     //create the roles and seed them to the database: Question 1
-                    roleResult = await RoleManager.CreateAsync(new IdentityRole<Guid>(roleName));
+                    roleResult = await RoleManager.CreateAsync(new Role { Name = roleName });
                 }
             }
         }

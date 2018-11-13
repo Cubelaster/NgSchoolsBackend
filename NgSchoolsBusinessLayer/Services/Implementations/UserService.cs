@@ -23,7 +23,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly UserManager<User> userManager;
-        private readonly RoleManager<IdentityRole<Guid>> roleManager;
+        private readonly RoleManager<Role> roleManager;
         private readonly IJwtFactory jwtFactory;
         private readonly IMapper mapper;
         private readonly ICacheService cacheService;
@@ -31,7 +31,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IUnitOfWork unitOfWork;
 
         public UserService(UserManager<User> userManager, IJwtFactory jwtFactory,
-            RoleManager<IdentityRole<Guid>> roleManager, IMapper mapper,
+            RoleManager<Role> roleManager, IMapper mapper,
             ICacheService cacheService, ILoggerService loggerService, IUnitOfWork unitOfWork)
         {
             this.userManager = userManager;
