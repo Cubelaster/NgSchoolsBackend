@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
+using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
@@ -9,6 +12,7 @@ using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -26,7 +30,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public UserService(UserManager<User> userManager, IJwtFactory jwtFactory, 
+        public UserService(UserManager<User> userManager, IJwtFactory jwtFactory,
             RoleManager<IdentityRole<Guid>> roleManager, IMapper mapper,
             ICacheService cacheService, ILoggerService loggerService, IUnitOfWork unitOfWork)
         {
@@ -130,12 +134,35 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var allUsers = unitOfWork.GetGenericRepository<User>().GetAll();
-                return await ActionResponse<List<UserDto>>.ReturnSuccess(mapper.Map<List<User>, List<UserDto>>(allUsers));
+                return await ActionResponse<List<UserDto>>
+                    .ReturnSuccess(mapper.Map<List<User>, List<UserDto>>(allUsers));
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<UserDto>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<UserDto>>> GetAllUsersPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<UserDto> users = new List<UserDto>();
+                var cachedUsersResponse = await cacheService.GetFromCache<List<UserDto>>();
+                if (!cachedUsersResponse.IsSuccessAndHasData(out users))
+                {
+                    users = (await GetAllUsers()).GetData();
+                }
+
+                var pagedResult = await users.AsQueryable().GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<UserDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<UserDto>>
+                    .ReturnError("Some sort of fuckup. Try again.");
             }
         }
     }
