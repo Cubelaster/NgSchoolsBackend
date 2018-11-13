@@ -52,7 +52,7 @@ namespace NgSchoolsBackend
 
             ConfigureJWT(services);
 
-            services.AddIdentity<User, IdentityRole<Guid>>()
+            services.AddIdentity<User, Role>()
                 .AddEntityFrameworkStores<NgSchoolsContext>()
                 .AddRoles<IdentityRole<Guid>>()
                 .AddDefaultTokenProviders();

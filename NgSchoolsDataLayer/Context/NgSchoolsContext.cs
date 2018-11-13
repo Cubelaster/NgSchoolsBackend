@@ -6,7 +6,8 @@ using System;
 
 namespace NgSchoolsDataLayer.Context
 {
-    public class NgSchoolsContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+    public class NgSchoolsContext : IdentityDbContext<User, Role, Guid, IdentityUserClaim<Guid>, UserRoles, 
+        IdentityUserLogin<Guid>, IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
     {
         public NgSchoolsContext(DbContextOptions<NgSchoolsContext> options) : base(options) { }
     }
