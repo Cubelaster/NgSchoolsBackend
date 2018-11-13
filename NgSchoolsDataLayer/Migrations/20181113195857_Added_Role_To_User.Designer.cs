@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20181113195857_Added_Role_To_User")]
+    partial class Added_Role_To_User
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -184,9 +186,17 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<Guid>("RoleId");
 
+                    b.Property<Guid?>("RoleId1");
+
+                    b.Property<Guid?>("UserId1");
+
                     b.HasKey("UserId", "RoleId");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("RoleId1");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("AspNetUserRoles");
                 });
@@ -225,15 +235,23 @@ namespace NgSchoolsDataLayer.Migrations
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.UserRoles", b =>
                 {
-                    b.HasOne("NgSchoolsDataLayer.Models.Role", "Role")
-                        .WithMany("UserRoles")
+                    b.HasOne("NgSchoolsDataLayer.Models.Role")
+                        .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("NgSchoolsDataLayer.Models.User", "User")
-                        .WithMany("Roles")
+                    b.HasOne("NgSchoolsDataLayer.Models.Role", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId1");
+
+                    b.HasOne("NgSchoolsDataLayer.Models.User")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("NgSchoolsDataLayer.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1");
                 });
 #pragma warning restore 612, 618
         }

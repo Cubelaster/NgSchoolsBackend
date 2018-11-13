@@ -118,7 +118,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll();
+                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll(includeProperties: "Roles.Role");
                 return await ActionResponse<List<UserDto>>.ReturnSuccess(
                     mapper.Map<List<User>, List<UserDto>>(allUsers));
             }
@@ -133,7 +133,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll();
+                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll(includeProperties: "Roles.Role");
                 return await ActionResponse<List<UserDto>>
                     .ReturnSuccess(mapper.Map<List<User>, List<UserDto>>(allUsers));
             }

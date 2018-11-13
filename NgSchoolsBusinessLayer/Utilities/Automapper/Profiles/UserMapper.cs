@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsDataLayer.Models;
+using System.Linq;
 
 namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 {
@@ -8,7 +9,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public UserMapper()
         {
-            CreateMap<User, UserDto>();
+            CreateMap<User, UserDto>()
+                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.Roles.Select(r => r.Role.Name)));
             CreateMap<UserDto, User>();
         }
     }

@@ -15,7 +15,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public List<Claim> Claims { get; set; }
+        public List<string> Roles { get; set; }
 
-        public string UserRoles => Claims != null ? string.Join(", ", Claims) : "";
+        public string UserRoles => Roles != null ? string.Join(", ", Roles) : "";
     }
 }

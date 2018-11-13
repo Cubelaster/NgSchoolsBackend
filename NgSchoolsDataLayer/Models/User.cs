@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using NgSchoolsDataLayer.Enums;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
@@ -15,5 +16,7 @@ namespace NgSchoolsDataLayer.Models
         public DateTime DateCreated { get; set; }
         public DateTime? DateModified { get; set; }
         public DatabaseEntityStatusEnum Status { get; set; }
+
+        public ICollection<UserRoles> Roles { get; set; }
     }
 }
