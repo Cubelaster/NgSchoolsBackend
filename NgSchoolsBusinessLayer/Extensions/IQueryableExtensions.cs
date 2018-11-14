@@ -2,7 +2,9 @@
 using NgSchoolsBusinessLayer.Enums.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ namespace NgSchoolsBusinessLayer.Extensions
     {
         public static async Task<PagedResult<T>> GetPaged<T>(this IQueryable<T> query, BasePagedRequest pagedRequest) where T : class
         {
+            Type objectType = query.FirstOrDefault().GetType();
             var currentPage = pagedRequest.PageIndex + 1;
             var result = new PagedResult<T>
             {
@@ -28,7 +31,6 @@ namespace NgSchoolsBusinessLayer.Extensions
             PropertyInfo propertyForSort = null;
             if (!string.IsNullOrEmpty(pagedRequest.OrderBy) && result.RowCount > 1)
             {
-                Type objectType = query.FirstOrDefault().GetType();
                 propertyForSort = objectType.GetProperty(pagedRequest.OrderBy);
             }
 
@@ -44,6 +46,20 @@ namespace NgSchoolsBusinessLayer.Extensions
                 {
                     query = query.OrderByDescending(q => propertyForSort.GetValue(q));
                 }
+            }
+
+            List<PropertyInfo> searchableProperties;
+            if (!string.IsNullOrEmpty(pagedRequest.SearchQuery))
+            {
+                searchableProperties = objectType
+                    .GetProperties()
+                    .Where(p => p.GetCustomAttributes().OfType<Searchable>().Any())
+                    .ToList();
+
+                query = query
+                    .Where(q => searchableProperties
+                        .Any(p => p.GetValue(q).ToString()
+                        .Equals(pagedRequest.SearchQuery, StringComparison.OrdinalIgnoreCase)));
             }
 
             result.Results = await Task.FromResult(
