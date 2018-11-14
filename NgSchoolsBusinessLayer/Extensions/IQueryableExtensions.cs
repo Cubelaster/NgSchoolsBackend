@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NgSchoolsBusinessLayer.Enums.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Extensions
@@ -23,8 +25,29 @@ namespace NgSchoolsBusinessLayer.Extensions
 
             int skip = (currentPage - 1) * pagedRequest.PageSize;
 
-            result.Results = await Task.FromResult(query
-                .AsNoTracking()
+            PropertyInfo propertyForSort = null;
+            if (!string.IsNullOrEmpty(pagedRequest.OrderBy) && result.RowCount > 1)
+            {
+                Type objectType = query.FirstOrDefault().GetType();
+                propertyForSort = objectType.GetProperty(pagedRequest.OrderBy);
+            }
+
+            query = query.AsNoTracking();
+
+            if (propertyForSort != null)
+            {
+                if (pagedRequest.SortDirection == SortDirectionEnum.ASC)
+                {
+                    query = query.OrderBy(q => propertyForSort.GetValue(q));
+                }
+                else
+                {
+                    query = query.OrderByDescending(q => propertyForSort.GetValue(q));
+                }
+            }
+
+            result.Results = await Task.FromResult(
+                query
                 .Skip(skip)
                 .Take(pagedRequest.PageSize)
                 .ToList()

@@ -1,4 +1,6 @@
-﻿namespace NgSchoolsBusinessLayer.Models.Requests.Base
+﻿using NgSchoolsBusinessLayer.Enums.Common;
+
+namespace NgSchoolsBusinessLayer.Models.Requests.Base
 {
     public class BasePagedRequest
     {
@@ -7,5 +9,6 @@
         public string SearchQuery { get; set; }
         public object Where { get; set; }
         public string OrderBy { get; set; }
+        public SortDirectionEnum SortDirection { get; set; }
     }
 }
