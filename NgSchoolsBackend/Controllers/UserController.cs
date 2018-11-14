@@ -2,8 +2,10 @@
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Services.Contracts;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -32,6 +34,12 @@ namespace NgSchoolsBackend.Controllers
         public async Task<ActionResponse<PagedResult<UserDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await userService.GetAllUsersPaged(pagedRequest);
+        }
+
+        [HttpPost]
+        public async Task<ActionResponse<UserDto>> GetById([FromBody]UserGetRequest request)
+        {
+            return await userService.GetById(request.UserId.Value);
         }
     }
 }

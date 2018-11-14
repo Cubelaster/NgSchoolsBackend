@@ -165,5 +165,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .ReturnError("Some sort of fuckup. Try again.");
             }
         }
+
+        public async Task<ActionResponse<UserDto>> GetById(Guid userId)
+        {
+            try
+            {
+                var user = unitOfWork.GetGenericRepository<User>().FindBy(u => u.Id == userId);
+                return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, userId);
+                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
     }
 }
