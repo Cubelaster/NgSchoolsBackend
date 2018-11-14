@@ -5,7 +5,6 @@ using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Services.Contracts;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -39,7 +38,7 @@ namespace NgSchoolsBackend.Controllers
         [HttpPost]
         public async Task<ActionResponse<UserDto>> GetById([FromBody]UserGetRequest request)
         {
-            return await userService.GetById(request.UserId.Value);
+            return await userService.GetById(request.Id.Value);
         }
     }
 }

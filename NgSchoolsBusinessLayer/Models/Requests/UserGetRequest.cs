@@ -4,6 +4,6 @@ namespace NgSchoolsBusinessLayer.Models.Requests
 {
     public class UserGetRequest
     {
-        public Guid? UserId { get; set; }
+        public Guid? Id { get; set; }
     }
 }
