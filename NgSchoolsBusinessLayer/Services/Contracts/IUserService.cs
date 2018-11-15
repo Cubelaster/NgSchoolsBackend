@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 
 namespace NgSchoolsBusinessLayer.Services.Contracts
@@ -19,5 +20,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<UserDto>> GetById(Guid userId);
         Task<ActionResponse<UserDto>> Create(UserDto request);
         Task<ActionResponse<UserDto>> Update(UserDto request);
+        Task<ActionResponse<object>> Delete(UserGetRequest request);
     }
 }

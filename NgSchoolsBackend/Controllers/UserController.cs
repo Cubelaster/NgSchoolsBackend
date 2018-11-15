@@ -52,5 +52,11 @@ namespace NgSchoolsBackend.Controllers
         {
             return await userService.Update(request);
         }
+
+        [HttpPost]
+        public async Task<ActionResponse<object>> Delete([FromBody]UserGetRequest request)
+        {
+            return await userService.Delete(request);
+        }
     }
 }

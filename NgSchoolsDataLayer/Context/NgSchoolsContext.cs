@@ -6,7 +6,7 @@ using System;
 
 namespace NgSchoolsDataLayer.Context
 {
-    public class NgSchoolsContext : IdentityDbContext<User, Role, Guid, IdentityUserClaim<Guid>, UserRoles, 
+    public class NgSchoolsContext : IdentityDbContext<User, Role, Guid, IdentityUserClaim<Guid>, UserRoles,
         IdentityUserLogin<Guid>, IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
     {
         public NgSchoolsContext(DbContextOptions<NgSchoolsContext> options) : base(options) { }
@@ -17,6 +17,10 @@ namespace NgSchoolsDataLayer.Context
 
             builder.Entity<UserRoles>(userRole =>
             {
+                builder.Entity<User>()
+                    .HasIndex(u => u.Email)
+                    .IsUnique();
+
                 userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
 
                 userRole.HasOne(ur => ur.Role)

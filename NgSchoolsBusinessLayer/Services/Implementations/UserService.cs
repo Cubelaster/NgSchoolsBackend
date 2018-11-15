@@ -4,6 +4,7 @@ using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Services.Contracts;
@@ -186,6 +187,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 var user = mapper.Map<UserDto, User>(request);
                 unitOfWork.GetGenericRepository<User>().Add(user);
+                unitOfWork.Save();
                 request = mapper.Map<User, UserDto>(user);
                 return await ActionResponse<UserDto>.ReturnSuccess(request);
             }
@@ -207,6 +209,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var user = mapper.Map<UserDto, User>(request);
                 unitOfWork.GetGenericRepository<User>().Update(user);
+                unitOfWork.Save();
                 request = mapper.Map<User, UserDto>(user);
                 return await ActionResponse<UserDto>.ReturnSuccess(request);
             }
@@ -214,6 +217,26 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<object>> Delete(UserGetRequest request)
+        {
+            try
+            {
+                if (!request.Id.HasValue)
+                {
+                    return await ActionResponse<object>.ReturnError("Incorect primary key so unable to update.");
+                }
+
+                unitOfWork.GetGenericRepository<User>().Delete(request.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<object>.ReturnSuccess("Success!");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<object>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
     }
