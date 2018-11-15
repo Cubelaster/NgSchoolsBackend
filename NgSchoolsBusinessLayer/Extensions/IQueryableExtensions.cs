@@ -59,7 +59,7 @@ namespace NgSchoolsBusinessLayer.Extensions
                 query = query
                     .Where(q => searchableProperties
                         .Any(p => p.GetValue(q).ToString()
-                        .Equals(pagedRequest.SearchQuery, StringComparison.OrdinalIgnoreCase)));
+                        .Contains(pagedRequest.SearchQuery, StringComparison.OrdinalIgnoreCase)));
             }
 
             result.Results = await Task.FromResult(
