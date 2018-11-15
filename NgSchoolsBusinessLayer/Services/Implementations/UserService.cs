@@ -179,5 +179,42 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
+
+        public async Task<ActionResponse<UserDto>> Create(UserDto request)
+        {
+            try
+            {
+                var user = mapper.Map<UserDto, User>(request);
+                unitOfWork.GetGenericRepository<User>().Add(user);
+                request = mapper.Map<User, UserDto>(user);
+                return await ActionResponse<UserDto>.ReturnSuccess(request);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<UserDto>> Update(UserDto request)
+        {
+            try
+            {
+                if (!request.Id.HasValue)
+                {
+                    return await ActionResponse<UserDto>.ReturnError("Incorect primary key so unable to update.");
+                }
+
+                var user = mapper.Map<UserDto, User>(request);
+                unitOfWork.GetGenericRepository<User>().Update(user);
+                request = mapper.Map<User, UserDto>(user);
+                return await ActionResponse<UserDto>.ReturnSuccess(request);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
     }
 }

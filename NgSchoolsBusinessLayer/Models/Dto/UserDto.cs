@@ -9,7 +9,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
     [Cached(CacheKeysEnum.User)]
     public class UserDto
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         [Searchable]
         public string Email { get; set; }
         [Searchable]

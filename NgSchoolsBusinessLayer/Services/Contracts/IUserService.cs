@@ -17,5 +17,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<List<UserDto>>> GetAllUsers();
         Task<ActionResponse<PagedResult<UserDto>>> GetAllUsersPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<UserDto>> GetById(Guid userId);
+        Task<ActionResponse<UserDto>> Create(UserDto request);
+        Task<ActionResponse<UserDto>> Update(UserDto request);
     }
 }

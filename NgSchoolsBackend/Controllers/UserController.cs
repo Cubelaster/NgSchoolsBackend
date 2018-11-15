@@ -40,5 +40,17 @@ namespace NgSchoolsBackend.Controllers
         {
             return await userService.GetById(request.Id.Value);
         }
+
+        [HttpPost]
+        public async Task<ActionResponse<UserDto>> Create([FromBody]UserDto request)
+        {
+            return await userService.Create(request);
+        }
+
+        [HttpPost]
+        public async Task<ActionResponse<UserDto>> Update([FromBody]UserDto request)
+        {
+            return await userService.Update(request);
+        }
     }
 }

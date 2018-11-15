@@ -59,7 +59,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                     return await ActionResponse<LoginResponse>.ReturnSuccess(new LoginResponse
                     {
-                        UserId = user.Id,
+                        UserId = user.Id.Value,
                         JwtToken = jwtToken.Token,
                         ValidUntil = jwtToken.ValidUntil
                     }, "Successfully logged in!");
