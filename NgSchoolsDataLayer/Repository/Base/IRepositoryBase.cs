@@ -11,6 +11,10 @@ namespace NgSchoolsDataLayer.Repository.Base
                        Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null,
                        string includeProperties = "");
 
+        IQueryable<T> GetAllAsQueryable(Expression<Func<T, bool>> filter = null,
+            Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null,
+            string includeProperties = "");
+
         T FindSingle(Guid id);
 
         T FindBy(Expression<Func<T, bool>> predicate, string includeProperties = "");

@@ -40,6 +40,30 @@ namespace NgSchoolsDataLayer.Repository.Base
             return query.ToList();
         }
 
+        public virtual IQueryable<T> GetAllAsQueryable(Expression<Func<T, bool>> filter = null,
+            Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null,
+            string includeProperties = "")
+        {
+            IQueryable<T> query = context.Set<T>();
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            foreach (string includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(includeProperty);
+            }
+
+            if (orderBy != null)
+            {
+                return orderBy(query).AsQueryable();
+            }
+
+            return query;
+        }
+
         public virtual T FindSingle(Guid id)
         {
             return context.Set<T>().Find(id);
