@@ -163,7 +163,7 @@ namespace NgSchoolsBackend
             //initializing custom roles 
             var RoleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
             var UserManager = serviceProvider.GetRequiredService<UserManager<User>>();
-            string[] roleNames = { "Admin" };
+            string[] roleNames = { "Admin", "Super Admin", "Ravnatelj", "Voditelj obrazovanja", "Nastavnik" };
             IdentityResult roleResult;
 
             foreach (var roleName in roleNames)
@@ -199,7 +199,7 @@ namespace NgSchoolsBackend
                 if (await userManager.FindByNameAsync(appUser.UserName) == null)
                 {
                     await userManager.CreateAsync(appUser, user.GetValue<string>("Password"));
-                    await userManager.AddToRoleAsync(await userManager.FindByNameAsync(appUser.UserName), "Admin");
+                    await userManager.AddToRoleAsync(await userManager.FindByNameAsync(appUser.UserName), "Super Admin");
                 }
             }
         }
