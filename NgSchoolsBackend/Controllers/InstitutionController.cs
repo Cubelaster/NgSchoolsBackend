@@ -19,9 +19,23 @@ namespace NgSchoolsWebApi.Controllers
 
         // TODO: Authorize
         [HttpPost]
-        public async Task<ActionResponse<InstitutionDto>> GetInstitution()
+        public async Task<ActionResponse<InstitutionDto>> Get()
         {
             return await institutionService.GetInstitution();
+        }
+
+        // TODO: Authorize
+        [HttpPost]
+        public async Task<ActionResponse<InstitutionDto>> Insert([FromBody] InstitutionDto institution)
+        {
+            return await institutionService.Insert(institution);
+        }
+
+        // TODO: Authorize
+        [HttpPost]
+        public async Task<ActionResponse<InstitutionDto>> Update([FromBody] InstitutionDto institution)
+        {
+            return await institutionService.Update(institution);
         }
     }
 }

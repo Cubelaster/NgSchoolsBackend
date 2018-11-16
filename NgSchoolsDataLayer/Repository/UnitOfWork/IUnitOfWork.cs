@@ -1,4 +1,5 @@
-﻿using NgSchoolsDataLayer.Repository.Base;
+﻿using NgSchoolsDataLayer.Context;
+using NgSchoolsDataLayer.Repository.Base;
 using System;
 
 namespace NgSchoolsDataLayer.Repository.UnitOfWork
@@ -8,6 +9,8 @@ namespace NgSchoolsDataLayer.Repository.UnitOfWork
         IRepositoryBase<T> GetGenericRepository<T>() where T : class;
 
         T GetCustomRepository<T>() where T : class;
+
+        NgSchoolsContext GetContext();
 
         int Save();
     }

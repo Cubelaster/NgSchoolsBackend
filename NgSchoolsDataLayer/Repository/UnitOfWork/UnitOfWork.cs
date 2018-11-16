@@ -41,5 +41,10 @@ namespace NgSchoolsDataLayer.Repository.UnitOfWork
         {
             return repositoryProvider.GetCustomRepository<T>();
         }
+
+        public NgSchoolsContext GetContext()
+        {
+            return context;
+        }
     }
 }

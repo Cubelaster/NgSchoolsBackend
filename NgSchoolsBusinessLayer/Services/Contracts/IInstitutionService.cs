@@ -7,5 +7,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
     public interface IInstitutionService
     {
         Task<ActionResponse<InstitutionDto>> GetInstitution();
+        Task<ActionResponse<InstitutionDto>> Update(InstitutionDto institution);
+        Task<ActionResponse<InstitutionDto>> Insert(InstitutionDto institution);
     }
 }

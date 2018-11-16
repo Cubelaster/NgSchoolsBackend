@@ -18,7 +18,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public InstitutionService(IMapper mapper, ILoggerService loggerService, 
+        public InstitutionService(IMapper mapper, ILoggerService loggerService,
             IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
@@ -33,8 +33,45 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var institution = unitOfWork.GetGenericRepository<Institution>()
-                    .GetAll(includeProperties: "Principal").First();
-                return await ActionResponse<InstitutionDto>.ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institution));
+                    .GetAll(includeProperties: "Principal").FirstOrDefault();
+                return await ActionResponse<InstitutionDto>
+                    .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institution));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<InstitutionDto>.ReturnError("Some sort of fuckup!");
+            }
+        }
+
+        public async Task<ActionResponse<InstitutionDto>> Insert(InstitutionDto institution)
+        {
+            try
+            {
+                var institutionToAdd = mapper.Map<InstitutionDto, Institution>(institution);
+                unitOfWork.GetGenericRepository<Institution>().Add(institutionToAdd);
+                unitOfWork.Save();
+                unitOfWork.GetContext().Entry(institutionToAdd).Reference(p => p.Principal).Load();
+                return await ActionResponse<InstitutionDto>
+                    .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institutionToAdd));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<InstitutionDto>.ReturnError("Some sort of fuckup!");
+            }
+        }
+
+        public async Task<ActionResponse<InstitutionDto>> Update(InstitutionDto institution)
+        {
+            try
+            {
+                var institutionToUpdate = mapper.Map<InstitutionDto, Institution>(institution);
+                unitOfWork.GetGenericRepository<Institution>().Update(institutionToUpdate);
+                unitOfWork.Save();
+                unitOfWork.GetContext().Entry(institutionToUpdate).Reference(p => p.Principal).Load();
+                return await ActionResponse<InstitutionDto>
+                    .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institutionToUpdate));
             }
             catch (Exception ex)
             {
