@@ -13,7 +13,6 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<InstitutionDto, Institution>()
                 .ForMember(dest => dest.Principal, opt => opt.Ignore());
-            //.ForMember(dest => dest.Principal, opt => opt.MapFrom(src => Mapper.Map<UserDto, User>(src.Principal)));
         }
     }
 }
