@@ -57,12 +57,13 @@ namespace NgSchoolsBackend
                 .AddRoles<IdentityRole<Guid>>()
                 .AddDefaultTokenProviders();
 
-            services.AddLogging(options => {
+            services.AddLogging(options =>
+            {
                 var eventLogSettings = new EventLogSettings
                 {
                     LogName = "NgSchools",
                     SourceName = "NgSchools",
-                    
+
                 };
                 options.AddEventLog(eventLogSettings);
             });
@@ -120,6 +121,7 @@ namespace NgSchoolsBackend
             services.AddScoped<ICacheService, CacheService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IInstitutionService, InstitutionService>();
         }
 
         private void ConfigureJWT(IServiceCollection services)

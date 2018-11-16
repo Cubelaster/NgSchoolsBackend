@@ -1,0 +1,46 @@
+﻿using AutoMapper;
+using NgSchoolsBusinessLayer.Models.Common;
+using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Services.Contracts;
+using NgSchoolsDataLayer.Models;
+using NgSchoolsDataLayer.Repository.UnitOfWork;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace NgSchoolsBusinessLayer.Services.Implementations
+{
+    public class InstitutionService : IInstitutionService
+    {
+        #region Ctors and Members
+
+        private readonly IMapper mapper;
+        private readonly ILoggerService loggerService;
+        private readonly IUnitOfWork unitOfWork;
+
+        public InstitutionService(IMapper mapper, ILoggerService loggerService, 
+            IUnitOfWork unitOfWork)
+        {
+            this.mapper = mapper;
+            this.loggerService = loggerService;
+            this.unitOfWork = unitOfWork;
+        }
+
+        #endregion Ctors and Members
+
+        public async Task<ActionResponse<InstitutionDto>> GetInstitution()
+        {
+            try
+            {
+                var institution = unitOfWork.GetGenericRepository<Institution>()
+                    .GetAll(includeProperties: "Principal").First();
+                return await ActionResponse<InstitutionDto>.ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institution));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<InstitutionDto>.ReturnError("Some sort of fuckup!");
+            }
+        }
+    }
+}
