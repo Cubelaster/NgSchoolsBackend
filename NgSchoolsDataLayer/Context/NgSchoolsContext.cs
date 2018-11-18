@@ -11,7 +11,10 @@ namespace NgSchoolsDataLayer.Context
     {
         public NgSchoolsContext(DbContextOptions<NgSchoolsContext> options) : base(options) { }
 
+        public DbSet<ClassLocations> ClassLocations { get; set; }
         public DbSet<ClassType> ClassTypes { get; set; }
+        public DbSet<EducationGroups> EducationGroups { get; set; }
+        public DbSet<EducationLevel> EducationLevels { get; set; }
         public DbSet<Institution> Institution { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
