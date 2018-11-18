@@ -13,6 +13,12 @@ namespace NgSchoolsDataLayer.Models
         public string InstitutionCode { get; set; }
         [Required]
         public string City { get; set; }
+        [Required]
+        public string InstitutionClassFirstPart { get; set; }
+        [Required]
+        public string InstitutionClassSecondPart { get; set; }
+        [Required]
+        public string InstitutionUrNumber { get; set; }
         public Guid? PrincipalId { get; set; }
         public User Principal { get; set; }
     }
