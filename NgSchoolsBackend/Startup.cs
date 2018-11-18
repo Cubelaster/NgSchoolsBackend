@@ -24,6 +24,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
 using NgSchoolsBusinessLayer.Services.Implementations.Common;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace NgSchoolsBackend
 {
@@ -103,6 +106,18 @@ namespace NgSchoolsBackend
                 options.WithOrigins(Configuration.GetValue<string>("CorsOrigin"));
             });
 
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(directoryPath),
+                RequestPath = "/uploads",
+                EnableDirectoryBrowsing = false
+            });
+
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();
@@ -119,6 +134,8 @@ namespace NgSchoolsBackend
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddScoped<ICacheService, CacheService>();
+            services.AddScoped<IFileUploadService, FileUploadService>();
+
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IInstitutionService, InstitutionService>();
