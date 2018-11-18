@@ -97,6 +97,8 @@ namespace NgSchoolsBackend
                 app.UseHsts();
             }
 
+            ConfigureFileServer(app);
+
             app.UseCors(options =>
             {
                 options.AllowCredentials();
@@ -105,24 +107,29 @@ namespace NgSchoolsBackend
                 options.WithOrigins(Configuration.GetValue<string>("CorsOrigin"));
             });
 
-            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-            if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-            app.UseFileServer(new FileServerOptions
-            {
-                FileProvider = new PhysicalFileProvider(directoryPath),
-                RequestPath = "/uploads",
-                EnableDirectoryBrowsing = false
-            });
-
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();
 
             CreateDefaultRoles(serviceProvider).Wait();
             CreateDefaultUsers(serviceProvider).Wait();
+        }
+
+        private void ConfigureFileServer(IApplicationBuilder app)
+        {
+            string fileServerFolder = Configuration.GetValue<string>("UploadDestination");
+            var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), fileServerFolder.Replace("/", ""));
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            app.UseFileServer(new FileServerOptions
+            {
+                FileProvider = new PhysicalFileProvider(directoryPath),
+                RequestPath = fileServerFolder,
+                EnableDirectoryBrowsing = false
+            });
         }
 
         private void ConfigureServicesDI(IServiceCollection services)

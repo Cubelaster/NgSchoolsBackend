@@ -1,4 +1,5 @@
-﻿using NgSchoolsBusinessLayer.Models.Common;
+﻿using Microsoft.Extensions.Configuration;
+using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using System;
@@ -10,17 +11,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
     public class FileUploadService : IFileUploadService
     {
         private readonly ILoggerService loggerService;
+        private readonly IConfiguration configuration;
 
-        public FileUploadService(ILoggerService loggerService)
+        public FileUploadService(ILoggerService loggerService, IConfiguration configuration)
         {
             this.loggerService = loggerService;
+            this.configuration = configuration;
         }
 
         public async Task<ActionResponse<string>> Upload(FileUploadRequest fileUploadRequest)
         {
             try
             {
-                string uploadFolderName = "uploads";
+                string uploadFolderName = configuration.GetValue<string>("UploadDestination").Replace("/", "");
                 string ottResources = Path.Combine(Directory.GetCurrentDirectory(), uploadFolderName);
                 string directoryPath = ottResources;
                 string filePath = Path.Combine(directoryPath, fileUploadRequest.FileName);
