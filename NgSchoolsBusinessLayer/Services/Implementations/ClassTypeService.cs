@@ -35,9 +35,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var classType = unitOfWork.GetGenericRepository<ClassType>().FindBy(c => c.Id == id);
+                var entity = unitOfWork.GetGenericRepository<ClassType>().FindBy(c => c.Id == id);
                 return await ActionResponse<ClassTypeDto>
-                    .ReturnSuccess(mapper.Map<ClassType, ClassTypeDto>(classType));
+                    .ReturnSuccess(mapper.Map<ClassType, ClassTypeDto>(entity));
             }
             catch (Exception ex)
             {
@@ -50,9 +50,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var classTypes = unitOfWork.GetGenericRepository<ClassType>().GetAll();
+                var entities = unitOfWork.GetGenericRepository<ClassType>().GetAll();
                 return await ActionResponse<List<ClassTypeDto>>
-                    .ReturnSuccess(mapper.Map<List<ClassType>, List<ClassTypeDto>>(classTypes));
+                    .ReturnSuccess(mapper.Map<List<ClassType>, List<ClassTypeDto>>(entities));
             }
             catch (Exception ex)
             {
@@ -65,11 +65,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<ClassTypeDto> classTypes = new List<ClassTypeDto>();
-
-                var bla = unitOfWork.GetGenericRepository<ClassType>()
-                    .GetAllAsQueryable();
-
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<ClassType>()
                     .GetAllAsQueryable().GetPaged(pagedRequest);
 
@@ -91,15 +86,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<ClassTypeDto>> Insert(ClassTypeDto classType)
+        public async Task<ActionResponse<ClassTypeDto>> Insert(ClassTypeDto entityDto)
         {
             try
             {
-                var classTypeToAdd = mapper.Map<ClassTypeDto, ClassType>(classType);
-                unitOfWork.GetGenericRepository<ClassType>().Add(classTypeToAdd);
+                var entityToAdd = mapper.Map<ClassTypeDto, ClassType>(entityDto);
+                unitOfWork.GetGenericRepository<ClassType>().Add(entityToAdd);
                 unitOfWork.Save();
                 return await ActionResponse<ClassTypeDto>
-                    .ReturnSuccess(mapper.Map<ClassType, ClassTypeDto>(classTypeToAdd));
+                    .ReturnSuccess(mapper.Map<ClassType, ClassTypeDto>(entityToAdd));
             }
             catch (Exception ex)
             {
@@ -108,15 +103,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<ClassTypeDto>> Update(ClassTypeDto classType)
+        public async Task<ActionResponse<ClassTypeDto>> Update(ClassTypeDto entityDto)
         {
             try
             {
-                var classTypeToUpdate = mapper.Map<ClassTypeDto, ClassType>(classType);
-                unitOfWork.GetGenericRepository<ClassType>().Update(classTypeToUpdate);
+                var entityToUpdate = mapper.Map<ClassTypeDto, ClassType>(entityDto);
+                unitOfWork.GetGenericRepository<ClassType>().Update(entityToUpdate);
                 unitOfWork.Save();
                 return await ActionResponse<ClassTypeDto>
-                    .ReturnSuccess(mapper.Map<ClassType, ClassTypeDto>(classTypeToUpdate));
+                    .ReturnSuccess(mapper.Map<ClassType, ClassTypeDto>(entityToUpdate));
             }
             catch (Exception ex)
             {
