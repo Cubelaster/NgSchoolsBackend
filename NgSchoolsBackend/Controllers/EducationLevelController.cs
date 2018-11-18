@@ -35,9 +35,9 @@ namespace NgSchoolsWebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResponse<EducationLevelDto>> GetById(int id)
+        public async Task<ActionResponse<EducationLevelDto>> GetById(SimpleRequestBase request)
         {
-            return await educationLevelService.GetById(id);
+            return await educationLevelService.GetById(request.Id);
         }
 
         [HttpPost]

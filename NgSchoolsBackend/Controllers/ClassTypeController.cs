@@ -22,9 +22,9 @@ namespace NgSchoolsWebApi.Controllers
 
         // TODO: Authorize
         [HttpPost]
-        public async Task<ActionResponse<ClassTypeDto>> GetById(int id)
+        public async Task<ActionResponse<ClassTypeDto>> GetById(SimpleRequestBase request)
         {
-            return await classTypeService.GetById(id);
+            return await classTypeService.GetById(request.Id);
         }
 
         // TODO: Authorize
