@@ -49,6 +49,7 @@ namespace NgSchoolsDataLayer.Repository.Implementations
             userToUpdate.Title = user.Title;
             userToUpdate.Avatar = user.Avatar;
             userToUpdate.DateModified = DateTime.Now;
+
             return userToUpdate;
         }
     }
