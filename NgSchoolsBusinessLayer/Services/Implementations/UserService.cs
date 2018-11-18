@@ -226,5 +226,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<object>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
+
+        #region Roles 
+
+        public async Task<ActionResponse<List<RoleDto>>> GetAllRoles()
+        {
+            try
+            {
+                var entities = unitOfWork.GetGenericRepository<Role>().GetAll();
+                return await ActionResponse<List<RoleDto>>.ReturnSuccess(mapper.Map<List<Role>, List<RoleDto>>(entities));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<RoleDto>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        #endregion Roles
     }
 }

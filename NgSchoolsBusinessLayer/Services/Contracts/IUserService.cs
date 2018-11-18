@@ -20,5 +20,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<UserDto>> Create(UserDto request);
         Task<ActionResponse<UserDto>> Update(UserDto request);
         Task<ActionResponse<object>> Delete(UserGetRequest request);
+        Task<ActionResponse<List<RoleDto>>> GetAllRoles();
     }
 }

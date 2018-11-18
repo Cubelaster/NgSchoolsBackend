@@ -58,5 +58,11 @@ namespace NgSchoolsBackend.Controllers
         {
             return await userService.Delete(request);
         }
+
+        [HttpPost]
+        public async Task<ActionResponse<List<RoleDto>>> GetAllRoles()
+        {
+            return await userService.GetAllRoles();
+        }
     }
 }
