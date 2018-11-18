@@ -3,7 +3,6 @@ using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
@@ -21,41 +20,17 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                Regex regex = null;
-
-                if (fileUploadRequest.FileString.StartsWith("data:image", StringComparison.InvariantCulture))
-                {
-                    regex = new Regex("data:image\\/(?<extension>(png)|(jpg)|(jpeg)|(gif));base64,(?<payload>.+)");
-                }
-                else if (fileUploadRequest.FileString.StartsWith("data:application", StringComparison.InvariantCulture))
-                {
-                    regex = new Regex("data:application\\/(?<extension>(ttf));base64,(?<payload>.+)");
-                }
-                else
-                {
-                    return await ActionResponse<string>.ReturnError("File not in supported base 64 format");
-                }
-
-                string extension = regex.Match(fileUploadRequest.FileString).Groups["extension"].Value;
-                string payload = regex.Match(fileUploadRequest.FileString).Groups["payload"].Value;
-
                 string uploadFolderName = "uploads";
                 string ottResources = Path.Combine(Directory.GetCurrentDirectory(), uploadFolderName);
-                string fileName = $"{Guid.NewGuid().ToString().Replace("-", "") }.{extension}";
                 string directoryPath = ottResources;
-                string filePath = Path.Combine(directoryPath, fileName);
+                string filePath = Path.Combine(directoryPath, fileUploadRequest.FileName);
 
-                var bytes = Convert.FromBase64String(payload);
+                var bytes = Convert.FromBase64String(fileUploadRequest.FileString);
 
-                if (!Directory.Exists(directoryPath))
+                using (var file = new FileStream(filePath, FileMode.Create))
                 {
-                    Directory.CreateDirectory(directoryPath);
-                }
-
-                using (var imageFile = new FileStream(filePath, FileMode.Create))
-                {
-                    imageFile.Write(bytes, 0, bytes.Length);
-                    imageFile.Flush();
+                    file.Write(bytes, 0, bytes.Length);
+                    file.Flush();
                 }
 
                 return await ActionResponse<string>.ReturnSuccess(filePath.Replace(ottResources, "").Replace("\\", ""), "File uploaded successfully");

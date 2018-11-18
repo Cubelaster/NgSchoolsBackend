@@ -26,7 +26,6 @@ using NgSchoolsBusinessLayer.Services.Implementations.Common;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace NgSchoolsBackend
 {
