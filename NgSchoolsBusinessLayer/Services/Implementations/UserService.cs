@@ -10,6 +10,7 @@ using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
+using NgSchoolsDataLayer.Repository.Contracts;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
@@ -45,20 +46,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         }
 
         #endregion Ctors and Members
-
-        public async Task<ActionResponse<UserDto>> GetUserById(Guid Id)
-        {
-            try
-            {
-                var user = unitOfWork.GetGenericRepository<User>().FindSingle(Id);
-                return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<UserDto>.ReturnError(ex.Message);
-            }
-        }
 
         public async Task<ActionResponse<UserDto>> GetUserByEmail(string email)
         {
@@ -208,7 +195,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
 
                 var user = mapper.Map<UserDto, User>(request);
-                unitOfWork.GetGenericRepository<User>().Update(user);
+                user = unitOfWork.GetCustomRepository<IUserRepository>().Update(user);
                 unitOfWork.Save();
                 request = mapper.Map<User, UserDto>(user);
                 return await ActionResponse<UserDto>.ReturnSuccess(request);
