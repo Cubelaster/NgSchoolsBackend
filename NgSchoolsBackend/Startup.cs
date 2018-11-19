@@ -192,7 +192,7 @@ namespace NgSchoolsBackend
             //initializing custom roles 
             var RoleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
             var UserManager = serviceProvider.GetRequiredService<UserManager<User>>();
-            string[] roleNames = { "Admin", "Super Admin", "Ravnatelj", "Voditelj obrazovanja", "Nastavnik" };
+            string[] roleNames = { "Admin", "Super Admin", "Ravnatelj", "Voditelj obrazovanja", "Nastavnik", "Korisnik" };
             IdentityResult roleResult;
 
             foreach (var roleName in roleNames)

@@ -16,7 +16,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<UserDto, User>()
                 .ForMember(dest => dest.SecurityStamp, opt => opt.MapFrom(src => Guid.NewGuid().ToString()))
-                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.Roles.Select(ur => new UserRoles { RoleId = Guid.Parse(ur), UserId = src.Id.Value })));
+                .ForMember(dest => dest.Roles, opt => opt.Ignore());
         }
     }
 }

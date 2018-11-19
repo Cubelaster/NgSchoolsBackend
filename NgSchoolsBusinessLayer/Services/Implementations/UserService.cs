@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -31,9 +32,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly ICacheService cacheService;
         private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
+        private readonly IConfiguration configuration;
 
         public UserService(UserManager<User> userManager, IJwtFactory jwtFactory,
-            RoleManager<Role> roleManager, IMapper mapper,
+            RoleManager<Role> roleManager, IMapper mapper, IConfiguration configuration,
             ICacheService cacheService, ILoggerService loggerService, IUnitOfWork unitOfWork)
         {
             this.userManager = userManager;
@@ -43,6 +45,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             this.cacheService = cacheService;
             this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
+            this.configuration = configuration;
         }
 
         #endregion Ctors and Members
@@ -173,9 +176,26 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var user = mapper.Map<UserDto, User>(request);
-                unitOfWork.GetGenericRepository<User>().Add(user);
-                unitOfWork.Save();
-                request = mapper.Map<User, UserDto>(user);
+                var result = await userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                {
+                    return await ActionResponse<UserDto>.ReturnError("Failed to create new user.");
+                }
+
+                request.Id = user.Id;
+
+                var actionResponse = await AddToDefaultRole(request);
+                if (!actionResponse.IsSuccessAndHasData(out request))
+                {
+                    return await ActionResponse<UserDto>.ReturnError("Failed to edit user's roles.");
+                };
+
+                actionResponse = await ModifyUserRoles(request);
+                if (!actionResponse.IsSuccessAndHasData(out request))
+                {
+                    return await ActionResponse<UserDto>.ReturnError("Failed to edit user's roles.");
+                };
+
                 return await ActionResponse<UserDto>.ReturnSuccess(request);
             }
             catch (Exception ex)
@@ -195,11 +215,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
 
                 var user = mapper.Map<UserDto, User>(request);
+
                 user = unitOfWork.GetCustomRepository<IUserRepository>().Update(user);
                 unitOfWork.Save();
 
-                var actionResponse = await AddUserToRoles(request);
-                if (!actionResponse.IsSuccessAndHasData<UserDto>(out request)) {
+                var actionResponse = await ModifyUserRoles(request);
+                if (!actionResponse.IsSuccessAndHasData(out request))
+                {
                     return await ActionResponse<UserDto>.ReturnError("Failed to edit user's roles.");
                 };
 
@@ -248,28 +270,92 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<UserDto>> AddUserToRoles(UserDto user)
+        private async Task<ActionResponse<UserDto>> AddRoles(UserDto user)
+        {
+            try
+            {
+                var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
+                var result = await userManager.AddToRolesAsync(entity, user.Roles);
+                if (!result.Succeeded)
+                {
+                    return await ActionResponse<UserDto>.ReturnError("Failed to add user to roles");
+                }
+                return await ActionResponse<UserDto>.ReturnSuccess(user);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, user);
+                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        private async Task<ActionResponse<UserDto>> AddToDefaultRole(UserDto user)
+        {
+            try
+            {
+                var defaultRole = await roleManager
+                    .FindByNameAsync(configuration.GetValue<string>("DefaultUserRole"));
+                user.Roles.Add(defaultRole.Id.ToString());
+                return await ActionResponse<UserDto>.ReturnSuccess(user);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, user);
+                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        private async Task<ActionResponse<UserDto>> RemoveRoles(UserDto user)
+        {
+            try
+            {
+                var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
+                var result = await userManager.RemoveFromRolesAsync(entity, user.Roles);
+                if (!result.Succeeded)
+                {
+                    return await ActionResponse<UserDto>.ReturnError("Failed to remove from roles");
+                }
+                return await ActionResponse<UserDto>.ReturnSuccess(user);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, user);
+                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        private async Task<ActionResponse<UserDto>> ModifyUserRoles(UserDto user)
         {
             try
             {
                 var entity = mapper.Map<UserDto, User>(user);
-                List<Role> roles = new List<Role>();
+                var currentUserRoles = await userManager.GetRolesAsync(entity);
 
-                entity.Roles.ToList().ForEach(role =>
+                List<string> updateRoles = new List<string>();
+                foreach (var roleId in user.Roles)
                 {
-                    roles.Add(unitOfWork.GetGenericRepository<Role>().FindSingle(role.RoleId));
-                });
-
-                foreach(Role role in roles)
-                {
-                    var isInRole = await userManager.IsInRoleAsync(entity, role.Name);
-                    if (!isInRole)
-                    {
-                        await userManager.AddToRoleAsync(await userManager.FindByIdAsync(user.Id.Value.ToString()), role.Name);
-                    }
+                    var role = await roleManager.FindByIdAsync(roleId);
+                    updateRoles.Add(role.Name);
                 }
 
-                return await ActionResponse<UserDto>.ReturnSuccess(user);
+                var rolesToRemove = currentUserRoles.Where(cur => !updateRoles.Contains(cur)).ToList();
+                var rolesToAdd = updateRoles.Where(ur => !currentUserRoles.Contains(ur)).ToList();
+
+                user.Roles = rolesToRemove;
+                var actionResponse = await RemoveRoles(user);
+                if (!actionResponse.IsSuccess(out user))
+                {
+                    return actionResponse;
+                }
+
+                user.Roles = rolesToAdd;
+                actionResponse = await AddRoles(user);
+                if (!actionResponse.IsSuccess(out user))
+                {
+                    return actionResponse;
+                }
+
+                return actionResponse;
             }
             catch (Exception ex)
             {
