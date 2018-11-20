@@ -69,6 +69,11 @@ namespace NgSchoolsDataLayer.Repository.Base
             return context.Set<T>().Find(id);
         }
 
+        public virtual T FindSingle(int id)
+        {
+            return context.Set<T>().Find(id);
+        }
+
         public virtual T FindBy(Expression<Func<T, bool>> predicate, string includeProperties = "")
         {
             IQueryable<T> query = context.Set<T>();
@@ -97,6 +102,12 @@ namespace NgSchoolsDataLayer.Repository.Base
 
         public virtual void Delete(T entity)
         {
+            context.Set<T>().Remove(entity);
+        }
+
+        public void Delete(int id)
+        {
+            T entity = FindSingle(id);
             context.Set<T>().Remove(entity);
         }
     }

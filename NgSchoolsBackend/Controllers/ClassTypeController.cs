@@ -53,5 +53,11 @@ namespace NgSchoolsWebApi.Controllers
         {
             return await classTypeService.GetAllClassTypesPaged(pagedRequest);
         }
+
+        [HttpPost]
+        public async Task<ActionResponse<ClassTypeDto>> Delete([FromBody] SimpleRequestBase request)
+        {
+            return await classTypeService.Delete(request.Id);
+        }
     }
 }

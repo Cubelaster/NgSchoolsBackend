@@ -119,5 +119,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<EducationLevelDto>.ReturnError("Some sort of fuckup!");
             }
         }
+
+        public async Task<ActionResponse<EducationLevelDto>> Delete(int id)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<EducationLevel>().Delete(id);
+                unitOfWork.Save();
+                return await ActionResponse<EducationLevelDto>.ReturnSuccess("Delete successful.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<EducationLevelDto>.ReturnError("Some sort of fuckup!");
+            }
+        }
     }
 }

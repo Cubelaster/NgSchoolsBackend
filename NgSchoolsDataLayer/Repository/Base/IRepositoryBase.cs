@@ -17,6 +17,8 @@ namespace NgSchoolsDataLayer.Repository.Base
 
         T FindSingle(Guid id);
 
+        T FindSingle(int id);
+
         T FindBy(Expression<Func<T, bool>> predicate, string includeProperties = "");
 
         void Add(T toAdd);
@@ -24,6 +26,8 @@ namespace NgSchoolsDataLayer.Repository.Base
         void Update(T toUpdate);
 
         void Delete(Guid id);
+
+        void Delete(int id);
 
         void Delete(T entity);
     }

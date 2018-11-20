@@ -9,5 +9,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<InstitutionDto>> GetInstitution();
         Task<ActionResponse<InstitutionDto>> Update(InstitutionDto institution);
         Task<ActionResponse<InstitutionDto>> Insert(InstitutionDto institution);
+        Task<ActionResponse<InstitutionDto>> Delete(int id);
     }
 }

@@ -51,5 +51,11 @@ namespace NgSchoolsWebApi.Controllers
         {
             return await educationLevelService.Update(request);
         }
+
+        [HttpPost]
+        public async Task<ActionResponse<EducationLevelDto>> Delete([FromBody] SimpleRequestBase request)
+        {
+            return await educationLevelService.Delete(request.Id);
+        }
     }
 }
