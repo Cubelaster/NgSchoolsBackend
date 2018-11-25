@@ -11,6 +11,7 @@ namespace NgSchoolsDataLayer.Context
     {
         public NgSchoolsContext(DbContextOptions<NgSchoolsContext> options) : base(options) { }
 
+        public DbSet<BusinessPartner> BusinessPartners { get; set; }
         public DbSet<ClassLocations> ClassLocations { get; set; }
         public DbSet<ClassType> ClassTypes { get; set; }
         public DbSet<EducationGroups> EducationGroups { get; set; }
