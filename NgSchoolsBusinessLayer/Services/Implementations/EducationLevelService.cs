@@ -126,7 +126,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<EducationLevel>().Delete(id);
                 unitOfWork.Save();
-                return await ActionResponse<EducationLevelDto>.ReturnSuccess("Delete successful.");
+                return await ActionResponse<EducationLevelDto>.ReturnSuccess(null, "Delete successful.");
             }
             catch (Exception ex)
             {

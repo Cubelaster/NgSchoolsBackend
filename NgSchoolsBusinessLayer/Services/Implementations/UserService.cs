@@ -257,7 +257,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 unitOfWork.GetGenericRepository<User>().Delete(request.Id.Value);
                 unitOfWork.Save();
-                return await ActionResponse<object>.ReturnSuccess("Success!");
+                return await ActionResponse<object>.ReturnSuccess(null, "Success!");
             }
             catch (Exception ex)
             {
