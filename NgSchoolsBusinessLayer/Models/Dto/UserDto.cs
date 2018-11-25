@@ -10,6 +10,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
     public class UserDto
     {
         public Guid? Id { get; set; }
+        public int? UserDetailsId { get; set; }
         [Searchable]
         public string Email { get; set; }
         [Searchable]

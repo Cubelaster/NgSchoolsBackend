@@ -29,7 +29,7 @@ namespace NgSchoolsDataLayer.Repository.Base
 
             foreach (string includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                query = query.Include(includeProperty);
+                query = query.Include(includeProperty.Trim());
             }
 
             if (orderBy != null)
@@ -53,7 +53,7 @@ namespace NgSchoolsDataLayer.Repository.Base
 
             foreach (string includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                query = query.Include(includeProperty);
+                query = query.Include(includeProperty.Trim());
             }
 
             if (orderBy != null)
@@ -79,7 +79,7 @@ namespace NgSchoolsDataLayer.Repository.Base
             IQueryable<T> query = context.Set<T>();
             foreach (string includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                query = query.Include(includeProperty);
+                query = query.Include(includeProperty.Trim());
             }
             return query.Where(predicate).FirstOrDefault();
         }

@@ -10,5 +10,6 @@ namespace NgSchoolsDataLayer.Repository.Contracts
         User GetUserByEmail(string email);
         List<User> GetAllUsers();
         User Update(User user);
+        UserDetails UpdateUserDetails(UserDetails userDetails);
     }
 }

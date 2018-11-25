@@ -54,7 +54,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var user = unitOfWork.GetGenericRepository<User>().FindBy(u => u.Email == email);
+                var user = unitOfWork.GetGenericRepository<User>().FindBy(u => u.Email == email, includeProperties: "Roles.Role, UserDetails");
                 return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
             }
             catch (Exception ex)
@@ -109,7 +109,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll(includeProperties: "Roles.Role");
+                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll(includeProperties: "Roles.Role, UserDetails");
                 return await ActionResponse<List<UserDto>>.ReturnSuccess(
                     mapper.Map<List<User>, List<UserDto>>(allUsers));
             }
@@ -161,7 +161,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var user = unitOfWork.GetGenericRepository<User>().FindBy(u => u.Id == userId, includeProperties: "Roles.Role");
+                var user = unitOfWork.GetGenericRepository<User>().FindBy(u => u.Id == userId, includeProperties: "Roles.Role, UserDetails");
                 return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
             }
             catch (Exception ex)
@@ -203,6 +203,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
             }
+            finally
+            {
+                await cacheService.RefreshCache<List<UserDto>>();
+            }
         }
 
         public async Task<ActionResponse<UserDto>> Update(UserDto request)
@@ -215,6 +219,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
 
                 var user = mapper.Map<UserDto, User>(request);
+                var userDetails = user.UserDetails;
+
+                userDetails = unitOfWork.GetCustomRepository<IUserRepository>()
+                    .UpdateUserDetails(user.UserDetails);
 
                 user = unitOfWork.GetCustomRepository<IUserRepository>().Update(user);
                 unitOfWork.Save();
@@ -231,6 +239,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<UserDto>>();
             }
         }
 
@@ -251,6 +263,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<object>.ReturnError("Some sort of fuckup. Try again.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<UserDto>>();
             }
         }
 

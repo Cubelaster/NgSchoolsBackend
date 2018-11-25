@@ -16,6 +16,7 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<EducationGroups> EducationGroups { get; set; }
         public DbSet<EducationLevel> EducationLevels { get; set; }
         public DbSet<Institution> Institution { get; set; }
+        public DbSet<UserDetails> UserDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -39,6 +40,12 @@ namespace NgSchoolsDataLayer.Context
                     .HasForeignKey(ur => ur.UserId)
                     .IsRequired();
             });
+
+            builder.Entity<User>()
+                .HasOne(u => u.UserDetails)
+                .WithOne(ud => ud.User)
+                .HasForeignKey<UserDetails>(ud => ud.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -39,18 +39,26 @@ namespace NgSchoolsDataLayer.Repository.Implementations
         public User Update(User user)
         {
             var userToUpdate = context.Users.Where(u => u.Id == user.Id).FirstOrDefault();
-            userToUpdate.FirstName = user.FirstName;
-            userToUpdate.LastName = user.LastName;
-            userToUpdate.MiddleName = user.MiddleName;
-            userToUpdate.Mobile = user.Mobile;
-            userToUpdate.Mobile2 = user.Mobile2;
-            userToUpdate.Phone = user.Phone;
-            userToUpdate.Signature = user.Signature;
-            userToUpdate.Title = user.Title;
-            userToUpdate.Avatar = user.Avatar;
             userToUpdate.DateModified = DateTime.Now;
 
             return userToUpdate;
+        }
+
+        public UserDetails UpdateUserDetails(UserDetails userDetails)
+        {
+            var userDetailsToUpdate = context.UserDetails.Where(u => u.Id == userDetails.Id).FirstOrDefault();
+            userDetailsToUpdate.FirstName = userDetails.FirstName;
+            userDetailsToUpdate.LastName = userDetails.LastName;
+            userDetailsToUpdate.MiddleName = userDetails.MiddleName;
+            userDetailsToUpdate.Mobile = userDetails.Mobile;
+            userDetailsToUpdate.Mobile2 = userDetails.Mobile2;
+            userDetailsToUpdate.Phone = userDetails.Phone;
+            userDetailsToUpdate.Signature = userDetails.Signature;
+            userDetailsToUpdate.Title = userDetails.Title;
+            userDetailsToUpdate.Avatar = userDetails.Avatar;
+            userDetailsToUpdate.DateModified = DateTime.Now;
+
+            return userDetailsToUpdate;
         }
     }
 }

@@ -221,8 +221,11 @@ namespace NgSchoolsBackend
                     EmailConfirmed = true,
                     DateCreated = DateTime.UtcNow,
                     Status = DatabaseEntityStatusEnum.Active,
-                    FirstName = user[nameof(User.FirstName)],
-                    LastName = user[nameof(User.LastName)]
+                    UserDetails = new UserDetails
+                    {
+                        FirstName = user[nameof(UserDetails.FirstName)],
+                        LastName = user[nameof(UserDetails.LastName)]
+                    }
                 };
 
                 if (await userManager.FindByNameAsync(appUser.UserName) == null)
