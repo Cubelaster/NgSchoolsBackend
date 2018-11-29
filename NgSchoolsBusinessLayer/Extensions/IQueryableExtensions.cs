@@ -18,7 +18,6 @@ namespace NgSchoolsBusinessLayer.Extensions
             Type objectType = query.FirstOrDefault()?.GetType();
             if (objectType != null)
             {
-
                 var currentPage = pagedRequest.PageIndex + 1;
                 var result = new PagedResult<T>
                 {

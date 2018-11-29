@@ -1,17 +1,13 @@
-﻿using NgSchoolsDataLayer.Models.BaseTypes;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
 
-namespace NgSchoolsDataLayer.Models
+namespace NgSchoolsBusinessLayer.Models.Dto
 {
-    public class UserDetails : DatabaseEntity
+    public class UserDetailsDto
     {
-        [Key]
-        public int Id { get; set; }
-        [Required]
+        public int? Id { get; set; }
+        public Guid? UserId { get; set; }
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
-        [Required]
         public string LastName { get; set; }
         public string Avatar { get; set; }
         public string Signature { get; set; }
@@ -31,8 +27,5 @@ namespace NgSchoolsDataLayer.Models
         public string Authorization { get; set; }
         public string Certificates { get; set; }
         public string Notes { get; set; }
-
-        public Guid? UserId { get; set; }
-        public User User { get; set; }
     }
 }

@@ -60,5 +60,22 @@ namespace NgSchoolsDataLayer.Repository.Implementations
 
             return userDetailsToUpdate;
         }
+
+        public UserDetails UpdateTeacherDetails(UserDetails userDetails)
+        {
+            var userDetailsToUpdate = context.UserDetails.Where(u => u.Id == userDetails.Id).FirstOrDefault();
+            userDetailsToUpdate.FirstName = userDetails.FirstName;
+            userDetailsToUpdate.LastName = userDetails.LastName;
+            userDetailsToUpdate.MiddleName = userDetails.MiddleName;
+            userDetailsToUpdate.Mobile = userDetails.Mobile;
+            userDetailsToUpdate.Mobile2 = userDetails.Mobile2;
+            userDetailsToUpdate.Phone = userDetails.Phone;
+            userDetailsToUpdate.Signature = userDetails.Signature;
+            userDetailsToUpdate.Title = userDetails.Title;
+            userDetailsToUpdate.Avatar = userDetails.Avatar;
+            userDetailsToUpdate.DateModified = DateTime.Now;
+
+            return userDetailsToUpdate;
+        }
     }
 }

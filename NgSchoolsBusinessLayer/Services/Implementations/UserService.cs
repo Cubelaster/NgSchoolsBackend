@@ -7,6 +7,7 @@ using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
@@ -135,7 +136,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<PagedResult<UserDto>>> GetAllUsersPaged(BasePagedRequest pagedRequest)
+        public async Task<ActionResponse<PagedResult<UserViewModel>>> GetAllUsersPaged(BasePagedRequest pagedRequest)
         {
             try
             {
@@ -146,18 +147,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     users = (await GetAllUsers()).GetData();
                 }
 
-                var pagedResult = await users.AsQueryable().GetPaged(pagedRequest);
-                return await ActionResponse<PagedResult<UserDto>>.ReturnSuccess(pagedResult);
+                var pagedResult = await  mapper.Map<List<UserDto>,List<UserViewModel>>(users)
+                    .AsQueryable()
+                    .GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<UserViewModel>>.ReturnSuccess(pagedResult);
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<UserDto>>
+                return await ActionResponse<PagedResult<UserViewModel>>
                     .ReturnError("Some sort of fuckup. Try again.");
             }
         }
 
-        public async Task<ActionResponse<PagedResult<UserDto>>> GetAllTeachersPaged(BasePagedRequest pagedRequest)
+        public async Task<ActionResponse<PagedResult<TeacherViewModel>>> GetAllTeachersPaged(BasePagedRequest pagedRequest)
         {
             try
             {
@@ -171,12 +174,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await users
                     .Where(u => u.UserRoles.Any(ur => ur.Name == "Nastavnik"))
                     .AsQueryable().GetPaged(pagedRequest);
-                return await ActionResponse<PagedResult<UserDto>>.ReturnSuccess(pagedResult);
+                return await ActionResponse<PagedResult<TeacherViewModel>>.ReturnSuccess(pagedResult);
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<UserDto>>
+                return await ActionResponse<PagedResult<TeacherViewModel>>
                     .ReturnError("Some sort of fuckup. Try again.");
             }
         }
@@ -195,30 +198,47 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<UserViewModel>> GetViewModelById(Guid userId)
+        {
+            try
+            {
+                if((await GetById(userId)).IsNotSuccess(out ActionResponse<UserDto> response, out UserDto user))
+                {
+                    return await ActionResponse<UserViewModel>.ReturnError(response.Message);
+                }
+                return await ActionResponse<UserViewModel>.ReturnSuccess(mapper.Map<UserDto, UserViewModel>(user));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, userId);
+                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
         public async Task<ActionResponse<UserDto>> Create(UserDto request)
         {
             try
             {
-                var user = mapper.Map<UserDto, User>(request);
-                var result = await userManager.CreateAsync(user);
-                if (!result.Succeeded)
-                {
-                    return await ActionResponse<UserDto>.ReturnError("Failed to create new user.");
-                }
+                //var user = mapper.Map<UserDto, User>(request);
+                //var result = await userManager.CreateAsync(user);
+                //if (!result.Succeeded)
+                //{
+                //    return await ActionResponse<UserDto>.ReturnError("Failed to create new user.");
+                //}
 
-                request.Id = user.Id;
+                //request.Id = user.Id;
 
-                var actionResponse = await AddToDefaultRole(request);
-                if (!actionResponse.IsSuccessAndHasData(out request))
-                {
-                    return await ActionResponse<UserDto>.ReturnError("Failed to edit user's roles.");
-                };
+                //var actionResponse = await AddToDefaultRole(request);
+                //if (!actionResponse.IsSuccessAndHasData(out request))
+                //{
+                //    return await ActionResponse<UserDto>.ReturnError("Failed to edit user's roles.");
+                //};
 
-                actionResponse = await ModifyUserRoles(request);
-                if (!actionResponse.IsSuccessAndHasData(out request))
-                {
-                    return await ActionResponse<UserDto>.ReturnError("Failed to edit user's roles.");
-                };
+                //actionResponse = await ModifyUserRoles(request);
+                //if (!actionResponse.IsSuccessAndHasData(out request))
+                //{
+                //    return await ActionResponse<UserDto>.ReturnError("Failed to edit user's roles.");
+                //};
 
                 return await ActionResponse<UserDto>.ReturnSuccess(request);
             }
@@ -270,6 +290,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<TeacherViewModel>> UpdateTeacher(TeacherViewModel request)
+        {
+            if (!request.Id.HasValue)
+            {
+                return await ActionResponse<TeacherViewModel>.ReturnError("Incorect primary key so unable to update.");
+            }
+            return await ActionResponse<TeacherViewModel>.ReturnSuccess();
+        }
+
         public async Task<ActionResponse<object>> Delete(UserGetRequest request)
         {
             try
@@ -314,12 +343,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
-                var result = await userManager.AddToRolesAsync(entity, user.Roles);
-                if (!result.Succeeded)
-                {
-                    return await ActionResponse<UserDto>.ReturnError("Failed to add user to roles");
-                }
+                //var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
+                //var result = await userManager.AddToRolesAsync(entity, user.RoleNames);
+                //if (!result.Succeeded)
+                //{
+                //    return await ActionResponse<UserDto>.ReturnError("Failed to add user to roles");
+                //}
                 return await ActionResponse<UserDto>.ReturnSuccess(user);
             }
             catch (Exception ex)
@@ -333,9 +362,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var defaultRole = await roleManager
-                    .FindByNameAsync(configuration.GetValue<string>("DefaultUserRole"));
-                user.Roles.Add(defaultRole.Id.ToString());
+                //var defaultRole = await roleManager
+                //    .FindByNameAsync(configuration.GetValue<string>("DefaultUserRole"));
+                //user.Roles.Add(defaultRole.Id);
                 return await ActionResponse<UserDto>.ReturnSuccess(user);
             }
             catch (Exception ex)
@@ -349,12 +378,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
-                var result = await userManager.RemoveFromRolesAsync(entity, user.Roles);
-                if (!result.Succeeded)
-                {
-                    return await ActionResponse<UserDto>.ReturnError("Failed to remove from roles");
-                }
+                //var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
+                //var result = await userManager.RemoveFromRolesAsync(entity, user.RoleNames);
+                //if (!result.Succeeded)
+                //{
+                //    return await ActionResponse<UserDto>.ReturnError("Failed to remove from roles");
+                //}
                 return await ActionResponse<UserDto>.ReturnSuccess(user);
             }
             catch (Exception ex)
@@ -368,34 +397,36 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = mapper.Map<UserDto, User>(user);
-                var currentUserRoles = await userManager.GetRolesAsync(entity);
+                //var entity = mapper.Map<UserDto, User>(user);
+                //var currentUserRoles = await userManager.GetRolesAsync(entity);
 
-                List<string> updateRoles = new List<string>();
-                foreach (var roleId in user.Roles)
-                {
-                    var role = await roleManager.FindByIdAsync(roleId);
-                    updateRoles.Add(role.Name);
-                }
+                //List<string> updateRoles = new List<string>();
+                //foreach (var roleId in user.Roles)
+                //{
+                //    var role = await roleManager.FindByIdAsync(roleId.ToString());
+                //    updateRoles.Add(role.Name);
+                //}
 
-                var rolesToRemove = currentUserRoles.Where(cur => !updateRoles.Contains(cur)).ToList();
-                var rolesToAdd = updateRoles.Where(ur => !currentUserRoles.Contains(ur)).ToList();
+                //var rolesToRemove = currentUserRoles.Where(cur => !updateRoles.Contains(cur)).ToList();
+                //var rolesToAdd = updateRoles.Where(ur => !currentUserRoles.Contains(ur)).ToList();
 
-                user.Roles = rolesToRemove;
-                var actionResponse = await RemoveRoles(user);
-                if (!actionResponse.IsSuccess(out user))
-                {
-                    return actionResponse;
-                }
+                //user.RoleNames = rolesToRemove;
+                //var actionResponse = await RemoveRoles(user);
+                //if (!actionResponse.IsSuccess(out user))
+                //{
+                //    return actionResponse;
+                //}
 
-                user.Roles = rolesToAdd;
-                actionResponse = await AddRoles(user);
-                if (!actionResponse.IsSuccess(out user))
-                {
-                    return actionResponse;
-                }
+                //user.RoleNames = rolesToAdd;
+                //actionResponse = await AddRoles(user);
+                //if (!actionResponse.IsSuccess(out user))
+                //{
+                //    return actionResponse;
+                //}
 
-                return actionResponse;
+                //return actionResponse;
+
+                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
             }
             catch (Exception ex)
             {

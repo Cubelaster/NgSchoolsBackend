@@ -4,6 +4,7 @@ using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -30,21 +31,21 @@ namespace NgSchoolsBackend.Controllers
 
         // TODO: Authorize
         [HttpPost]
-        public async Task<ActionResponse<PagedResult<UserDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
+        public async Task<ActionResponse<PagedResult<UserViewModel>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await userService.GetAllUsersPaged(pagedRequest);
         }
 
         [HttpPost]
-        public async Task<ActionResponse<PagedResult<UserDto>>> GetAllTeachersPaged([FromBody] BasePagedRequest pagedRequest)
+        public async Task<ActionResponse<PagedResult<TeacherViewModel>>> GetAllTeachersPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await userService.GetAllTeachersPaged(pagedRequest);
         }
 
         [HttpPost]
-        public async Task<ActionResponse<UserDto>> GetById([FromBody]UserGetRequest request)
+        public async Task<ActionResponse<UserViewModel>> GetById([FromBody]UserGetRequest request)
         {
-            return await userService.GetById(request.Id.Value);
+            return await userService.GetViewModelById(request.Id.Value);
         }
 
         [HttpPost]
@@ -57,6 +58,12 @@ namespace NgSchoolsBackend.Controllers
         public async Task<ActionResponse<UserDto>> Update([FromBody]UserDto request)
         {
             return await userService.Update(request);
+        }
+
+        [HttpPost]
+        public async Task<ActionResponse<TeacherViewModel>> UpdateTeacher([FromBody]TeacherViewModel request)
+        {
+            return await userService.UpdateTeacher(request);
         }
 
         [HttpPost]

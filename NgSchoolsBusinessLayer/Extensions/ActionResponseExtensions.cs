@@ -29,5 +29,16 @@ namespace NgSchoolsBusinessLayer.Extensions
             }
             return false;
         }
+
+        public static bool IsNotSuccess<T>(this ActionResponse<T> response, out ActionResponse<T> actionResponse, out T Data)
+        {
+            actionResponse = response;
+            Data = actionResponse.Data != null ? (T)actionResponse.Data : default(T);
+            if (response.ActionResponseType != ActionResponseTypeEnum.Success)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
