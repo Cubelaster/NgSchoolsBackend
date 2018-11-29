@@ -36,6 +36,12 @@ namespace NgSchoolsBackend.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResponse<PagedResult<UserDto>>> GetAllTeachersPaged([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await userService.GetAllTeachersPaged(pagedRequest);
+        }
+
+        [HttpPost]
         public async Task<ActionResponse<UserDto>> GetById([FromBody]UserGetRequest request)
         {
             return await userService.GetById(request.Id.Value);

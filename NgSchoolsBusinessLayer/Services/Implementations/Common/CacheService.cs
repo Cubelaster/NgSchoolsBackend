@@ -78,6 +78,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
 
             var caller = serviceProvider.GetService(callingClassTypeInterfaces.First());
             var result = (ActionResponse<T>)await (dynamic)refreshMethod.Invoke(caller, null);
+
+            await SetInCache<T>(result.Data);
+
             return result;
         }
 
@@ -101,7 +104,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
                 {
                     return await ActionResponse<T>.ReturnError("Unable to refresh cache!");
                 }
-                await SetInCache<T>(result.Data);
 
                 return await GetFromCache<T>();
             }

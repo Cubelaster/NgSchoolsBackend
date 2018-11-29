@@ -157,6 +157,30 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<PagedResult<UserDto>>> GetAllTeachersPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<UserDto> users = new List<UserDto>();
+                var cachedUsersResponse = await cacheService.GetFromCache<List<UserDto>>();
+                if (!cachedUsersResponse.IsSuccessAndHasData(out users))
+                {
+                    users = (await GetAllUsers()).GetData();
+                }
+
+                var pagedResult = await users
+                    .Where(u => u.UserRoles.Any(ur => ur.Name == "Nastavnik"))
+                    .AsQueryable().GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<UserDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<UserDto>>
+                    .ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
         public async Task<ActionResponse<UserDto>> GetById(Guid userId)
         {
             try
