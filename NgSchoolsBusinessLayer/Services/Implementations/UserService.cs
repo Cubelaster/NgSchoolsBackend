@@ -290,6 +290,70 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<UserDetailsDto>> UpdateUserDetails(UserDetailsDto userDetails)
+        {
+            try
+            {
+                var entityToUpdate = mapper.Map<UserDetailsDto, UserDetails>(userDetails);
+                unitOfWork.GetGenericRepository<UserDetails>().Update(entityToUpdate);
+                userDetails = mapper.Map<UserDetails, UserDetailsDto>(entityToUpdate);
+                return await ActionResponse<UserDetailsDto>.ReturnSuccess(userDetails);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, userDetails);
+                return await ActionResponse<UserDetailsDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<UserViewModel>> UpdateUserDetails(UserViewModel userDetails)
+        {
+            try
+            {
+                var userDetailsEntity = unitOfWork.GetGenericRepository<UserDetails>().FindBy(ud => ud.Id == userDetails.UserDetailsId);
+                userDetailsEntity.Avatar = userDetails.Avatar;
+                userDetailsEntity.FirstName = userDetails.FirstName;
+                userDetailsEntity.LastName = userDetails.LastName;
+                userDetailsEntity.Mobile = userDetails.Mobile;
+                userDetailsEntity.Mobile2 = userDetails.Mobile2;
+                userDetailsEntity.Phone = userDetails.Phone;
+                userDetailsEntity.Signature = userDetails.Signature;
+                userDetailsEntity.Title = userDetails.Title;
+                unitOfWork.GetGenericRepository<UserDetails>().Update(userDetailsEntity);
+
+                return await ActionResponse<UserViewModel>.ReturnSuccess(userDetails);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, userDetails);
+                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<UserViewModel>> Update(UserViewModel request)
+        {
+            try
+            {
+                if (!request.Id.HasValue || !request.UserDetailsId.HasValue)
+                {
+                    return await ActionResponse<UserViewModel>.ReturnError("Incorect primary key so unable to update.");
+                }
+
+                if ((await UpdateUserDetails(request))
+                    .IsNotSuccess(out ActionResponse<UserViewModel> response, out request))
+                {
+                    return await ActionResponse<UserViewModel>.ReturnError(response.Message, request);
+                }
+
+                return await ActionResponse<UserViewModel>.ReturnSuccess(request, "User updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
         public async Task<ActionResponse<TeacherViewModel>> UpdateTeacher(TeacherViewModel request)
         {
             if (!request.Id.HasValue)

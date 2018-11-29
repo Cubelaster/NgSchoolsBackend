@@ -25,5 +25,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<List<RoleDto>>> GetAllRoles();
         Task<ActionResponse<TeacherViewModel>> UpdateTeacher(TeacherViewModel request);
         Task<ActionResponse<UserViewModel>> GetViewModelById(Guid value);
+        Task<ActionResponse<UserViewModel>> Update(UserViewModel request);
     }
 }

@@ -55,7 +55,7 @@ namespace NgSchoolsBackend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResponse<UserDto>> Update([FromBody]UserDto request)
+        public async Task<ActionResponse<UserViewModel>> Update([FromBody]UserViewModel request)
         {
             return await userService.Update(request);
         }

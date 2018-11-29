@@ -39,6 +39,10 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Signature, opt => opt.MapFrom(src => src.UserDetails.Signature))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.UserDetails.Title));
 
+            CreateMap<UserDetails, UserDetailsDto>();
+
+            CreateMap<UserDetailsDto, UserDetails>();
+
             //CreateMap<UserDto, User>()
             //    .ForMember(dest => dest.UserDetails, opt => opt.MapFrom(src => src.UserDetailsId.HasValue ?
             //    new UserDetails
