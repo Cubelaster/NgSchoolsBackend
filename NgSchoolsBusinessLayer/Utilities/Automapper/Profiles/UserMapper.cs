@@ -27,6 +27,9 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Signature, opt => opt.MapFrom(src => src.UserDetails.Signature))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.UserDetails.Title));
 
+            CreateMap<UserViewModel, User>()
+                .ForMember(dest => dest.Roles, opt => opt.Ignore());
+
             CreateMap<UserDto, UserViewModel>()
                 .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.UserDetails.Avatar))
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.UserDetails.FirstName))
@@ -39,27 +42,25 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Signature, opt => opt.MapFrom(src => src.UserDetails.Signature))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.UserDetails.Title));
 
+            CreateMap<UserDto, TeacherViewModel>()
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.UserDetails.Address))
+                .ForMember(dest => dest.Authorization, opt => opt.MapFrom(src => src.UserDetails.Authorization))
+                .ForMember(dest => dest.Bank, opt => opt.MapFrom(src => src.UserDetails.Bank))
+                .ForMember(dest => dest.Certificates, opt => opt.MapFrom(src => src.UserDetails.Certificates))
+                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.UserDetails.City))
+                .ForMember(dest => dest.EmploymentPlace, opt => opt.MapFrom(src => src.UserDetails.EmploymentPlace));
+                //.ForMember(dest => dest.Iban, opt => opt.MapFrom(src => src.iba))
+                //.ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(r => r.Id)))
+                //.ForMember(dest => dest.Signature, opt => opt.MapFrom(src => src.UserDetails.Signature))
+                //.ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.UserDetails.Title));
+
             CreateMap<UserDetails, UserDetailsDto>();
+
+            CreateMap<UserDetails, UserViewModel>();
 
             CreateMap<UserDetailsDto, UserDetails>();
 
-            //CreateMap<UserDto, User>()
-            //    .ForMember(dest => dest.UserDetails, opt => opt.MapFrom(src => src.UserDetailsId.HasValue ?
-            //    new UserDetails
-            //    {
-            //        Id = src.UserDetailsId.Value,
-            //        Avatar = src.Avatar,
-            //        FirstName = src.FirstName,
-            //        LastName = src.LastName,
-            //        Mobile = src.Mobile,
-            //        Mobile2 = src.Mobile2,
-            //        Phone = src.Phone,
-            //        Signature = src.Signature,
-            //        Title = src.Title,
-            //        UserId = src.Id
-            //    } : null))
-            //    .ForMember(dest => dest.SecurityStamp, opt => opt.MapFrom(src => Guid.NewGuid().ToString()))
-            //    .ForMember(dest => dest.Roles, opt => opt.Ignore());
+            CreateMap<UserViewModel, UserDetails>();
         }
     }
 }

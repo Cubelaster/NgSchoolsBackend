@@ -45,11 +45,11 @@ namespace NgSchoolsBackend.Controllers
         [HttpPost]
         public async Task<ActionResponse<UserViewModel>> GetById([FromBody]UserGetRequest request)
         {
-            return await userService.GetViewModelById(request.Id.Value);
+            return await userService.GetUserViewModelById(request.Id.Value);
         }
 
         [HttpPost]
-        public async Task<ActionResponse<UserDto>> Create([FromBody]UserDto request)
+        public async Task<ActionResponse<UserViewModel>> Create([FromBody]UserViewModel request)
         {
             return await userService.Create(request);
         }

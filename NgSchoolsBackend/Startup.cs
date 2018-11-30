@@ -144,6 +144,7 @@ namespace NgSchoolsBackend
 
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserDetailsService, UserDetailsService>();
             services.AddScoped<IInstitutionService, InstitutionService>();
             services.AddScoped<IClassTypeService, ClassTypeService>();
             services.AddScoped<IClassLocationsService, ClassLocationsService>();

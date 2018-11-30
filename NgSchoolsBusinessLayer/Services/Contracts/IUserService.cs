@@ -13,18 +13,23 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
 {
     public interface IUserService
     {
-        Task<ActionResponse<UserDto>> GetUserByEmail(string name);
-        Task<ActionResponse<List<Claim>>> GetUserClaims(UserDto user);
         Task<ActionResponse<List<UserDto>>> GetAllUsers();
+        Task<ActionResponse<List<UserDto>>> GetAllUsersForCache();
+        Task<ActionResponse<UserDto>> GetUserByEmail(string name);
+        Task<ActionResponse<UserDto>> GetById(Guid userId);
+        Task<ActionResponse<UserViewModel>> GetUserViewModelById(Guid value);
         Task<ActionResponse<PagedResult<UserViewModel>>> GetAllUsersPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<PagedResult<TeacherViewModel>>> GetAllTeachersPaged(BasePagedRequest pagedRequest);
-        Task<ActionResponse<UserDto>> GetById(Guid userId);
-        Task<ActionResponse<UserDto>> Create(UserDto request);
-        Task<ActionResponse<UserDto>> Update(UserDto request);
+        Task<ActionResponse<UserViewModel>> Create(UserViewModel request);
         Task<ActionResponse<object>> Delete(UserGetRequest request);
-        Task<ActionResponse<List<RoleDto>>> GetAllRoles();
         Task<ActionResponse<TeacherViewModel>> UpdateTeacher(TeacherViewModel request);
-        Task<ActionResponse<UserViewModel>> GetViewModelById(Guid value);
         Task<ActionResponse<UserViewModel>> Update(UserViewModel request);
+
+        Task<ActionResponse<List<Claim>>> GetUserClaims(UserDto user);
+        Task<ActionResponse<List<RoleDto>>> GetAllRoles();
+        Task<ActionResponse<UserViewModel>> AddRoles(UserViewModel user);
+        Task<ActionResponse<UserViewModel>> AddToDefaultRole(UserViewModel user);
+        Task<ActionResponse<UserViewModel>> RemoveRoles(UserViewModel user);
+        Task<ActionResponse<UserViewModel>> ModifyUserRoles(UserViewModel user);
     }
 }

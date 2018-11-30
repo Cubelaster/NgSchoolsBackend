@@ -12,13 +12,13 @@ using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
-using NgSchoolsDataLayer.Repository.Contracts;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -28,6 +28,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         private readonly UserManager<User> userManager;
         private readonly RoleManager<Role> roleManager;
+        private readonly IUserDetailsService userDetailsService;
+
         private readonly IJwtFactory jwtFactory;
         private readonly IMapper mapper;
         private readonly ICacheService cacheService;
@@ -35,13 +37,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IUnitOfWork unitOfWork;
         private readonly IConfiguration configuration;
 
-        public UserService(UserManager<User> userManager, IJwtFactory jwtFactory,
-            RoleManager<Role> roleManager, IMapper mapper, IConfiguration configuration,
+        public UserService(UserManager<User> userManager, IUserDetailsService userDetailsService, 
+            IJwtFactory jwtFactory, RoleManager<Role> roleManager, IMapper mapper, IConfiguration configuration,
             ICacheService cacheService, ILoggerService loggerService, IUnitOfWork unitOfWork)
         {
             this.userManager = userManager;
-            this.jwtFactory = jwtFactory;
             this.roleManager = roleManager;
+            this.userDetailsService = userDetailsService;
+            this.jwtFactory = jwtFactory;
             this.mapper = mapper;
             this.cacheService = cacheService;
             this.loggerService = loggerService;
@@ -50,6 +53,39 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         }
 
         #endregion Ctors and Members
+
+        #region Readers
+
+        public async Task<ActionResponse<List<UserDto>>> GetAllUsers()
+        {
+            try
+            {
+                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll(includeProperties: "Roles.Role");
+                return await ActionResponse<List<UserDto>>
+                    .ReturnSuccess(mapper.Map<List<User>, List<UserDto>>(allUsers));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<UserDto>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        [CacheRefreshSource(typeof(UserDto))]
+        public async Task<ActionResponse<List<UserDto>>> GetAllUsersForCache()
+        {
+            try
+            {
+                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll(includeProperties: "Roles.Role, UserDetails");
+                return await ActionResponse<List<UserDto>>.ReturnSuccess(
+                    mapper.Map<List<User>, List<UserDto>>(allUsers));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<UserDto>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
 
         public async Task<ActionResponse<UserDto>> GetUserByEmail(string email)
         {
@@ -64,6 +100,206 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<UserDto>.ReturnError(ex.Message);
             }
         }
+
+        public async Task<ActionResponse<UserDto>> GetById(Guid userId)
+        {
+            try
+            {
+                var user = unitOfWork.GetGenericRepository<User>().FindBy(u => u.Id == userId, includeProperties: "Roles.Role, UserDetails");
+                return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, userId);
+                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<UserViewModel>> GetUserViewModelById(Guid userId)
+        {
+            try
+            {
+                if ((await GetById(userId)).IsNotSuccess(out ActionResponse<UserDto> response, out UserDto user))
+                {
+                    return await ActionResponse<UserViewModel>.ReturnError(response.Message);
+                }
+                return await ActionResponse<UserViewModel>.ReturnSuccess(mapper.Map<UserDto, UserViewModel>(user));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, userId);
+                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<UserViewModel>>> GetAllUsersPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<UserDto> users = new List<UserDto>();
+                var cachedUsersResponse = await cacheService.GetFromCache<List<UserDto>>();
+                if (!cachedUsersResponse.IsSuccessAndHasData(out users))
+                {
+                    users = (await GetAllUsers()).GetData();
+                }
+
+                var pagedResult = await mapper.Map<List<UserDto>, List<UserViewModel>>(users)
+                    .AsQueryable()
+                    .GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<UserViewModel>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<UserViewModel>>
+                    .ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<TeacherViewModel>>> GetAllTeachersPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<UserDto> users = new List<UserDto>();
+                var cachedUsersResponse = await cacheService.GetFromCache<List<UserDto>>();
+                if (!cachedUsersResponse.IsSuccessAndHasData(out users))
+                {
+                    users = (await GetAllUsers()).GetData();
+                }
+
+                var teacherUsers = mapper.Map<List<UserDto>, List<TeacherViewModel>>(users
+                    .Where(u => u.UserRoles.Any(ur => ur.Name == "Nastavnik"))
+                    .ToList());
+
+                var pagedResult = await teacherUsers
+                    .AsQueryable().GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<TeacherViewModel>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<TeacherViewModel>>
+                    .ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        #endregion Readers
+
+        #region Writers
+
+        public async Task<ActionResponse<UserViewModel>> Create(UserViewModel request)
+        {
+            try
+            {
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    request.DateCreated = DateTime.UtcNow;
+                    var user = mapper.Map<UserViewModel, User>(request);
+                    var result = await userManager.CreateAsync(user);
+                    if (!result.Succeeded)
+                    {
+                        return await ActionResponse<UserViewModel>.ReturnError("Failed to create new user.");
+                    }
+
+                    request.Id = user.Id;
+
+                    if ((await AddToDefaultRole(request)).IsNotSuccess(out ActionResponse<UserViewModel> actionResponse, out request))
+                    {
+                        return await ActionResponse<UserViewModel>.ReturnError("Failed to edit user's roles.", request);
+                    }
+
+                    if ((await ModifyUserRoles(request)).IsNotSuccess(out actionResponse, out request))
+                    {
+                        return await ActionResponse<UserViewModel>.ReturnError("Failed to edit user's roles.");
+                    }
+
+                    if ((await userDetailsService.CreateUserDetails(request)).IsNotSuccess(out actionResponse, out request))
+                    {
+                        return actionResponse;
+                    }
+                    scope.Complete();
+                }
+
+                return await ActionResponse<UserViewModel>.ReturnSuccess(request);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<UserDto>>();
+            }
+        }
+
+        public async Task<ActionResponse<object>> Delete(UserGetRequest request)
+        {
+            try
+            {
+                if (!request.Id.HasValue)
+                {
+                    return await ActionResponse<object>.ReturnError("Incorect primary key so unable to update.");
+                }
+
+                unitOfWork.GetGenericRepository<User>().Delete(request.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<object>.ReturnSuccess(null, "Success!");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<object>.ReturnError("Some sort of fuckup. Try again.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<UserDto>>();
+            }
+        }
+
+        public async Task<ActionResponse<UserViewModel>> Update(UserViewModel request)
+        {
+            try
+            {
+                if (!request.Id.HasValue || !request.UserDetailsId.HasValue)
+                {
+                    return await ActionResponse<UserViewModel>.ReturnError("Incorect primary key so unable to update.");
+                }
+
+                if ((await userDetailsService.UpdateUserDetails(request))
+                    .IsNotSuccess(out ActionResponse<UserViewModel> response, out request))
+                {
+                    return await ActionResponse<UserViewModel>.ReturnError(response.Message, request);
+                }
+
+                unitOfWork.Save();
+
+                if ((await ModifyUserRoles(request)).IsNotSuccess(out response))
+                {
+                    return response;
+                }
+
+                return await ActionResponse<UserViewModel>.ReturnSuccess(request, "User updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<TeacherViewModel>> UpdateTeacher(TeacherViewModel request)
+        {
+            if (!request.Id.HasValue)
+            {
+                return await ActionResponse<TeacherViewModel>.ReturnError("Incorect primary key so unable to update.");
+            }
+            return await ActionResponse<TeacherViewModel>.ReturnSuccess();
+        }
+
+        #endregion Writers
+
+        #region Roles 
 
         public async Task<ActionResponse<List<Claim>>> GetUserClaims(UserDto user)
         {
@@ -105,291 +341,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        [CacheRefreshSource(typeof(UserDto))]
-        public async Task<ActionResponse<List<UserDto>>> GetAllUsersForCache()
-        {
-            try
-            {
-                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll(includeProperties: "Roles.Role, UserDetails");
-                return await ActionResponse<List<UserDto>>.ReturnSuccess(
-                    mapper.Map<List<User>, List<UserDto>>(allUsers));
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<UserDto>>.ReturnError("Some sort of fuckup. Try again.");
-            }
-        }
-
-        public async Task<ActionResponse<List<UserDto>>> GetAllUsers()
-        {
-            try
-            {
-                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll(includeProperties: "Roles.Role");
-                return await ActionResponse<List<UserDto>>
-                    .ReturnSuccess(mapper.Map<List<User>, List<UserDto>>(allUsers));
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<UserDto>>.ReturnError("Some sort of fuckup. Try again.");
-            }
-        }
-
-        public async Task<ActionResponse<PagedResult<UserViewModel>>> GetAllUsersPaged(BasePagedRequest pagedRequest)
-        {
-            try
-            {
-                List<UserDto> users = new List<UserDto>();
-                var cachedUsersResponse = await cacheService.GetFromCache<List<UserDto>>();
-                if (!cachedUsersResponse.IsSuccessAndHasData(out users))
-                {
-                    users = (await GetAllUsers()).GetData();
-                }
-
-                var pagedResult = await  mapper.Map<List<UserDto>,List<UserViewModel>>(users)
-                    .AsQueryable()
-                    .GetPaged(pagedRequest);
-                return await ActionResponse<PagedResult<UserViewModel>>.ReturnSuccess(pagedResult);
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<UserViewModel>>
-                    .ReturnError("Some sort of fuckup. Try again.");
-            }
-        }
-
-        public async Task<ActionResponse<PagedResult<TeacherViewModel>>> GetAllTeachersPaged(BasePagedRequest pagedRequest)
-        {
-            try
-            {
-                List<UserDto> users = new List<UserDto>();
-                var cachedUsersResponse = await cacheService.GetFromCache<List<UserDto>>();
-                if (!cachedUsersResponse.IsSuccessAndHasData(out users))
-                {
-                    users = (await GetAllUsers()).GetData();
-                }
-
-                var pagedResult = await users
-                    .Where(u => u.UserRoles.Any(ur => ur.Name == "Nastavnik"))
-                    .AsQueryable().GetPaged(pagedRequest);
-                return await ActionResponse<PagedResult<TeacherViewModel>>.ReturnSuccess(pagedResult);
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<TeacherViewModel>>
-                    .ReturnError("Some sort of fuckup. Try again.");
-            }
-        }
-
-        public async Task<ActionResponse<UserDto>> GetById(Guid userId)
-        {
-            try
-            {
-                var user = unitOfWork.GetGenericRepository<User>().FindBy(u => u.Id == userId, includeProperties: "Roles.Role, UserDetails");
-                return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, userId);
-                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
-            }
-        }
-
-        public async Task<ActionResponse<UserViewModel>> GetViewModelById(Guid userId)
-        {
-            try
-            {
-                if((await GetById(userId)).IsNotSuccess(out ActionResponse<UserDto> response, out UserDto user))
-                {
-                    return await ActionResponse<UserViewModel>.ReturnError(response.Message);
-                }
-                return await ActionResponse<UserViewModel>.ReturnSuccess(mapper.Map<UserDto, UserViewModel>(user));
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, userId);
-                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
-            }
-        }
-
-        public async Task<ActionResponse<UserDto>> Create(UserDto request)
-        {
-            try
-            {
-                //var user = mapper.Map<UserDto, User>(request);
-                //var result = await userManager.CreateAsync(user);
-                //if (!result.Succeeded)
-                //{
-                //    return await ActionResponse<UserDto>.ReturnError("Failed to create new user.");
-                //}
-
-                //request.Id = user.Id;
-
-                //var actionResponse = await AddToDefaultRole(request);
-                //if (!actionResponse.IsSuccessAndHasData(out request))
-                //{
-                //    return await ActionResponse<UserDto>.ReturnError("Failed to edit user's roles.");
-                //};
-
-                //actionResponse = await ModifyUserRoles(request);
-                //if (!actionResponse.IsSuccessAndHasData(out request))
-                //{
-                //    return await ActionResponse<UserDto>.ReturnError("Failed to edit user's roles.");
-                //};
-
-                return await ActionResponse<UserDto>.ReturnSuccess(request);
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, request);
-                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
-            }
-            finally
-            {
-                await cacheService.RefreshCache<List<UserDto>>();
-            }
-        }
-
-        public async Task<ActionResponse<UserDto>> Update(UserDto request)
-        {
-            try
-            {
-                if (!request.Id.HasValue)
-                {
-                    return await ActionResponse<UserDto>.ReturnError("Incorect primary key so unable to update.");
-                }
-
-                var user = mapper.Map<UserDto, User>(request);
-                var userDetails = user.UserDetails;
-
-                userDetails = unitOfWork.GetCustomRepository<IUserRepository>()
-                    .UpdateUserDetails(user.UserDetails);
-
-                user = unitOfWork.GetCustomRepository<IUserRepository>().Update(user);
-                unitOfWork.Save();
-
-                var actionResponse = await ModifyUserRoles(request);
-                if (!actionResponse.IsSuccessAndHasData(out request))
-                {
-                    return await ActionResponse<UserDto>.ReturnError("Failed to edit user's roles.");
-                };
-
-                return await ActionResponse<UserDto>.ReturnSuccess(request);
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, request);
-                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
-            }
-            finally
-            {
-                await cacheService.RefreshCache<List<UserDto>>();
-            }
-        }
-
-        public async Task<ActionResponse<UserDetailsDto>> UpdateUserDetails(UserDetailsDto userDetails)
-        {
-            try
-            {
-                var entityToUpdate = mapper.Map<UserDetailsDto, UserDetails>(userDetails);
-                unitOfWork.GetGenericRepository<UserDetails>().Update(entityToUpdate);
-                userDetails = mapper.Map<UserDetails, UserDetailsDto>(entityToUpdate);
-                return await ActionResponse<UserDetailsDto>.ReturnSuccess(userDetails);
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, userDetails);
-                return await ActionResponse<UserDetailsDto>.ReturnError("Some sort of fuckup. Try again.");
-            }
-        }
-
-        public async Task<ActionResponse<UserViewModel>> UpdateUserDetails(UserViewModel userDetails)
-        {
-            try
-            {
-                var userDetailsEntity = unitOfWork.GetGenericRepository<UserDetails>().FindBy(ud => ud.Id == userDetails.UserDetailsId);
-                userDetailsEntity.Avatar = userDetails.Avatar;
-                userDetailsEntity.FirstName = userDetails.FirstName;
-                userDetailsEntity.LastName = userDetails.LastName;
-                userDetailsEntity.Mobile = userDetails.Mobile;
-                userDetailsEntity.Mobile2 = userDetails.Mobile2;
-                userDetailsEntity.Phone = userDetails.Phone;
-                userDetailsEntity.Signature = userDetails.Signature;
-                userDetailsEntity.Title = userDetails.Title;
-                unitOfWork.GetGenericRepository<UserDetails>().Update(userDetailsEntity);
-
-                return await ActionResponse<UserViewModel>.ReturnSuccess(userDetails);
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, userDetails);
-                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
-            }
-        }
-
-        public async Task<ActionResponse<UserViewModel>> Update(UserViewModel request)
-        {
-            try
-            {
-                if (!request.Id.HasValue || !request.UserDetailsId.HasValue)
-                {
-                    return await ActionResponse<UserViewModel>.ReturnError("Incorect primary key so unable to update.");
-                }
-
-                if ((await UpdateUserDetails(request))
-                    .IsNotSuccess(out ActionResponse<UserViewModel> response, out request))
-                {
-                    return await ActionResponse<UserViewModel>.ReturnError(response.Message, request);
-                }
-
-                unitOfWork.Save();
-                return await ActionResponse<UserViewModel>.ReturnSuccess(request, "User updated successfully.");
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, request);
-                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
-            }
-        }
-
-        public async Task<ActionResponse<TeacherViewModel>> UpdateTeacher(TeacherViewModel request)
-        {
-            if (!request.Id.HasValue)
-            {
-                return await ActionResponse<TeacherViewModel>.ReturnError("Incorect primary key so unable to update.");
-            }
-            return await ActionResponse<TeacherViewModel>.ReturnSuccess();
-        }
-
-        public async Task<ActionResponse<object>> Delete(UserGetRequest request)
-        {
-            try
-            {
-                if (!request.Id.HasValue)
-                {
-                    return await ActionResponse<object>.ReturnError("Incorect primary key so unable to update.");
-                }
-
-                unitOfWork.GetGenericRepository<User>().Delete(request.Id.Value);
-                unitOfWork.Save();
-                return await ActionResponse<object>.ReturnSuccess(null, "Success!");
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, request);
-                return await ActionResponse<object>.ReturnError("Some sort of fuckup. Try again.");
-            }
-            finally
-            {
-                await cacheService.RefreshCache<List<UserDto>>();
-            }
-        }
-
-        #region Roles 
-
         public async Task<ActionResponse<List<RoleDto>>> GetAllRoles()
         {
             try
@@ -404,99 +355,97 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        private async Task<ActionResponse<UserDto>> AddRoles(UserDto user)
+        public async Task<ActionResponse<UserViewModel>> AddRoles(UserViewModel user)
         {
             try
             {
-                //var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
-                //var result = await userManager.AddToRolesAsync(entity, user.RoleNames);
-                //if (!result.Succeeded)
-                //{
-                //    return await ActionResponse<UserDto>.ReturnError("Failed to add user to roles");
-                //}
-                return await ActionResponse<UserDto>.ReturnSuccess(user);
+                var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
+                var result = await userManager.AddToRolesAsync(entity, user.RolesNamed);
+                if (!result.Succeeded)
+                {
+                    return await ActionResponse<UserViewModel>.ReturnError("Failed to add user to roles");
+                }
+                return await ActionResponse<UserViewModel>.ReturnSuccess(user);
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, user);
-                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
 
-        private async Task<ActionResponse<UserDto>> AddToDefaultRole(UserDto user)
+        public async Task<ActionResponse<UserViewModel>> AddToDefaultRole(UserViewModel user)
         {
             try
             {
-                //var defaultRole = await roleManager
-                //    .FindByNameAsync(configuration.GetValue<string>("DefaultUserRole"));
-                //user.Roles.Add(defaultRole.Id);
-                return await ActionResponse<UserDto>.ReturnSuccess(user);
+                var defaultRole = await roleManager
+                    .FindByNameAsync(configuration.GetValue<string>("DefaultUserRole"));
+                user.Roles.Add(defaultRole.Id);
+                return await ActionResponse<UserViewModel>.ReturnSuccess(user);
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, user);
-                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
 
-        private async Task<ActionResponse<UserDto>> RemoveRoles(UserDto user)
+        public async Task<ActionResponse<UserViewModel>> RemoveRoles(UserViewModel user)
         {
             try
             {
-                //var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
-                //var result = await userManager.RemoveFromRolesAsync(entity, user.RoleNames);
-                //if (!result.Succeeded)
-                //{
-                //    return await ActionResponse<UserDto>.ReturnError("Failed to remove from roles");
-                //}
-                return await ActionResponse<UserDto>.ReturnSuccess(user);
+                var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
+                var result = await userManager.RemoveFromRolesAsync(entity, user.RolesNamed);
+                if (!result.Succeeded)
+                {
+                    return await ActionResponse<UserViewModel>.ReturnError("Failed to remove from roles");
+                }
+                return await ActionResponse<UserViewModel>.ReturnSuccess(user);
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, user);
-                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
 
-        private async Task<ActionResponse<UserDto>> ModifyUserRoles(UserDto user)
+        public async Task<ActionResponse<UserViewModel>> ModifyUserRoles(UserViewModel user)
         {
             try
             {
-                //var entity = mapper.Map<UserDto, User>(user);
-                //var currentUserRoles = await userManager.GetRolesAsync(entity);
+                var entity = mapper.Map<UserViewModel, User>(user);
+                var currentUserRoles = await userManager.GetRolesAsync(entity);
 
-                //List<string> updateRoles = new List<string>();
-                //foreach (var roleId in user.Roles)
-                //{
-                //    var role = await roleManager.FindByIdAsync(roleId.ToString());
-                //    updateRoles.Add(role.Name);
-                //}
+                List<string> updateRoles = new List<string>();
+                foreach (var roleId in user.Roles)
+                {
+                    var role = await roleManager.FindByIdAsync(roleId.ToString());
+                    updateRoles.Add(role.Name);
+                }
 
-                //var rolesToRemove = currentUserRoles.Where(cur => !updateRoles.Contains(cur)).ToList();
-                //var rolesToAdd = updateRoles.Where(ur => !currentUserRoles.Contains(ur)).ToList();
+                var rolesToRemove = currentUserRoles.Where(cur => !updateRoles.Contains(cur)).ToList();
+                var rolesToAdd = updateRoles.Where(ur => !currentUserRoles.Contains(ur)).ToList();
 
-                //user.RoleNames = rolesToRemove;
-                //var actionResponse = await RemoveRoles(user);
-                //if (!actionResponse.IsSuccess(out user))
-                //{
-                //    return actionResponse;
-                //}
+                user.RolesNamed = rolesToRemove;
+                var actionResponse = await RemoveRoles(user);
+                if (!actionResponse.IsSuccess(out user))
+                {
+                    return actionResponse;
+                }
 
-                //user.RoleNames = rolesToAdd;
-                //actionResponse = await AddRoles(user);
-                //if (!actionResponse.IsSuccess(out user))
-                //{
-                //    return actionResponse;
-                //}
+                user.RolesNamed = rolesToAdd;
+                actionResponse = await AddRoles(user);
+                if (!actionResponse.IsSuccess(out user))
+                {
+                    return actionResponse;
+                }
 
-                //return actionResponse;
-
-                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+                return actionResponse;
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, user);
-                return await ActionResponse<UserDto>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
 
