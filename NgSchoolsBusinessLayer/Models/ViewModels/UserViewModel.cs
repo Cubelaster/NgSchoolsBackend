@@ -22,7 +22,7 @@ namespace NgSchoolsBusinessLayer.Models.ViewModels
         public string Mobile { get; set; }
         public string Mobile2 { get; set; }
         public string Phone { get; set; }
-        public List<string> RoleNames { get; set; }
+        public string RoleNames { get; set; }
         public List<Guid> Roles { get; set; }
     }
 }

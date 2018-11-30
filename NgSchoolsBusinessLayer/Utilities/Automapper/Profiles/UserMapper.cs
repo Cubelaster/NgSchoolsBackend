@@ -22,7 +22,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Mobile, opt => opt.MapFrom(src => src.UserDetails.Mobile))
                 .ForMember(dest => dest.Mobile2, opt => opt.MapFrom(src => src.UserDetails.Mobile2))
                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.UserDetails.Phone))
-                .ForMember(dest => dest.RoleNames, opt => opt.MapFrom(src => src.Roles.Select(r => r.Role.Name)))
+                .ForMember(dest => dest.RoleNames, opt => opt.MapFrom(src => string.Join(", ", src.Roles.Select(r => r.Role.Name))))
                 .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.Roles.Select(r => r.Role.Id)))
                 .ForMember(dest => dest.Signature, opt => opt.MapFrom(src => src.UserDetails.Signature))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.UserDetails.Title));
@@ -34,7 +34,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Mobile, opt => opt.MapFrom(src => src.UserDetails.Mobile))
                 .ForMember(dest => dest.Mobile2, opt => opt.MapFrom(src => src.UserDetails.Mobile2))
                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.UserDetails.Phone))
-                .ForMember(dest => dest.RoleNames, opt => opt.MapFrom(src => src.UserRoles.Select(r => r.Name)))
+                .ForMember(dest => dest.RoleNames, opt => opt.MapFrom(src => string.Join(", ", src.UserRoles.Select(r => r.Name))))
                 .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(r => r.Id)))
                 .ForMember(dest => dest.Signature, opt => opt.MapFrom(src => src.UserDetails.Signature))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.UserDetails.Title));

@@ -345,6 +345,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     return await ActionResponse<UserViewModel>.ReturnError(response.Message, request);
                 }
 
+                unitOfWork.Save();
                 return await ActionResponse<UserViewModel>.ReturnSuccess(request, "User updated successfully.");
             }
             catch (Exception ex)
