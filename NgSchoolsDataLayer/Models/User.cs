@@ -13,5 +13,6 @@ namespace NgSchoolsDataLayer.Models
 
         public UserDetails UserDetails { get; set; }
         public ICollection<UserRoles> Roles { get; set; }
+        public ICollection<UserExamCommission> ExamCommissions { get; set; }
     }
 }

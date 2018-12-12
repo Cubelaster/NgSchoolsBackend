@@ -16,6 +16,7 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<ClassType> ClassTypes { get; set; }
         public DbSet<EducationGroups> EducationGroups { get; set; }
         public DbSet<EducationLevel> EducationLevels { get; set; }
+        public DbSet<ExamCommission> ExamCommissions { get; set; }
         public DbSet<Institution> Institution { get; set; }
         public DbSet<UserDetails> UserDetails { get; set; }
 
