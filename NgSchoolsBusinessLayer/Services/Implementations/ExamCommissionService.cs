@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
-    public class ExamCommissionService
+    public class ExamCommissionService : IExamCommissionService
     {
         #region Ctors and Members
 
@@ -50,7 +50,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entities = unitOfWork.GetGenericRepository<ExamCommission>().GetAll();
+                var entities = unitOfWork.GetGenericRepository<ExamCommission>()
+                    .GetAll(includeProperties: "UserExamCommissions.User");
                 return await ActionResponse<List<ExamCommissionDto>>
                     .ReturnSuccess(mapper.Map<List<ExamCommission>, List<ExamCommissionDto>>(entities));
             }
@@ -66,7 +67,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<ExamCommission>()
-                    .GetAllAsQueryable().GetPaged(pagedRequest);
+                    .GetAllAsQueryable(includeProperties: "UserExamCommissions.User").GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<ExamCommissionDto>
                 {

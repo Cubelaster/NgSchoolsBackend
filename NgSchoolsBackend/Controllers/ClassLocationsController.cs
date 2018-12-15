@@ -4,9 +4,7 @@ using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Services.Contracts;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace NgSchoolsWebApi.Controllers
