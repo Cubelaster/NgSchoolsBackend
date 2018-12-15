@@ -5,10 +5,12 @@ using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Services.Contracts;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
@@ -20,13 +22,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IMapper mapper;
         private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
+        private readonly ICacheService cacheService;
 
         public ClassTypeService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             this.mapper = mapper;
             this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
+            this.cacheService = cacheService;
         }
 
         #endregion Ctors and Members
@@ -43,6 +47,22 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ClassTypeDto>.ReturnError("Some sort of fuckup!");
+            }
+        }
+
+        [CacheRefreshSource(typeof(ClassTypeDto))]
+        public async Task<ActionResponse<List<ClassTypeDto>>> GetAllForCache()
+        {
+            try
+            {
+                var allClassTypes = unitOfWork.GetGenericRepository<ClassType>().GetAll();
+                return await ActionResponse<List<ClassTypeDto>>.ReturnSuccess(
+                    mapper.Map<List<ClassType>, List<ClassTypeDto>>(allClassTypes));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<ClassTypeDto>>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
 
@@ -65,18 +85,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var pagedEntityResult = await unitOfWork.GetGenericRepository<ClassType>()
-                    .GetAllAsQueryable().GetPaged(pagedRequest);
-
-                var pagedResult = new PagedResult<ClassTypeDto>
+                List<ClassTypeDto> classTypes = new List<ClassTypeDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<ClassTypeDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out classTypes))
                 {
-                    CurrentPage = pagedEntityResult.CurrentPage,
-                    PageSize = pagedEntityResult.PageSize,
-                    PageCount = pagedEntityResult.PageCount,
-                    RowCount = pagedEntityResult.RowCount,
-                    Results = mapper.Map<List<ClassType>, List<ClassTypeDto>>(pagedEntityResult.Results)
-                };
+                    classTypes = (await GetAll()).GetData();
+                }
 
+                var pagedResult = await classTypes.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<ClassTypeDto>>.ReturnSuccess(pagedResult);
             }
             catch (Exception ex)

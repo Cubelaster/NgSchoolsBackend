@@ -286,6 +286,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
             }
+            finally
+            {
+                await cacheService.RefreshCache<List<UserDto>>();
+            }
         }
 
         public async Task<ActionResponse<TeacherViewModel>> UpdateTeacher(TeacherViewModel request)

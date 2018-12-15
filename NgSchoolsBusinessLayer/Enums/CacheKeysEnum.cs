@@ -4,6 +4,7 @@
     {
         Country,
         County,
-        User
+        User,
+        ClassType
     }
 }
