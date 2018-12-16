@@ -14,6 +14,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
     public interface IUserService
     {
         Task<ActionResponse<List<UserDto>>> GetAllUsers();
+        Task<ActionResponse<List<UserViewModel>>> GetAllUsersFE();
         Task<ActionResponse<List<UserDto>>> GetAllUsersForCache();
         Task<ActionResponse<UserDto>> GetUserByEmail(string name);
         Task<ActionResponse<UserDto>> GetById(Guid userId);

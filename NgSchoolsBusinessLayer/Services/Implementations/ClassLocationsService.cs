@@ -5,10 +5,12 @@ using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Services.Contracts;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
@@ -20,12 +22,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IMapper mapper;
         private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
+        private readonly ICacheService cacheService;
 
-        public ClassLocationsService(IMapper mapper, ILoggerService loggerService, IUnitOfWork unitOfWork)
+        public ClassLocationsService(IMapper mapper, ILoggerService loggerService, 
+            IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             this.mapper = mapper;
             this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
+            this.cacheService = cacheService;
         }
 
         #endregion Ctors and Members
@@ -60,22 +65,34 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        [CacheRefreshSource(typeof(ClassLocationsDto))]
+        public async Task<ActionResponse<List<ClassLocationsDto>>> GetAllUsersForCache()
+        {
+            try
+            {
+                var allClassLocations = unitOfWork.GetGenericRepository<ClassLocations>().GetAll();
+                return await ActionResponse<List<ClassLocationsDto>>.ReturnSuccess(
+                    mapper.Map<List<ClassLocations>, List<ClassLocationsDto>>(allClassLocations));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<ClassLocationsDto>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
         public async Task<ActionResponse<PagedResult<ClassLocationsDto>>> GetAllPaged(BasePagedRequest pagedRequest)
         {
             try
             {
-                var pagedEntityResult = await unitOfWork.GetGenericRepository<ClassLocations>()
-                    .GetAllAsQueryable().GetPaged(pagedRequest);
-
-                var pagedResult = new PagedResult<ClassLocationsDto>
+                List<ClassLocationsDto> classTypes = new List<ClassLocationsDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<ClassLocationsDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out classTypes))
                 {
-                    CurrentPage = pagedEntityResult.CurrentPage,
-                    PageSize = pagedEntityResult.PageSize,
-                    PageCount = pagedEntityResult.PageCount,
-                    RowCount = pagedEntityResult.RowCount,
-                    Results = mapper.Map<List<ClassLocations>, List<ClassLocationsDto>>(pagedEntityResult.Results)
-                };
+                    classTypes = (await GetAll()).GetData();
+                }
 
+                var pagedResult = await classTypes.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<ClassLocationsDto>>.ReturnSuccess(pagedResult);
             }
             catch (Exception ex)

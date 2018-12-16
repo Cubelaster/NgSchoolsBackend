@@ -1,7 +1,9 @@
-﻿using NgSchoolsBusinessLayer.Utilities.Attributes;
+﻿using NgSchoolsBusinessLayer.Enums;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
+    [Cached(CacheKeysEnum.ClassLocation)]
     public class ClassLocationsDto
     {
         public int? Id { get; set; }

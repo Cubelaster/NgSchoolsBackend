@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NgSchoolsDataLayer.Models;
+using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
 
 namespace NgSchoolsDataLayer.Context

@@ -5,6 +5,8 @@ namespace NgSchoolsDataLayer.Models
 {
     public class UserExamCommission : DatabaseEntity
     {
+        public UserExamCommission() : base() { }
+
         public int Id { get; set; }
         public Guid UserId { get; set; }
         public virtual User User { get; set; }

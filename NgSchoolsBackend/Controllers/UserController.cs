@@ -24,9 +24,9 @@ namespace NgSchoolsBackend.Controllers
         
         // TODO: Authorize
         [HttpPost]
-        public async Task<ActionResponse<List<UserDto>>> GetAll()
+        public async Task<ActionResponse<List<UserViewModel>>> GetAll()
         {
-            return await userService.GetAllUsers();
+            return await userService.GetAllUsersFE();
         }
 
         // TODO: Authorize

@@ -6,6 +6,8 @@ namespace NgSchoolsDataLayer.Models
 {
     public class UserDetails : DatabaseEntity
     {
+        public UserDetails() : base() {}
+
         [Key]
         public int Id { get; set; }
         [Required]

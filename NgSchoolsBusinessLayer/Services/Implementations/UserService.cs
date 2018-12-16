@@ -71,6 +71,26 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<List<UserViewModel>>> GetAllUsersFE()
+        {
+            try
+            {
+                List<UserDto> users = new List<UserDto>();
+                var cachedUsersResponse = await cacheService.GetFromCache<List<UserDto>>();
+                if (!cachedUsersResponse.IsSuccessAndHasData(out users))
+                {
+                    users = (await GetAllUsers()).GetData();
+                }
+                var feUsers = mapper.Map<List<UserDto>, List<UserViewModel>>(users);
+                return await ActionResponse<List<UserViewModel>>.ReturnSuccess(feUsers);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<UserViewModel>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
         [CacheRefreshSource(typeof(UserDto))]
         public async Task<ActionResponse<List<UserDto>>> GetAllUsersForCache()
         {

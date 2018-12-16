@@ -5,6 +5,8 @@ namespace NgSchoolsDataLayer.Models
 {
     public class ExamCommission : DatabaseEntity
     {
+        public ExamCommission() : base() { }
+
         public int Id { get; set; }
         public string Name { get; set; }
 
