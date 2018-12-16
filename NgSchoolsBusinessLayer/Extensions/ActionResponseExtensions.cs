@@ -1,5 +1,6 @@
 ﻿using NgSchoolsBusinessLayer.Enums.Common;
 using NgSchoolsBusinessLayer.Models.Common;
+using System;
 
 namespace NgSchoolsBusinessLayer.Extensions
 {
@@ -49,6 +50,15 @@ namespace NgSchoolsBusinessLayer.Extensions
                 return true;
             }
             return false;
+        }
+
+        public static ActionResponse<T> AppendErrorMessage<T>(this ActionResponse<T> response, string errorMessage)
+        {
+            response.ActionResponseType = ActionResponseTypeEnum.Error;
+            response.Message += string.IsNullOrEmpty(response.Message)
+                || response.Message.EndsWith(Environment.NewLine)
+                ? errorMessage : Environment.NewLine + errorMessage;
+            return response;
         }
     }
 }

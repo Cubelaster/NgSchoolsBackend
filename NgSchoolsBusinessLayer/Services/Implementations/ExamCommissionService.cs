@@ -9,6 +9,7 @@ using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
@@ -51,7 +52,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<ExamCommission>()
-                    .GetAll(includeProperties: "UserExamCommissions.User");
+                    .GetAll(includeProperties: "UserExamCommissions.User.UserDetails");
                 return await ActionResponse<List<ExamCommissionDto>>
                     .ReturnSuccess(mapper.Map<List<ExamCommission>, List<ExamCommissionDto>>(entities));
             }
@@ -91,15 +92,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                List<Guid> teachers = new List<Guid>(entityDto.TeacherIds);
                 var entityToAdd = mapper.Map<ExamCommissionDto, ExamCommission>(entityDto);
                 unitOfWork.GetGenericRepository<ExamCommission>().Add(entityToAdd);
                 unitOfWork.Save();
+                mapper.Map(entityToAdd, entityDto);
+                entityDto.TeacherIds = new List<Guid>(teachers);
+                if ((await ModifyExamTeachers(entityDto)).IsNotSuccess(out ActionResponse<ExamCommissionDto> actionResponse, out entityDto))
+                {
+                    return actionResponse;
+                }
+
                 return await ActionResponse<ExamCommissionDto>
                     .ReturnSuccess(mapper.Map<ExamCommission, ExamCommissionDto>(entityToAdd));
             }
             catch (Exception ex)
             {
-                loggerService.LogErrorToEventLog(ex);
+                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<ExamCommissionDto>.ReturnError("Some sort of fuckup!");
             }
         }
@@ -133,6 +142,121 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ExamCommissionDto>.ReturnError("Some sort of fuckup!");
+            }
+        }
+
+        public async Task<ActionResponse<ExamCommissionDto>> ModifyExamTeachers(ExamCommissionDto examCommission)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<ExamCommission>()
+                    .FindBy(e => e.Id == examCommission.Id.Value, includeProperties: "UserExamCommissions");
+                var currentExamTeachers = entity.UserExamCommissions.ToList();
+                var newTeachers = new List<Guid>(examCommission.TeacherIds);
+
+                var teachersToRemove = mapper.Map<List<UserExamCommission>, List<UserExamCommissionDto>>
+                    (currentExamTeachers.Where(cet => !newTeachers.Contains(cet.UserId)).ToList());
+
+                var teachersToAdd = newTeachers
+                    .Where(nt => !currentExamTeachers.Select(uec => uec.UserId).Contains(nt))
+                    .Select(nt => new UserExamCommissionDto { UserId = nt, ExamCommissionId = examCommission.Id })
+                    .ToList();
+
+                if((await RemoveExamTeachers(teachersToRemove))
+                    .IsNotSuccess(out ActionResponse<List<UserExamCommissionDto>> actionResponse))
+                {
+                    return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena učitelja u ispitnoj komisiji.");
+                }
+
+                if ((await AddExamTeachers(teachersToAdd))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena učitelja u ispitnoj komisiji.");
+                }
+
+                return await ActionResponse<ExamCommissionDto>.ReturnSuccess(null, "Uspješno izmijenjeni članovi ispitne komisije.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, examCommission);
+                return await ActionResponse<ExamCommissionDto>.ReturnError("Some sort of fuckup!");
+            }
+        }
+
+        public async Task<ActionResponse<List<UserExamCommissionDto>>> RemoveExamTeachers(List<UserExamCommissionDto> examCommissionTeachers)
+        {
+            try
+            {
+                var response = await ActionResponse<List<UserExamCommissionDto>>.ReturnSuccess(null, "Učitelji uspješno maknuti iz ispitne komisije.");
+                examCommissionTeachers.ForEach(async ect =>
+                {
+                    if ((await RemoveExamTeacher(ect))
+                    .IsNotSuccess(out ActionResponse<UserExamCommissionDto> actionResponse))
+                    {
+                        response.AppendErrorMessage(actionResponse.Message);
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, examCommissionTeachers);
+                return await ActionResponse<List<UserExamCommissionDto>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<UserExamCommissionDto>> RemoveExamTeacher(UserExamCommissionDto teacher)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<UserExamCommission>().Delete(teacher.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<UserExamCommissionDto>.ReturnSuccess(null, "Učitelj upsješno izbrisan iz komisije.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, teacher);
+                return await ActionResponse<UserExamCommissionDto>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<List<UserExamCommissionDto>>> AddExamTeachers(List<UserExamCommissionDto> examCommissionTeachers)
+        {
+            try
+            {
+                var response = await ActionResponse<List<UserExamCommissionDto>>.ReturnSuccess(null, "Učitelji uspješno dodani u ispitnu komisiju.");
+                examCommissionTeachers.ForEach(async ect =>
+                {
+                    if ((await AddExamTeacher(ect))
+                    .IsNotSuccess(out ActionResponse<UserExamCommissionDto> actionResponse))
+                    {
+                        response.AppendErrorMessage(actionResponse.Message);
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, examCommissionTeachers);
+                return await ActionResponse<List<UserExamCommissionDto>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<UserExamCommissionDto>> AddExamTeacher(UserExamCommissionDto teacher)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<UserExamCommissionDto, UserExamCommission>(teacher);
+                unitOfWork.GetGenericRepository<UserExamCommission>().Add(entityToAdd);
+                unitOfWork.Save();
+                return await ActionResponse<UserExamCommissionDto>
+                    .ReturnSuccess(mapper.Map<UserExamCommission, UserExamCommissionDto>(entityToAdd), 
+                    "Učitelj upsješno dodan u komisiju.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, teacher);
+                return await ActionResponse<UserExamCommissionDto>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
     }
