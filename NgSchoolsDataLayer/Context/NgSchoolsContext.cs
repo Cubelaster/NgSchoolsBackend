@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NgSchoolsDataLayer.Models;
-using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
 
 namespace NgSchoolsDataLayer.Context
@@ -19,6 +18,7 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<EducationLevel> EducationLevels { get; set; }
         public DbSet<ExamCommission> ExamCommissions { get; set; }
         public DbSet<Institution> Institution { get; set; }
+        public DbSet<Student> Students { get; set; }
         public DbSet<UserDetails> UserDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
