@@ -109,6 +109,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToAdd = mapper.Map<ClassLocationsDto, ClassLocations>(entityDto);
                 unitOfWork.GetGenericRepository<ClassLocations>().Add(entityToAdd);
                 unitOfWork.Save();
+                await cacheService.RefreshCache<List<ClassLocationsDto>>();
                 return await ActionResponse<ClassLocationsDto>
                     .ReturnSuccess(mapper.Map<ClassLocations, ClassLocationsDto>(entityToAdd));
             }
@@ -126,6 +127,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToUpdate = mapper.Map<ClassLocationsDto, ClassLocations>(entityDto);
                 unitOfWork.GetGenericRepository<ClassLocations>().Update(entityToUpdate);
                 unitOfWork.Save();
+                await cacheService.RefreshCache<List<ClassLocationsDto>>();
                 return await ActionResponse<ClassLocationsDto>
                     .ReturnSuccess(mapper.Map<ClassLocations, ClassLocationsDto>(entityToUpdate));
             }
@@ -142,6 +144,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<ClassLocations>().Delete(id);
                 unitOfWork.Save();
+                await cacheService.RefreshCache<List<ClassLocationsDto>>();
                 return await ActionResponse<ClassLocationsDto>.ReturnSuccess(null, "Delete successful.");
             }
             catch (Exception ex)
