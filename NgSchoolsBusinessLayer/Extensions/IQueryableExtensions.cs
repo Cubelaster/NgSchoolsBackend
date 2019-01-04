@@ -22,11 +22,8 @@ namespace NgSchoolsBusinessLayer.Extensions
                 var result = new PagedResult<T>
                 {
                     CurrentPage = currentPage,
-                    PageSize = pagedRequest.PageSize,
-                    RowCount = query.Count()
+                    PageSize = pagedRequest.PageSize
                 };
-
-                result.PageCount = (int)Math.Ceiling((double)result.RowCount / pagedRequest.PageSize);
 
                 int skip = (currentPage - 1) * pagedRequest.PageSize;
 
@@ -64,12 +61,16 @@ namespace NgSchoolsBusinessLayer.Extensions
                             .Contains(pagedRequest.SearchQuery, StringComparison.OrdinalIgnoreCase)));
                 }
 
+                result.RowCount = query.Count();
+                result.PageCount = (int)Math.Ceiling((double)result.RowCount / pagedRequest.PageSize);
+
                 result.Results = await Task.FromResult(
                     query
                     .Skip(skip)
                     .Take(pagedRequest.PageSize)
                     .ToList()
                 );
+
 
                 return result;
             }
