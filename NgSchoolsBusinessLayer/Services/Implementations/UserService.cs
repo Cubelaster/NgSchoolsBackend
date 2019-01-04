@@ -215,7 +215,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 {
                     request.DateCreated = DateTime.UtcNow;
                     var user = mapper.Map<UserViewModel, User>(request);
-                    var result = await userManager.CreateAsync(user);
+                    var result = await userManager.CreateAsync(user, request.Password);
                     if (!result.Succeeded)
                     {
                         return await ActionResponse<UserViewModel>.ReturnError("Failed to create new user.");

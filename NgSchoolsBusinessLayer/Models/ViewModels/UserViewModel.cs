@@ -16,6 +16,7 @@ namespace NgSchoolsBusinessLayer.Models.ViewModels
         public string FirstName { get; set; }
         [Searchable]
         public string LastName { get; set; }
+        public string Password { get; set; }
         public string Avatar { get; set; }
         public string Signature { get; set; }
         public string Title { get; set; }
