@@ -4,7 +4,7 @@ namespace NgSchoolsBusinessLayer.Models.ViewModels
 {
     public class TeacherViewModel
     {
-        public Guid? Id { get; set; }
+        public Guid? UserId { get; set; }
         public string Oib { get; set; }
         public string Address { get; set; }
         public string City { get; set; }

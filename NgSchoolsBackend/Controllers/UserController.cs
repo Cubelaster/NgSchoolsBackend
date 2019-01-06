@@ -43,31 +43,37 @@ namespace NgSchoolsBackend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResponse<UserViewModel>> GetById([FromBody]UserGetRequest request)
+        public async Task<ActionResponse<UserViewModel>> GetById([FromBody] UserGetRequest request)
         {
             return await userService.GetUserViewModelById(request.Id.Value);
         }
 
         [HttpPost]
-        public async Task<ActionResponse<UserViewModel>> Create([FromBody]UserViewModel request)
+        public async Task<ActionResponse<UserViewModel>> Create([FromBody] UserViewModel request)
         {
             return await userService.Create(request);
         }
 
         [HttpPost]
-        public async Task<ActionResponse<UserViewModel>> Update([FromBody]UserViewModel request)
+        public async Task<ActionResponse<TeacherViewModel>> CreateTeacher([FromBody] TeacherViewModel request)
+        {
+            return await userService.CreateTeacher(request);
+        }
+
+        [HttpPost]
+        public async Task<ActionResponse<UserViewModel>> Update([FromBody] UserViewModel request)
         {
             return await userService.Update(request);
         }
 
         [HttpPost]
-        public async Task<ActionResponse<TeacherViewModel>> UpdateTeacher([FromBody]TeacherViewModel request)
+        public async Task<ActionResponse<TeacherViewModel>> UpdateTeacher([FromBody] TeacherViewModel request)
         {
             return await userService.UpdateTeacher(request);
         }
 
         [HttpPost]
-        public async Task<ActionResponse<object>> Delete([FromBody]UserGetRequest request)
+        public async Task<ActionResponse<object>> Delete([FromBody] UserGetRequest request)
         {
             return await userService.Delete(request);
         }

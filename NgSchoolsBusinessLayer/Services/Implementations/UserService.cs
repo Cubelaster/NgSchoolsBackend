@@ -37,7 +37,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IUnitOfWork unitOfWork;
         private readonly IConfiguration configuration;
 
-        public UserService(UserManager<User> userManager, IUserDetailsService userDetailsService, 
+        public UserService(UserManager<User> userManager, IUserDetailsService userDetailsService,
             IJwtFactory jwtFactory, RoleManager<Role> roleManager, IMapper mapper, IConfiguration configuration,
             ICacheService cacheService, ILoggerService loggerService, IUnitOfWork unitOfWork)
         {
@@ -253,6 +253,38 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<TeacherViewModel>> CreateTeacher(TeacherViewModel request)
+        {
+            if (!request.UserId.HasValue)
+            {
+                return await ActionResponse<TeacherViewModel>.ReturnError("Molimo, povežite nastavnika na postojećeg korisnika.");
+            }
+
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                if ((await UpdateTeacher(request))
+                    .IsNotSuccess(out ActionResponse<TeacherViewModel> actionResponse, out request))
+                {
+                    return actionResponse;
+                }
+
+                var rolesRequest = new UserViewModel
+                {
+                    Id = request.UserId,
+                    RolesNamed = new List<string> { "Nastavnik" }
+                };
+
+                if ((await AddRoles(mapper.Map<UserViewModel>(rolesRequest)))
+                    .IsNotSuccess(out ActionResponse<UserViewModel> rolesResponse, out UserViewModel viewModel))
+                {
+                    return await ActionResponse<TeacherViewModel>
+                        .ReturnError("Dogodila se greška prilikom dodavanja role nastavnika za korisnika. Molimo pokušajte ponovno.");
+                }
+                scope.Complete();
+            }
+            return await ActionResponse<TeacherViewModel>.ReturnSuccess(request, "Korisnik uspješno dodan u rolu nastavnika i njegovi detelji ažurirani.");
+        }
+
         public async Task<ActionResponse<object>> Delete(UserGetRequest request)
         {
             try
@@ -314,11 +346,38 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         public async Task<ActionResponse<TeacherViewModel>> UpdateTeacher(TeacherViewModel request)
         {
-            if (!request.Id.HasValue)
+            try
             {
-                return await ActionResponse<TeacherViewModel>.ReturnError("Incorect primary key so unable to update.");
+                var response = ActionResponse<TeacherViewModel>.ReturnSuccess(request);
+
+                if (!request.UserId.HasValue)
+                {
+                    return (await response).AppendErrorMessage("Nepotpuni podatci. Molimo popunite sva obavezna polja.");
+                }
+
+                if ((await userDetailsService.GetUserDetails(request.UserId.Value))
+                    .IsNotSuccess(out ActionResponse<UserDetailsDto> actionResponse, out UserDetailsDto userDetails))
+                {
+                    return (await response).AppendErrorMessage(actionResponse.Message);
+                }
+
+                mapper.Map(request, userDetails);
+
+                if ((await userDetailsService.UpdateUserDetails(userDetails)).IsNotSuccess(out actionResponse, out userDetails))
+                {
+                    return (await response).AppendErrorMessage(actionResponse.Message);
+                }
+
+                unitOfWork.Save();
+
+                return (await response).AppendMessage("Nastavnik uspješno ažuriran.");
             }
-            return await ActionResponse<TeacherViewModel>.ReturnSuccess();
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<TeacherViewModel>
+                    .ReturnError("Dogodila se greška prilikom ažuriranja podataka o nastavniku. Molimo pokušajte ponovno.");
+            }
         }
 
         #endregion Writers
@@ -385,7 +444,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 var entity = await userManager.FindByIdAsync(user.Id.Value.ToString());
                 var result = await userManager.AddToRolesAsync(entity, user.RolesNamed);
-                if (!result.Succeeded)
+                if (!result.Succeeded && !result.Errors.Any(e => e.Code == "UserAlreadyInRole"))
                 {
                     return await ActionResponse<UserViewModel>.ReturnError("Failed to add user to roles");
                 }

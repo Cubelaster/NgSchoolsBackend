@@ -22,6 +22,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<PagedResult<UserViewModel>>> GetAllUsersPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<PagedResult<TeacherViewModel>>> GetAllTeachersPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<UserViewModel>> Create(UserViewModel request);
+        Task<ActionResponse<TeacherViewModel>> CreateTeacher(TeacherViewModel request);
         Task<ActionResponse<object>> Delete(UserGetRequest request);
         Task<ActionResponse<TeacherViewModel>> UpdateTeacher(TeacherViewModel request);
         Task<ActionResponse<UserViewModel>> Update(UserViewModel request);

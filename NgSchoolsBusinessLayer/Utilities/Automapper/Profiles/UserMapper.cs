@@ -49,18 +49,9 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Certificates, opt => opt.MapFrom(src => src.UserDetails.Certificates))
                 .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.UserDetails.City))
                 .ForMember(dest => dest.EmploymentPlace, opt => opt.MapFrom(src => src.UserDetails.EmploymentPlace));
-                //.ForMember(dest => dest.Iban, opt => opt.MapFrom(src => src.iba))
-                //.ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(r => r.Id)))
-                //.ForMember(dest => dest.Signature, opt => opt.MapFrom(src => src.UserDetails.Signature))
-                //.ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.UserDetails.Title));
 
-            CreateMap<UserDetails, UserDetailsDto>();
-
-            CreateMap<UserDetails, UserViewModel>();
-
-            CreateMap<UserDetailsDto, UserDetails>();
-
-            CreateMap<UserViewModel, UserDetails>();
+            CreateMap<TeacherViewModel, UserViewModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId));
         }
     }
 }

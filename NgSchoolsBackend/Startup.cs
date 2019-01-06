@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -6,26 +7,25 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.EventLog;
 using Microsoft.IdentityModel.Tokens;
-using NgSchoolsBusinessLayer.Services.Contracts;
-using NgSchoolsBusinessLayer.Services.Implementations;
-using NgSchoolsDataLayer.Context;
-using NgSchoolsDataLayer.Enums;
-using NgSchoolsDataLayer.Models;
-using System;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+using Newtonsoft.Json.Serialization;
 using NgSchoolsBusinessLayer.Security.Jwt;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Security.Jwt.Implementations;
-using Newtonsoft.Json.Serialization;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.EventLog;
+using NgSchoolsBusinessLayer.Services.Contracts;
+using NgSchoolsBusinessLayer.Services.Implementations;
 using NgSchoolsBusinessLayer.Services.Implementations.Common;
+using NgSchoolsDataLayer.Context;
+using NgSchoolsDataLayer.Enums;
+using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
-using Microsoft.Extensions.FileProviders;
+using System;
 using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace NgSchoolsBackend
 {

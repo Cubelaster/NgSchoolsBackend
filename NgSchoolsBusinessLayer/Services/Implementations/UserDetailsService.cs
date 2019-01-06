@@ -19,7 +19,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public UserDetailsService(IMapper mapper, ICacheService cacheService, 
+        public UserDetailsService(IMapper mapper, ICacheService cacheService,
             ILoggerService loggerService, IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
@@ -61,11 +61,28 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<UserDetailsDto>> GetUserDetails(Guid userId)
+        {
+            try
+            {
+                return await ActionResponse<UserDetailsDto>
+                    .ReturnSuccess(mapper.Map<UserDetailsDto>(unitOfWork.GetGenericRepository<UserDetails>()
+                    .FindBy(ud => ud.UserId == userId)));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, userId);
+                return await ActionResponse<UserDetailsDto>.ReturnError("Dogodila se greška prilikom dohvata detalja za korisnika.");
+            }
+        }
+
         public async Task<ActionResponse<UserDetailsDto>> UpdateUserDetails(UserDetailsDto userDetails)
         {
             try
             {
-                var entityToUpdate = mapper.Map<UserDetailsDto, UserDetails>(userDetails);
+                var entityToUpdate = unitOfWork.GetGenericRepository<UserDetails>()
+                    .FindBy(ud => ud.UserId == userDetails.UserId);
+                mapper.Map(userDetails, entityToUpdate);
                 unitOfWork.GetGenericRepository<UserDetails>().Update(entityToUpdate);
                 userDetails = mapper.Map<UserDetails, UserDetailsDto>(entityToUpdate);
                 return await ActionResponse<UserDetailsDto>.ReturnSuccess(userDetails);
@@ -73,7 +90,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, userDetails);
-                return await ActionResponse<UserDetailsDto>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<UserDetailsDto>
+                    .ReturnError("Dogodila se greška prilikom ažuriranja podataka o korisniku. Molimo pokušajte ponovno.");
             }
         }
 
@@ -97,7 +115,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, userDetails);
-                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<UserViewModel>
+                    .ReturnError("Dogodila se greška prilikom ažuriranja podataka o korisniku. Molimo pokušajte ponovno.");
             }
         }
     }

@@ -60,5 +60,13 @@ namespace NgSchoolsBusinessLayer.Extensions
                 ? errorMessage : Environment.NewLine + errorMessage;
             return response;
         }
+
+        public static ActionResponse<T> AppendMessage<T>(this ActionResponse<T> response, string message)
+        {
+            response.Message += string.IsNullOrEmpty(response.Message)
+                || response.Message.EndsWith(Environment.NewLine)
+                ? message : Environment.NewLine + message;
+            return response;
+        }
     }
 }
