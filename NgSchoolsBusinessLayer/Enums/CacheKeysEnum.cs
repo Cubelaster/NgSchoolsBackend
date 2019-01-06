@@ -6,6 +6,7 @@
         County,
         User,
         ClassType,
-        ClassLocation
+        ClassLocation,
+        Student
     }
 }

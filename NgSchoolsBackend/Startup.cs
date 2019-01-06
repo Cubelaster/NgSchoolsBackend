@@ -152,6 +152,7 @@ namespace NgSchoolsBackend
             services.AddScoped<IEducationLevelService, EducationLevelService>();
             services.AddScoped<IExamCommissionService, ExamCommissionService>();
             services.AddScoped<IBusinessPartnerService, BusinessPartnerService>();
+            services.AddScoped<IStudentService, StudentService>();
         }
 
         private void ConfigureJWT(IServiceCollection services)
