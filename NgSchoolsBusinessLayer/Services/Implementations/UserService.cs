@@ -187,7 +187,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     users = (await GetAllUsers()).GetData();
                 }
 
-                var teacherUsers = mapper.Map<List<UserDto>, List<TeacherViewModel>>(users
+                var teacherUsers = mapper.Map<List<UserDto>, List<TeacherViewModel>>(
+                    users
                     .Where(u => u.UserRoles.Any(ur => ur.Name == "Nastavnik"))
                     .ToList());
 
