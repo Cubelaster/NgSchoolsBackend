@@ -14,6 +14,7 @@ namespace NgSchoolsDataLayer.Models
         public DateTime CredentialDate { get; set; }
         public DateTime FirstExamDate { get; set; }
         public DateTime SecondExamDate { get; set; }
+        public string Notes { get; set; }
         [Required]
         public int ProgramId { get; set; }
         public EducationProgram Program { get; set; }
