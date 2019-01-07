@@ -1,9 +1,10 @@
-﻿using System;
+﻿using NgSchoolsDataLayer.Models.BaseTypes;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
 {
-    public class Institution
+    public class Institution : DatabaseEntity
     {
         [Key]
         public int Id { get; set; }

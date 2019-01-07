@@ -1,8 +1,9 @@
-﻿using System;
+﻿using NgSchoolsDataLayer.Models.BaseTypes;
+using System;
 
 namespace NgSchoolsDataLayer.Models
 {
-    public class EducationProgram
+    public class EducationProgram : DatabaseEntity
     {
         public int Id { get; set; }
         public string Name { get; set; }

@@ -1,10 +1,11 @@
-﻿using System;
+﻿using NgSchoolsDataLayer.Models.BaseTypes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
 {
-    public class StudentGroup
+    public class StudentGroup : DatabaseEntity 
     {
         [Key]
         public int Id { get; set; }
