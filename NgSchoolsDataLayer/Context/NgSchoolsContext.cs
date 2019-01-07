@@ -20,6 +20,9 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<Institution> Institution { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<UserDetails> UserDetails { get; set; }
+        public DbSet<EducationProgram> EducationPrograms { get; set; }
+        public DbSet<StudentGroup> StudentGroups { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
