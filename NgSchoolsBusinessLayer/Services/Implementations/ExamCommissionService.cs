@@ -36,7 +36,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<ExamCommission>().FindBy(c => c.Id == id);
+                var entity = unitOfWork.GetGenericRepository<ExamCommission>()
+                    .FindBy(c => c.Id == id, includeProperties: "UserExamCommissions.User.UserDetails");
                 return await ActionResponse<ExamCommissionDto>
                     .ReturnSuccess(mapper.Map<ExamCommission, ExamCommissionDto>(entity));
             }
@@ -68,7 +69,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<ExamCommission>()
-                    .GetAllAsQueryable(includeProperties: "UserExamCommissions.User").GetPaged(pagedRequest);
+                    .GetAllAsQueryable(includeProperties: "UserExamCommissions.User.UserDetails").GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<ExamCommissionDto>
                 {
