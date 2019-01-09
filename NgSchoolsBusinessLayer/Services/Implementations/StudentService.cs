@@ -50,6 +50,21 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<StudentDto>> GetByOib(string oib)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<Student>().FindBy(c => c.Oib == oib);
+                return await ActionResponse<StudentDto>
+                    .ReturnSuccess(mapper.Map<Student, StudentDto>(entity));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<StudentDto>.ReturnError("Greška prilikom dohvata studenta.");
+            }
+        }
+
         [CacheRefreshSource(typeof(StudentDto))]
         public async Task<ActionResponse<List<StudentDto>>> GetAllForCache()
         {

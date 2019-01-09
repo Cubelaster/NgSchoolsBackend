@@ -27,6 +27,12 @@ namespace NgSchoolsWebApi.Controllers
             return await studentService.GetById(request.Id);
         }
 
+        [HttpPost]
+        public async Task<ActionResponse<StudentDto>> GetByOib(SimpleRequestBase request)
+        {
+            return await studentService.GetByOib(request.SearchParam);
+        }
+
         // TODO: Authorize
         [HttpPost]
         public async Task<ActionResponse<StudentDto>> Insert([FromBody] StudentDto student)
