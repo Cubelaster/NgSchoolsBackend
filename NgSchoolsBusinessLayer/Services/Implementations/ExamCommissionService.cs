@@ -120,6 +120,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 var entityToUpdate = mapper.Map<ExamCommissionDto, ExamCommission>(entityDto);
                 unitOfWork.GetGenericRepository<ExamCommission>().Update(entityToUpdate);
+                if ((await ModifyExamTeachers(entityDto)).IsNotSuccess(out ActionResponse<ExamCommissionDto> response, out entityDto))
+                {
+                    return response;
+                }
                 unitOfWork.Save();
                 return await ActionResponse<ExamCommissionDto>
                     .ReturnSuccess(mapper.Map<ExamCommission, ExamCommissionDto>(entityToUpdate));
@@ -163,7 +167,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .Select(nt => new UserExamCommissionDto { UserId = nt, ExamCommissionId = examCommission.Id })
                     .ToList();
 
-                if((await RemoveExamTeachers(teachersToRemove))
+                if ((await RemoveExamTeachers(teachersToRemove))
                     .IsNotSuccess(out ActionResponse<List<UserExamCommissionDto>> actionResponse))
                 {
                     return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena učitelja u ispitnoj komisiji.");
@@ -174,8 +178,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 {
                     return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena učitelja u ispitnoj komisiji.");
                 }
-
-                return await ActionResponse<ExamCommissionDto>.ReturnSuccess(null, "Uspješno izmijenjeni članovi ispitne komisije.");
+                //entity = null;
+                return await ActionResponse<ExamCommissionDto>.ReturnSuccess(examCommission, "Uspješno izmijenjeni članovi ispitne komisije.");
             }
             catch (Exception ex)
             {
@@ -251,7 +255,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.GetGenericRepository<UserExamCommission>().Add(entityToAdd);
                 unitOfWork.Save();
                 return await ActionResponse<UserExamCommissionDto>
-                    .ReturnSuccess(mapper.Map<UserExamCommission, UserExamCommissionDto>(entityToAdd), 
+                    .ReturnSuccess(mapper.Map<UserExamCommission, UserExamCommissionDto>(entityToAdd),
                     "Učitelj upsješno dodan u komisiju.");
             }
             catch (Exception ex)
