@@ -43,9 +43,21 @@ namespace NgSchoolsBackend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResponse<UserViewModel>> GetById([FromBody] UserGetRequest request)
+        public async Task<ActionResponse<UserDto>> GetById([FromBody] UserGetRequest request)
+        {
+            return await userService.GetById(request.Id.Value);
+        }
+
+        [HttpPost]
+        public async Task<ActionResponse<UserViewModel>> GetUserById([FromBody] UserGetRequest request)
         {
             return await userService.GetUserViewModelById(request.Id.Value);
+        }
+
+        [HttpPost]
+        public async Task<ActionResponse<TeacherViewModel>> GetTeacherById([FromBody] UserGetRequest request)
+        {
+            return await userService.GetTeacherViewModelById(request.Id.Value);
         }
 
         [HttpPost]
@@ -76,6 +88,12 @@ namespace NgSchoolsBackend.Controllers
         public async Task<ActionResponse<object>> Delete([FromBody] UserGetRequest request)
         {
             return await userService.Delete(request);
+        }
+
+        [HttpPost]
+        public async Task<ActionResponse<object>> DeleteTeacher([FromBody] UserGetRequest request)
+        {
+            return await userService.DeleteTeacher(request);
         }
 
         [HttpPost]

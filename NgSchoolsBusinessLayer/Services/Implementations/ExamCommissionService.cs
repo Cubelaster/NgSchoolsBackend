@@ -178,7 +178,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 {
                     return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena učitelja u ispitnoj komisiji.");
                 }
-                //entity = null;
                 return await ActionResponse<ExamCommissionDto>.ReturnSuccess(examCommission, "Uspješno izmijenjeni članovi ispitne komisije.");
             }
             catch (Exception ex)

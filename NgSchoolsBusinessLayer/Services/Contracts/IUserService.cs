@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using NgSchoolsBusinessLayer.Models.Common;
+﻿using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Models.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Contracts
 {
@@ -19,11 +19,13 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<UserDto>> GetUserByEmail(string name);
         Task<ActionResponse<UserDto>> GetById(Guid userId);
         Task<ActionResponse<UserViewModel>> GetUserViewModelById(Guid value);
+        Task<ActionResponse<TeacherViewModel>> GetTeacherViewModelById(Guid userId);
         Task<ActionResponse<PagedResult<UserViewModel>>> GetAllUsersPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<PagedResult<TeacherViewModel>>> GetAllTeachersPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<UserViewModel>> Create(UserViewModel request);
         Task<ActionResponse<TeacherViewModel>> CreateTeacher(TeacherViewModel request);
         Task<ActionResponse<object>> Delete(UserGetRequest request);
+        Task<ActionResponse<object>> DeleteTeacher(UserGetRequest request);
         Task<ActionResponse<TeacherViewModel>> UpdateTeacher(TeacherViewModel request);
         Task<ActionResponse<UserViewModel>> Update(UserViewModel request);
 

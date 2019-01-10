@@ -152,6 +152,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<TeacherViewModel>> GetTeacherViewModelById(Guid userId)
+        {
+            try
+            {
+                if ((await GetById(userId)).IsNotSuccess(out ActionResponse<UserDto> response, out UserDto user))
+                {
+                    return await ActionResponse<TeacherViewModel>.ReturnError(response.Message);
+                }
+                return await ActionResponse<TeacherViewModel>.ReturnSuccess(mapper.Map<UserDto, TeacherViewModel>(user));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, userId);
+                return await ActionResponse<TeacherViewModel>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
         public async Task<ActionResponse<PagedResult<UserViewModel>>> GetAllUsersPaged(BasePagedRequest pagedRequest)
         {
             try
@@ -256,34 +273,46 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         public async Task<ActionResponse<TeacherViewModel>> CreateTeacher(TeacherViewModel request)
         {
-            if (!request.UserId.HasValue)
+            try
             {
-                return await ActionResponse<TeacherViewModel>.ReturnError("Molimo, povežite nastavnika na postojećeg korisnika.");
-            }
-
-            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-            {
-                if ((await UpdateTeacher(request))
-                    .IsNotSuccess(out ActionResponse<TeacherViewModel> actionResponse, out request))
+                if (!request.UserId.HasValue)
                 {
-                    return actionResponse;
+                    return await ActionResponse<TeacherViewModel>.ReturnError("Molimo, povežite nastavnika na postojećeg korisnika.");
                 }
 
-                var rolesRequest = new UserViewModel
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    Id = request.UserId,
-                    RolesNamed = new List<string> { "Nastavnik" }
-                };
+                    if ((await UpdateTeacher(request))
+                        .IsNotSuccess(out ActionResponse<TeacherViewModel> actionResponse, out request))
+                    {
+                        return actionResponse;
+                    }
 
-                if ((await AddRoles(mapper.Map<UserViewModel>(rolesRequest)))
-                    .IsNotSuccess(out ActionResponse<UserViewModel> rolesResponse, out UserViewModel viewModel))
-                {
-                    return await ActionResponse<TeacherViewModel>
-                        .ReturnError("Dogodila se greška prilikom dodavanja role nastavnika za korisnika. Molimo pokušajte ponovno.");
+                    var rolesRequest = new UserViewModel
+                    {
+                        Id = request.UserId,
+                        RolesNamed = new List<string> { "Nastavnik" }
+                    };
+
+                    if ((await AddRoles(mapper.Map<UserViewModel>(rolesRequest)))
+                        .IsNotSuccess(out ActionResponse<UserViewModel> rolesResponse, out UserViewModel viewModel))
+                    {
+                        return await ActionResponse<TeacherViewModel>
+                            .ReturnError("Dogodila se greška prilikom dodavanja role nastavnika za korisnika.");
+                    }
+                    scope.Complete();
                 }
-                scope.Complete();
+                return await ActionResponse<TeacherViewModel>.ReturnSuccess(request, "Korisnik uspješno dodan u rolu nastavnika i njegovi detelji ažurirani.");
             }
-            return await ActionResponse<TeacherViewModel>.ReturnSuccess(request, "Korisnik uspješno dodan u rolu nastavnika i njegovi detelji ažurirani.");
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<TeacherViewModel>.ReturnError("Greška prilikom kreacije novog nastavnika.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<UserDto>>();
+            }
         }
 
         public async Task<ActionResponse<object>> Delete(UserGetRequest request)
@@ -298,6 +327,39 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.GetGenericRepository<User>().Delete(request.Id.Value);
                 unitOfWork.Save();
                 return await ActionResponse<object>.ReturnSuccess(null, "Success!");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<object>.ReturnError("Some sort of fuckup. Try again.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<UserDto>>();
+            }
+        }
+
+        public async Task<ActionResponse<object>> DeleteTeacher(UserGetRequest request)
+        {
+            try
+            {
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var rolesRequest = new UserViewModel
+                    {
+                        Id = request.Id,
+                        RolesNamed = new List<string> { "Nastavnik" }
+                    };
+
+                    if ((await RemoveRoles(mapper.Map<UserViewModel>(rolesRequest)))
+                        .IsNotSuccess(out ActionResponse<UserViewModel> rolesResponse, out UserViewModel viewModel))
+                    {
+                        return await ActionResponse<object>
+                            .ReturnError("Dogodila se greška prilikom brisanja role nastavnika za korisnika. Molimo pokušajte ponovno.");
+                    }
+                    scope.Complete();
+                }
+                return await ActionResponse<object>.ReturnSuccess(null, "Nastavnik uspješno izbrisan!");
             }
             catch (Exception ex)
             {
@@ -378,6 +440,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<TeacherViewModel>
                     .ReturnError("Dogodila se greška prilikom ažuriranja podataka o nastavniku. Molimo pokušajte ponovno.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<UserDto>>();
             }
         }
 

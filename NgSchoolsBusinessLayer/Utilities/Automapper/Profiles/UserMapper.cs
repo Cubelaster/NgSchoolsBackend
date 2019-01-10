@@ -44,6 +44,13 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<UserDto, TeacherViewModel>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.Oib, opt => opt.MapFrom(src => src.UserDetails.Oib))
+                .ForMember(dest => dest.Notes, opt => opt.MapFrom(src => src.UserDetails.Notes))
+                .ForMember(dest => dest.PpEducation, opt => opt.MapFrom(src => src.UserDetails.PpEducation))
+                .ForMember(dest => dest.Profession, opt => opt.MapFrom(src => src.UserDetails.Profession))
+                .ForMember(dest => dest.Qualifications, opt => opt.MapFrom(src => src.UserDetails.Qualifications))
+                .ForMember(dest => dest.Iban, opt => opt.MapFrom(src => src.UserDetails.Iban))
+                .ForMember(dest => dest.Bank, opt => opt.MapFrom(src => src.UserDetails.Bank))
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.UserDetails.Address))
                 .ForMember(dest => dest.Authorization, opt => opt.MapFrom(src => src.UserDetails.Authorization))
                 .ForMember(dest => dest.Bank, opt => opt.MapFrom(src => src.UserDetails.Bank))
