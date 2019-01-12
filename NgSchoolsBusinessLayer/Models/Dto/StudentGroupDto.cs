@@ -12,5 +12,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public DateTime? SecondExamDate { get; set; }
         public string Notes { get; set; }
         public int ProgramId { get; set; }
+        public int ClassLocationId { get; set; }
     }
 }

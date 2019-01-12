@@ -16,12 +16,14 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Pob { get; set; }
         public string Cob { get; set; }
         public string Citizenship { get; set; }
+        public string Proffesion { get; set; }
         public string FathersFullName { get; set; }
         public string MothersFullName { get; set; }
         public string Gender { get; set; }
         public string AddressStreet { get; set; }
         public string AddressCity { get; set; }
         public string AddressCounty { get; set; }
+        public string AddressMuncipality { get; set; }
         public string Mobile { get; set; }
         public string Email { get; set; }
         public bool Employed { get; set; }

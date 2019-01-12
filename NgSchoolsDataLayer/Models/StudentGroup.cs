@@ -15,9 +15,13 @@ namespace NgSchoolsDataLayer.Models
         public DateTime FirstExamDate { get; set; }
         public DateTime SecondExamDate { get; set; }
         public string Notes { get; set; }
+
         [Required]
         public int ProgramId { get; set; }
-        public EducationProgram Program { get; set; }
+        public virtual EducationProgram Program { get; set; }
+        [Required]
+        public int ClassLocationId { get; set; }
+        public virtual ClassLocations ClassLocation { get; set; }
 
         public ICollection<StudentsInGroups> StudentsInGroups { get; set; }
     }

@@ -97,7 +97,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    var planEntity = mapper.Map<PlanDto, Plan>(entityDto.Plan);
+                    //if ((await planService.Insert(entityDto.Plan)).IsNotSuccess(out ActionResponse<PlanDto> planResponse, out PlanDto insertedPlan))
+                    //{
+                    //    return await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                    //}
 
                     var entityToAdd = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
                     unitOfWork.GetGenericRepository<EducationProgram>().Add(entityToAdd);
