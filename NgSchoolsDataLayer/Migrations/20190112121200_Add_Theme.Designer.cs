@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190112121200_Add_Theme")]
+    partial class Add_Theme
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -504,29 +506,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("StudentsInGroups");
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.Subject", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Literature");
-
-                    b.Property<string>("MaterialConditions");
-
-                    b.Property<string>("Name");
-
-                    b.Property<string>("StaffingConditions");
-
-                    b.Property<string>("SubjectCompetence");
-
-                    b.Property<string>("WorkMethods");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Subjects");
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Theme", b =>

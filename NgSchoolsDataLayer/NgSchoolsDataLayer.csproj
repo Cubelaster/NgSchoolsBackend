@@ -11,6 +11,7 @@
     <Compile Remove="Migrations\20181216075330_DatabaseEntity_CreatedDate_Default_Value.cs" />
     <Compile Remove="Migrations\20190107173855_Added_StudentGroup_EducationProgram.cs" />
     <Compile Remove="Migrations\20190107174051_Added_StudentGroup_EducationProgram.cs" />
+    <Compile Remove="Migrations\20190112121542_Add_Subject.cs" />
   </ItemGroup>
 
   <ItemGroup>
