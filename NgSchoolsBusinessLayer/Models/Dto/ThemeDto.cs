@@ -6,6 +6,5 @@
         public string Name { get; set; }
         public string Content { get; set; }
         public string LearningOutcomes { get; set; }
-        public double? HoursNumber { get; set; }
     }
 }

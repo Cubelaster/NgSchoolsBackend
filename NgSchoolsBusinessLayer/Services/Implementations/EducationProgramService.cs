@@ -10,6 +10,7 @@ using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -20,13 +21,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IMapper mapper;
         private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
+        private readonly IPlanService planService;
 
         public EducationProgramService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork, IPlanService planService)
         {
             this.mapper = mapper;
             this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
+            this.planService = planService;
         }
 
         #endregion Ctors and Members
@@ -92,13 +95,18 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entityToAdd = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
-                unitOfWork.GetGenericRepository<EducationProgram>().Add(entityToAdd);
-                unitOfWork.Save();
-                mapper.Map(entityToAdd, entityDto);
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var planEntity = mapper.Map<PlanDto, Plan>(entityDto.Plan);
 
-                return await ActionResponse<EducationProgramDto>
-                    .ReturnSuccess(mapper.Map<EducationProgram, EducationProgramDto>(entityToAdd));
+                    var entityToAdd = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
+                    unitOfWork.GetGenericRepository<EducationProgram>().Add(entityToAdd);
+                    unitOfWork.Save();
+                    mapper.Map(entityToAdd, entityDto);
+
+                    return await ActionResponse<EducationProgramDto>
+                        .ReturnSuccess(mapper.Map<EducationProgram, EducationProgramDto>(entityToAdd));
+                }
             }
             catch (Exception ex)
             {

@@ -6,7 +6,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public List<SubjectDto> Subjects { get; set; }
-        public List<ThemeDto> Themes { get; set; }
+        public List<PlanDaySubjectDto> PlanDaySubjects { get; set; }
+        public List<PlanDayThemeDto> PlanDayThemes { get; set; }
     }
 }
