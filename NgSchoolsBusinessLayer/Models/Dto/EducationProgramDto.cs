@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
@@ -23,5 +24,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string ProgramCompetencies { get; set; }
         public string PerformingWay { get; set; }
         public string KnoweledgeVerification { get; set; }
+
+        public List<SubjectDto> Subjects { get; set; }
+        public PlanDto Plan { get; set; }
     }
 }
