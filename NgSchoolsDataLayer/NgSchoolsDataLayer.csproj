@@ -12,6 +12,9 @@
     <Compile Remove="Migrations\20190107173855_Added_StudentGroup_EducationProgram.cs" />
     <Compile Remove="Migrations\20190107174051_Added_StudentGroup_EducationProgram.cs" />
     <Compile Remove="Migrations\20190112121542_Add_Subject.cs" />
+    <Compile Remove="Migrations\20190112131757_Modify_EducationProgram_Connect_Plan.cs" />
+    <Compile Remove="Migrations\20190112133039_Modify_EducationProgram_Connect_Plan.cs" />
+    <Compile Remove="Migrations\20190112133312_Modify_EducationProgram_Connect_Plan.cs" />
   </ItemGroup>
 
   <ItemGroup>

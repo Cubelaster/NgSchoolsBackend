@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190112122528_Add_SubjectTheme")]
+    partial class Add_SubjectTheme
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,8 +241,6 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<string>("PerformingWay");
 
-                    b.Property<int?>("PlanId");
-
                     b.Property<double?>("PracticalClassesDuration");
 
                     b.Property<string>("ProgramCompetencies");
@@ -266,8 +266,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<string>("WorkingEnvironment");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PlanId");
 
                     b.ToTable("EducationPrograms");
                 });
@@ -332,102 +330,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasIndex("PrincipalId");
 
                     b.ToTable("Institution");
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.Plan", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime?>("DateModified");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("Status");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Plans");
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.PlanDay", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime?>("DateModified");
-
-                    b.Property<int>("PlanId");
-
-                    b.Property<int>("Status");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlanId");
-
-                    b.ToTable("PlanDays");
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.PlanDaySubject", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime?>("DateModified");
-
-                    b.Property<int>("PlanDayId");
-
-                    b.Property<int>("Status");
-
-                    b.Property<int>("SubjectId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlanDayId");
-
-                    b.HasIndex("SubjectId");
-
-                    b.ToTable("PlanDaySubjects");
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.PlanDayTheme", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime?>("DateModified");
-
-                    b.Property<double>("HoursNumber");
-
-                    b.Property<int>("PlanDayId");
-
-                    b.Property<int>("Status");
-
-                    b.Property<int>("ThemeId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlanDayId");
-
-                    b.HasIndex("ThemeId");
-
-                    b.ToTable("PlanDayThemes");
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Role", b =>
@@ -670,7 +572,7 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<DateTime?>("DateModified");
 
-                    b.Property<string>("LearningOutcomes");
+                    b.Property<string>("LearningOucomes");
 
                     b.Property<string>("Name")
                         .IsRequired();
@@ -882,52 +784,11 @@ namespace NgSchoolsDataLayer.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.EducationProgram", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.Plan", "Plan")
-                        .WithMany()
-                        .HasForeignKey("PlanId");
-                });
-
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Institution", b =>
                 {
                     b.HasOne("NgSchoolsDataLayer.Models.User", "Principal")
                         .WithMany()
                         .HasForeignKey("PrincipalId");
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.PlanDay", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.Plan", "Plan")
-                        .WithMany("PlanDays")
-                        .HasForeignKey("PlanId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.PlanDaySubject", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.PlanDay", "PlanDay")
-                        .WithMany("Subjects")
-                        .HasForeignKey("PlanDayId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("NgSchoolsDataLayer.Models.Subject", "Subject")
-                        .WithMany()
-                        .HasForeignKey("SubjectId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.PlanDayTheme", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.PlanDay", "PlanDay")
-                        .WithMany()
-                        .HasForeignKey("PlanDayId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("NgSchoolsDataLayer.Models.Theme", "Theme")
-                        .WithMany()
-                        .HasForeignKey("ThemeId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.StudentGroup", b =>
@@ -954,12 +815,12 @@ namespace NgSchoolsDataLayer.Migrations
             modelBuilder.Entity("NgSchoolsDataLayer.Models.SubjectTheme", b =>
                 {
                     b.HasOne("NgSchoolsDataLayer.Models.Subject", "Subject")
-                        .WithMany("SubjectThemes")
+                        .WithMany()
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("NgSchoolsDataLayer.Models.Theme", "Theme")
-                        .WithMany("ThemeSubjects")
+                        .WithMany()
                         .HasForeignKey("ThemeId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

@@ -1,4 +1,6 @@
-﻿namespace NgSchoolsDataLayer.Models
+﻿using System.Collections.Generic;
+
+namespace NgSchoolsDataLayer.Models
 {
     public class Subject
     {
@@ -9,5 +11,7 @@
         public string MaterialConditions { get; set; }
         public string StaffingConditions { get; set; }
         public string Literature { get; set; }
+
+        public virtual ICollection<SubjectTheme> SubjectThemes { get; set; }
     }
 }

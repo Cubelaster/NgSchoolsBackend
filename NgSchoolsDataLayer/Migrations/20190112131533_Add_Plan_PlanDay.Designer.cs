@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190112131533_Add_Plan_PlanDay")]
+    partial class Add_Plan_PlanDay
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -239,8 +241,6 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<string>("PerformingWay");
 
-                    b.Property<int?>("PlanId");
-
                     b.Property<double?>("PracticalClassesDuration");
 
                     b.Property<string>("ProgramCompetencies");
@@ -266,8 +266,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<string>("WorkingEnvironment");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PlanId");
 
                     b.ToTable("EducationPrograms");
                 });
@@ -880,13 +878,6 @@ namespace NgSchoolsDataLayer.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.EducationProgram", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.Plan", "Plan")
-                        .WithMany()
-                        .HasForeignKey("PlanId");
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Institution", b =>

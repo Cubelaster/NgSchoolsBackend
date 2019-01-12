@@ -4,15 +4,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
 {
-    public class Theme : DatabaseEntity
+    public class Plan : DatabaseEntity
     {
         [Key]
         public int Id { get; set; }
-        [Required]
         public string Name { get; set; }
-        public string Content { get; set; }
-        public string LearningOutcomes { get; set; }
 
-        public virtual ICollection<SubjectTheme> ThemeSubjects { get; set; }
+        public ICollection<PlanDay> PlanDays { get; set; }
     }
 }
