@@ -11,7 +11,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Photo { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public DateTime? Dob { get; set; }
+        public string Dob { get; set; }
         public string Mentor { get; set; }
         public string Oib { get; set; }
         public string Pob { get; set; }
