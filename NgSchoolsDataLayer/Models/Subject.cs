@@ -12,6 +12,9 @@ namespace NgSchoolsDataLayer.Models
         public string StaffingConditions { get; set; }
         public string Literature { get; set; }
 
+        public int EducationProgramId { get; set; }
+        public EducationProgram EducationProgram { get; set; }
+
         public virtual ICollection<SubjectTheme> SubjectThemes { get; set; }
     }
 }

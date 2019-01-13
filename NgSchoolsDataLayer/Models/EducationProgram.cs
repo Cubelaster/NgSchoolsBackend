@@ -1,6 +1,5 @@
 ﻿using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
-using System.Collections.Generic;
 
 namespace NgSchoolsDataLayer.Models
 {
@@ -25,8 +24,5 @@ namespace NgSchoolsDataLayer.Models
         public string ProgramCompetencies { get; set; }
         public string PerformingWay { get; set; }
         public string KnoweledgeVerification { get; set; }
-
-        public int? PlanId { get; set; }
-        public virtual Plan Plan { get; set; }
     }
 }

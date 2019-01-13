@@ -12,6 +12,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string StaffingConditions { get; set; }
         public string Literature { get; set; }
 
+        public int? EducationProgramId { get; set; }
         public List<ThemeDto> Themes { get; set; }
     }
 }
