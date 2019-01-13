@@ -1,7 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
 using NgSchoolsBusinessLayer.Models.Common;
+using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Services.Contracts;
+using NgSchoolsDataLayer.Models;
+using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -12,14 +16,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
     {
         private readonly ILoggerService loggerService;
         private readonly IConfiguration configuration;
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IMapper mapper;
 
-        public FileUploadService(ILoggerService loggerService, IConfiguration configuration)
+        public FileUploadService(ILoggerService loggerService, IConfiguration configuration,
+            IUnitOfWork unitOfWork, IMapper mapper)
         {
             this.loggerService = loggerService;
             this.configuration = configuration;
+            this.unitOfWork = unitOfWork;
+            this.mapper = mapper;
         }
 
-        public async Task<ActionResponse<string>> Upload(FileUploadRequest fileUploadRequest)
+        public async Task<ActionResponse<FileDto>> Upload(FileUploadRequest fileUploadRequest)
         {
             try
             {
@@ -36,12 +45,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     file.Flush();
                 }
 
-                return await ActionResponse<string>.ReturnSuccess(filePath.Replace(ottResources, "").Replace("\\", ""), "Datoteka uspješno učitana i spremljena.");
+                UploadedFile uploadedFile = new UploadedFile
+                {
+                    FileName = filePath.Replace(ottResources, "").Replace("\\", "")
+                };
+
+                unitOfWork.GetGenericRepository<UploadedFile>().Add(uploadedFile);
+                unitOfWork.Save();
+
+                return await ActionResponse<FileDto>.ReturnSuccess(mapper.Map<UploadedFile, FileDto>(uploadedFile), "Datoteka uspješno učitana i spremljena.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog<FileUploadRequest>(ex, fileUploadRequest);
-                return await ActionResponse<string>.ReturnError("Greška kod učitavanja datoteke.");
+                return await ActionResponse<FileDto>.ReturnError("Greška kod učitavanja datoteke.");
             }
         }
     }

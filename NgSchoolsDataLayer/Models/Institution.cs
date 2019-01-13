@@ -20,7 +20,9 @@ namespace NgSchoolsDataLayer.Models
         public string InstitutionClassSecondPart { get; set; }
         [Required]
         public string InstitutionUrNumber { get; set; }
-        public string Logo { get; set; }
+
+        public int? LogoId { get; set; }
+        public UploadedFile Logo { get; set; }
         public Guid? PrincipalId { get; set; }
         public User Principal { get; set; }
     }

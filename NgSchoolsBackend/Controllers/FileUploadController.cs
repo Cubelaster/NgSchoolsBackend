@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
+using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace NgSchoolsWebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResponse<string>> Upload([FromBody] FileUploadRequest fileUploadRequest)
+        public async Task<ActionResponse<FileDto>> Upload([FromBody] FileUploadRequest fileUploadRequest)
         {
             return await fileUploadService.Upload(fileUploadRequest);
         }

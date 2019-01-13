@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190113172001_Add_Table_UploadedFiles")]
+    partial class Add_Table_UploadedFiles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -318,7 +320,7 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<string>("InstitutionUrNumber")
                         .IsRequired();
 
-                    b.Property<int?>("LogoId");
+                    b.Property<string>("Logo");
 
                     b.Property<string>("Name")
                         .IsRequired();
@@ -328,8 +330,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<int>("Status");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LogoId");
 
                     b.HasIndex("PrincipalId");
 
@@ -566,25 +566,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Students");
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.StudentFiles", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("FileId");
-
-                    b.Property<int>("StudentId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FileId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("StudentFiles");
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.StudentGroup", b =>
@@ -953,10 +934,6 @@ namespace NgSchoolsDataLayer.Migrations
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Institution", b =>
                 {
-                    b.HasOne("NgSchoolsDataLayer.Models.UploadedFile", "Logo")
-                        .WithMany()
-                        .HasForeignKey("LogoId");
-
                     b.HasOne("NgSchoolsDataLayer.Models.User", "Principal")
                         .WithMany()
                         .HasForeignKey("PrincipalId");
@@ -1000,19 +977,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasOne("NgSchoolsDataLayer.Models.Theme", "Theme")
                         .WithMany()
                         .HasForeignKey("ThemeId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.StudentFiles", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.UploadedFile", "File")
-                        .WithMany()
-                        .HasForeignKey("FileId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("NgSchoolsDataLayer.Models.Student", "Student")
-                        .WithMany("Files")
-                        .HasForeignKey("StudentId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

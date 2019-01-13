@@ -29,6 +29,8 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<PlanDay> PlanDays { get; set; }
         public DbSet<PlanDaySubject> PlanDaySubjects { get; set; }
         public DbSet<PlanDayTheme> PlanDayThemes { get; set; }
+        public DbSet<UploadedFile> UploadedFiles { get; set; }
+        public DbSet<StudentFiles> StudentFiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

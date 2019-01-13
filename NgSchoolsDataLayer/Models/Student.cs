@@ -54,8 +54,8 @@ namespace NgSchoolsDataLayer.Models
         public string SchoolLevel { get; set; }
         public bool Gdpr { get; set; }
         public string Notes { get; set; }
-        // TODO Add Files Table
 
         public ICollection<StudentsInGroups> StudentsInGroups { get; set; }
+        public ICollection<StudentFiles> Files { get; set; }
     }
 }
