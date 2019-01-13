@@ -36,12 +36,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     file.Flush();
                 }
 
-                return await ActionResponse<string>.ReturnSuccess(filePath.Replace(ottResources, "").Replace("\\", ""), "File uploaded successfully");
+                return await ActionResponse<string>.ReturnSuccess(filePath.Replace(ottResources, "").Replace("\\", ""), "Datoteka uspješno učitana i spremljena.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog<FileUploadRequest>(ex, fileUploadRequest);
-                return await ActionResponse<string>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<string>.ReturnError("Greška kod učitavanja datoteke.");
             }
         }
     }
