@@ -22,14 +22,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
         private readonly IPlanService planService;
+        private readonly ISubjectService subjectService;
 
         public EducationProgramService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork, IPlanService planService)
+            IUnitOfWork unitOfWork, IPlanService planService, ISubjectService subjectService)
         {
             this.mapper = mapper;
             this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
             this.planService = planService;
+            this.subjectService = subjectService;
         }
 
         #endregion Ctors and Members
@@ -97,6 +99,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
+                    var subjectsInProgram = entityDto.Subjects;
+                    if ((await subjectService.ModifySubjectsForEducationProgram(subjectsInProgram)).IsNotSuccess(out ActionResponse<List<SubjectDto>> subjectResponse, out List<SubjectDto> modifiedSubjects))
+                    {
+                        return await ActionResponse<EducationProgramDto>.ReturnError(subjectResponse.Message);
+                    }
+
                     //if ((await planService.Insert(entityDto.Plan)).IsNotSuccess(out ActionResponse<PlanDto> planResponse, out PlanDto insertedPlan))
                     //{
                     //    return await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
@@ -107,6 +115,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     unitOfWork.Save();
                     mapper.Map(entityToAdd, entityDto);
 
+                    scope.Complete();
                     return await ActionResponse<EducationProgramDto>
                         .ReturnSuccess(mapper.Map<EducationProgram, EducationProgramDto>(entityToAdd));
                 }
