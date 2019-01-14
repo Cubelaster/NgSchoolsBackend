@@ -197,7 +197,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     if ((await RemoveExamTeacher(ect))
                     .IsNotSuccess(out ActionResponse<UserExamCommissionDto> actionResponse))
                     {
-                        response.AppendErrorMessage(actionResponse.Message);
+                        response = await ActionResponse<List<UserExamCommissionDto>>.ReturnError(actionResponse.Message);
+                        return;
                     }
                 });
                 return response;
@@ -234,7 +235,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     if ((await AddExamTeacher(ect))
                     .IsNotSuccess(out ActionResponse<UserExamCommissionDto> actionResponse))
                     {
-                        response.AppendErrorMessage(actionResponse.Message);
+                        response = await ActionResponse<List<UserExamCommissionDto>>.ReturnError(actionResponse.Message);
+                        return;
                     }
                 });
                 return response;
@@ -242,7 +244,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, examCommissionTeachers);
-                return await ActionResponse<List<UserExamCommissionDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<List<UserExamCommissionDto>>.ReturnError("Greška prilikom dodavanja nastavnika u ispitnu komisiju.");
             }
         }
 

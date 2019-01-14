@@ -1,0 +1,12 @@
+// StudentGroup/Insert
+{
+	"StartDate": "2019-01-01",
+	"EndDate": "2019-01-10",
+	"CredentialDate": "2019-01-11",
+	"FirstExamDate": "2019-01-21",
+	"SecondExamDate": "2019-02-01",
+	"Notes": "Notes",
+	"ProgramId": 3007,
+	"ClassLocationId": 1002,
+	"StudentIds": [1,3]
+}

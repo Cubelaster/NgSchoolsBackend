@@ -158,6 +158,7 @@ namespace NgSchoolsBackend
             services.AddScoped<IPlanService, PlanService>();
             services.AddScoped<ISubjectService, SubjectService>();
             services.AddScoped<IThemeService, ThemeService>();
+            services.AddScoped<IPlanDayService, PlanDayService>();
         }
 
         private void ConfigureJWT(IServiceCollection services)
