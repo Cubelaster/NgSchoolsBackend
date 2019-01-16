@@ -7,5 +7,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
     public interface IPlanService
     {
         Task<ActionResponse<PlanDto>> Insert(PlanDto entityDto);
+        Task<ActionResponse<EducationProgramDto>> InsertPlanForEducationProgram(EducationProgramDto completeEduProgram);
     }
 }

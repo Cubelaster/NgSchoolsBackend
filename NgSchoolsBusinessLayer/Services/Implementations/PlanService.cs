@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
+using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -31,10 +35,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                entityDto.PlanDays = null;
                 var planToAdd = mapper.Map<PlanDto, Plan>(entityDto);
                 unitOfWork.GetGenericRepository<Plan>().Add(planToAdd);
-                mapper.Map(planToAdd, entityDto);
+                unitOfWork.Save();
 
+                mapper.Map(planToAdd, entityDto);
                 return await ActionResponse<PlanDto>.ReturnSuccess(entityDto, "Plan uspješno upisan.");
             }
             catch (Exception ex)
@@ -44,120 +50,208 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        //public async Task<ActionResponse<PlanDto>> ModifyStudentsInGroup(PlanDto studentGroup)
-        //{
-        //    try
-        //    {
-        //        var entity = unitOfWork.GetGenericRepository<StudentGroup>()
-        //            .FindBy(e => e.Id == studentGroup.Id.Value, includeProperties: "StudentsInGroups.Student");
-        //        var currentStudents = mapper.Map<List<StudentsInGroups>, List<StudentInGroupDto>>(entity.StudentsInGroups.ToList());
+        public async Task<ActionResponse<EducationProgramDto>> InsertPlanForEducationProgram(EducationProgramDto completeEduProgram)
+        {
+            try
+            {
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var planDto = completeEduProgram.Plan;
+                    List<PlanDayDto> planDays = new List<PlanDayDto>(planDto.PlanDays);
+                    planDto.PlanDays = null;
+                    if ((await Insert(completeEduProgram.Plan)).IsNotSuccess(out ActionResponse<PlanDto> planResponse, out planDto))
+                    {
+                        return await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                    }
 
-        //        var newStudents = studentGroup.StudentIds;
+                    planDto.PlanDays = new List<PlanDayDto>(planDays);
+                    if ((await PreparePlanForInsertFromEducationProgram(completeEduProgram))
+                        .IsNotSuccess(out planResponse, out planDto))
+                    {
+                        return await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                    }
 
-        //        var studentsToRemove = currentStudents.Where(cet => !newStudents.Contains(cet.StudentId.Value)).ToList();
+                    if ((await ModifyPlanDaysForPlanInEducationProgram(planDto)).IsNotSuccess(out planResponse, out planDto))
+                    {
+                        return await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                    }
 
-        //        var studentsToAdd = newStudents
-        //            .Where(nt => !currentStudents.Select(uec => uec.StudentId).Contains(nt))
-        //            .Select(nt => new StudentInGroupDto { StudentId = nt, GroupId = studentGroup.Id })
-        //            .ToList();
+                    scope.Complete();
+                    return await ActionResponse<EducationProgramDto>.ReturnSuccess(completeEduProgram, "Plan uspješno upisan.");
+                }
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, completeEduProgram);
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom upisivanja plana.");
+            }
+        }
 
-        //        if ((await RemoveStudentsFromGroup(studentsToRemove))
-        //            .IsNotSuccess(out ActionResponse<List<StudentInGroupDto>> actionResponse))
-        //        {
-        //            return await ActionResponse<StudentGroupDto>.ReturnError("Neuspješna ažuriranje studenata u grupi.");
-        //        }
+        private async Task<ActionResponse<PlanDto>> PreparePlanForInsertFromEducationProgram(EducationProgramDto educationProgram)
+        {
+            try
+            {
+                var planToPrepare = educationProgram.Plan;
 
-        //        if ((await AddStudentsInGroup(studentsToAdd))
-        //            .IsNotSuccess(out actionResponse))
-        //        {
-        //            return await ActionResponse<StudentGroupDto>.ReturnError("Neuspješna promjena studenata u grupi.");
-        //        }
-        //        return await ActionResponse<StudentGroupDto>.ReturnSuccess(studentGroup, "Uspješno izmijenjeni studenti grupe.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        loggerService.LogErrorToEventLog(ex, studentGroup);
-        //        return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom ažuriranja grupe studenata.");
-        //    }
-        //}
+                if (planToPrepare.PlanDays
+                    .Any(pd => pd.PlanDaySubjects
+                        .Any(pds => pds.Subject == null || string.IsNullOrEmpty(pds.Subject.Name)))
+                        ||
+                    planToPrepare.PlanDays
+                    .Any(pd => pd.PlanDayThemes
+                        .Any(pds => pds.Theme == null || string.IsNullOrEmpty(pds.Theme.Name))))
+                {
+                    return await ActionResponse<PlanDto>.ReturnError("Dio podataka za dane plana nedostaje. " +
+                        "Svi predmeti i sve teme moraju imati ime.");
+                }
 
-        //public async Task<ActionResponse<List<StudentInGroupDto>>> RemoveStudentsFromGroup(List<StudentInGroupDto> studentsInGroup)
-        //{
-        //    try
-        //    {
-        //        var response = await ActionResponse<List<StudentInGroupDto>>.ReturnSuccess(null, "Studenti uspješno maknuti iz grupe.");
-        //        studentsInGroup.ForEach(async sig =>
-        //        {
-        //            if ((await RemoveStudentFromGroup(sig))
-        //            .IsNotSuccess(out ActionResponse<StudentInGroupDto> actionResponse))
-        //            {
-        //                response = await ActionResponse<List<StudentInGroupDto>>.ReturnError(actionResponse.Message);
-        //                return;
-        //            }
-        //        });
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        loggerService.LogErrorToEventLog(ex, studentsInGroup);
-        //        return await ActionResponse<List<StudentInGroupDto>>.ReturnError("Some sort of fuckup. Try again.");
-        //    }
-        //}
+                var educationProgramSubjects = educationProgram.Subjects;
+                var educationProgramThemes = educationProgram.Subjects
+                    .SelectMany(s => s.Themes)
+                        .GroupBy(t => t.Name)
+                        .Select(g => g.FirstOrDefault())
+                        .Where(t => t != null)
+                        .ToList();
 
-        //public async Task<ActionResponse<StudentInGroupDto>> RemoveStudentFromGroup(StudentInGroupDto studentInGroup)
-        //{
-        //    try
-        //    {
-        //        unitOfWork.GetGenericRepository<StudentsInGroups>().Delete(studentInGroup.Id.Value);
-        //        unitOfWork.Save();
-        //        return await ActionResponse<StudentInGroupDto>.ReturnSuccess(null, "Student upsješno izbrisan iz grupe.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        loggerService.LogErrorToEventLog(ex, studentInGroup);
-        //        return await ActionResponse<StudentInGroupDto>.ReturnError("Greška prilikom micanja studenta iz grupe.");
-        //    }
-        //}
+                planToPrepare.PlanDays
+                .Select(pd =>
+                {
+                    pd.PlanId = planToPrepare.Id;
+                    pd.PlanDaySubjectIds = educationProgramSubjects
+                        .Where(s => pd.PlanDaySubjects.Any(pds => pds.Subject.Name == s.Name))
+                        .Select(s => s.Id.Value)
+                        .ToList();
+                    pd.PlanDayThemeIds = educationProgramThemes
+                        .Where(t => pd.PlanDayThemes.Any(pdt => pdt.Theme.Name == t.Name))
+                        .Select(t => t.Id.Value)
+                        .ToList();
+                    return pd;
+                })
+                .ToList();
 
-        //public async Task<ActionResponse<List<StudentInGroupDto>>> AddStudentsInGroup(List<StudentInGroupDto> students)
-        //{
-        //    try
-        //    {
-        //        var response = await ActionResponse<List<StudentInGroupDto>>.ReturnSuccess(null, "Studenti uspješno dodani u grupu.");
-        //        students.ForEach(async s =>
-        //        {
-        //            if ((await AddStudentInGroup(s))
-        //            .IsNotSuccess(out ActionResponse<StudentInGroupDto> actionResponse))
-        //            {
-        //                response = await ActionResponse<List<StudentInGroupDto>>.ReturnError(actionResponse.Message);
-        //                return;
-        //            }
-        //        });
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        loggerService.LogErrorToEventLog(ex, students);
-        //        return await ActionResponse<List<StudentInGroupDto>>.ReturnError("Greška prilikom dodavanja studenata u grupu.");
-        //    }
-        //}
+                return await ActionResponse<PlanDto>.ReturnSuccess(planToPrepare, "Plan uspješno pripremljen za unos ili modifikaciju.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, educationProgram);
+                return await ActionResponse<PlanDto>.ReturnError("Greška prilikom pripreme plana za unos.");
+            }
+        }
 
-        //public async Task<ActionResponse<StudentInGroupDto>> AddStudentInGroup(StudentInGroupDto student)
-        //{
-        //    try
-        //    {
-        //        var entityToAdd = mapper.Map<StudentInGroupDto, StudentsInGroups>(student);
-        //        unitOfWork.GetGenericRepository<StudentsInGroups>().Add(entityToAdd);
-        //        unitOfWork.Save();
-        //        return await ActionResponse<StudentInGroupDto>
-        //            .ReturnSuccess(mapper.Map<StudentsInGroups, StudentInGroupDto>(entityToAdd),
-        //            "Student uspješno dodan u grupu.");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        loggerService.LogErrorToEventLog(ex, student);
-        //        return await ActionResponse<StudentInGroupDto>.ReturnError("Greška prilikom dodavanja studenta u grupu.");
-        //    }
-        //}
+        private async Task<ActionResponse<PlanDto>> ModifyPlanDaysForPlanInEducationProgram(PlanDto plan)
+        {
+            try
+            {
+                var planDto = plan;
+                var entity = unitOfWork.GetGenericRepository<Plan>()
+                    .FindBy(p => p.Id == plan.Id, includeProperties: "PlanDay.Subjects,PlanDay.Themes");
+
+                var currentDays = mapper.Map<List<PlanDay>, List<PlanDayDto>>(entity.PlanDays.ToList());
+
+                var newDays = planDto.PlanDaysId;
+
+                var daysToRemove = currentDays.Where(cd => !newDays.Contains(cd.Id.Value)).ToList();
+
+                var daysToAdd = newDays
+                    .Where(nt => !currentDays.Select(cd => cd.Id).Contains(nt))
+                    .Select(nt => new PlanDayDto { PlanId = nt })
+                    .ToList();
+
+                if ((await RemoveDaysFromPlan(daysToRemove))
+                    .IsNotSuccess(out ActionResponse<List<PlanDayDto>> actionResponse))
+                {
+                    return await ActionResponse<PlanDto>.ReturnError("Neuspješno ažuriranje dana u planu.");
+                }
+
+                if ((await AddDaysToPlan(daysToAdd)).IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<PlanDto>.ReturnError("Neuspješno ažuriranje dana u planu.");
+                }
+                return await ActionResponse<PlanDto>.ReturnSuccess(plan, "Uspješno izmijenjeni dani plana.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, plan);
+                return await ActionResponse<PlanDto>.ReturnError("Greška prilikom modifikacije dana za plan.");
+            }
+        }
+
+        public async Task<ActionResponse<List<PlanDayDto>>> RemoveDaysFromPlan(List<PlanDayDto> daysInPlan)
+        {
+            try
+            {
+                var response = await ActionResponse<List<PlanDayDto>>.ReturnSuccess(null, "Dani uspješno maknuti iz plana.");
+                daysInPlan.ForEach(async pd =>
+                {
+                    if ((await RemoveDayFromPlan(pd))
+                    .IsNotSuccess(out ActionResponse<PlanDayDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<PlanDayDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, daysInPlan);
+                return await ActionResponse<List<PlanDayDto>>.ReturnError("Greška prilikom micanja dana iz plana.");
+            }
+        }
+
+        public async Task<ActionResponse<PlanDayDto>> RemoveDayFromPlan(PlanDayDto planDay)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<PlanDay>().Delete(planDay.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<PlanDayDto>.ReturnSuccess(null, "Dan uspješno izbrisan iz plana.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, planDay);
+                return await ActionResponse<PlanDayDto>.ReturnError("Greška prilikom micanja dana iz plana.");
+            }
+        }
+
+        public async Task<ActionResponse<List<PlanDayDto>>> AddDaysToPlan(List<PlanDayDto> planDays)
+        {
+            try
+            {
+                var response = await ActionResponse<List<PlanDayDto>>.ReturnSuccess(null, "Studenti uspješno dodani u grupu.");
+                planDays.ForEach(async pd =>
+                {
+                    if ((await AddDayToPlan(pd))
+                    .IsNotSuccess(out ActionResponse<PlanDayDto> actionResponse, out pd))
+                    {
+                        response = await ActionResponse<List<PlanDayDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, planDays);
+                return await ActionResponse<List<PlanDayDto>>.ReturnError("Greška prilikom dodavanja dana u plan.");
+            }
+        }
+
+        public async Task<ActionResponse<PlanDayDto>> AddDayToPlan(PlanDayDto planDay)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<PlanDayDto, PlanDay>(planDay);
+                unitOfWork.GetGenericRepository<PlanDay>().Add(entityToAdd);
+                unitOfWork.Save();
+                return await ActionResponse<PlanDayDto>
+                    .ReturnSuccess(mapper.Map<PlanDay, PlanDayDto>(entityToAdd), "Dan uspješno dodan u plan.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, planDay);
+                return await ActionResponse<PlanDayDto>.ReturnError("Greška prilikom dodavanja dana u plan.");
+            }
+        }
     }
 }

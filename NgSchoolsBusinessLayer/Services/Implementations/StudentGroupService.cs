@@ -205,7 +205,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 students.ForEach(async s =>
                 {
                     if ((await AddStudentInGroup(s))
-                    .IsNotSuccess(out ActionResponse<StudentInGroupDto> actionResponse))
+                    .IsNotSuccess(out ActionResponse<StudentInGroupDto> actionResponse, out s))
                     {
                         response = await ActionResponse<List<StudentInGroupDto>>.ReturnError(actionResponse.Message);
                         return;

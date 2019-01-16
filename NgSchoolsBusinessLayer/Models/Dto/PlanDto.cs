@@ -8,5 +8,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Name { get; set; }
 
         public List<PlanDayDto> PlanDays { get; set; }
+        public List<int> PlanDaysId { get; set; }
     }
 }

@@ -108,7 +108,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return response;
                     }
 
-                    var themesInProgram = entityDto.Subjects.SelectMany(s => s.Themes).ToList();
+                    var themesInProgram = entityDto.Subjects
+                        .SelectMany(s => s.Themes)
+                        .GroupBy(t => t.Name)
+                        .Select(g => g.FirstOrDefault())
+                        .Where(t => t != null)
+                        .ToList();
+
                     if ((await themeService.ModifyThemesForEducationProgram(themesInProgram))
                         .IsNotSuccess(out ActionResponse<List<ThemeDto>> themesResponse, out themesInProgram))
                     {
@@ -116,16 +122,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     }
 
                     var subjectsInProgram = entityDto.Subjects
-                        .Select(s => { s.EducationProgramId = entityDto.Id; return s; }).ToList();
+                        .Select(s => {
+                            s.EducationProgramId = entityDto.Id;
+                            s.Themes.ForEach(t => t.Id = themesInProgram
+                                .FirstOrDefault(tip => tip.Name == t.Name).Id);
+                            return s;
+                        })
+                        .ToList();
+
                     if ((await subjectService.ModifySubjectsForEducationProgram(subjectsInProgram)).IsNotSuccess(out ActionResponse<List<SubjectDto>> subjectResponse, out List<SubjectDto> modifiedSubjects))
                     {
                         return await ActionResponse<EducationProgramDto>.ReturnError(subjectResponse.Message);
                     }
 
-                    //if ((await planService.Insert(entityDto.Plan)).IsNotSuccess(out ActionResponse<PlanDto> planResponse, out PlanDto insertedPlan))
-                    //{
-                    //    return await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
-                    //}
+                    if ((await planService.InsertPlanForEducationProgram(entityDto)).IsNotSuccess(out ActionResponse<EducationProgramDto> planResponse, out entityDto))
+                    {
+                        return planResponse;
+                    }
 
                     scope.Complete();
                     return await ActionResponse<EducationProgramDto>

@@ -25,3 +25,155 @@
 	"ClassLocationId": 1003,
 	"StudentIds": [1]
 }
+
+// EducationProgram/Insert
+
+{
+	"Name": "Program 1",
+	"ShorthandName": "PR1",
+	"ProgramDuration": "120",
+	"ProgramDurationTextual": "stodvadeset",
+	"ProgramDurationDays": "3",
+	"FinishedSchool": "Zavrsena skola",
+	"ProgramDate": "2019-01-10T00:31:00.000Z",
+	"TheoreticalClassesDuration": "12",
+	"PracticalClassesDuration": "12",
+	"ApprovalClass": "KL-001/08-22",
+	"UrNumber": "UR-001-01-01",
+	"ComplexityLevel": "<p>Razina složenosti</p>\n<p>&nbsp;</p>",
+	"ProgramJustifiability": "<p>Razina složenosti</p>\n<p>&nbsp;</p>",
+	"EnrollmentConditions": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
+	"WorkingEnvironment": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
+	"ProgramCompetencies": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
+	"PerformingWay": "<p>Način izvođenja</p>\n<p>&nbsp;</p>",
+	"KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>",
+	"Subjects": [{
+		"Name": "NP1",
+		"TheoreticalClasses": "2",
+		"PracticalClasses": "2",
+		"CollectiveConsultations": "2",
+		"InstConsultations": "2",
+		"IndividualConsultations": "2",
+		"SubjectObligatory": true,
+		"SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
+		"WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
+		"MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
+		"StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
+		"Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
+		"Themes": [{
+			"Name": "T1",
+			"HoursNumber": "2",
+			"Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
+			"LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>",
+			"NewData": true,
+			"Order": 0
+		}, {
+			"Name": "T2",
+			"HoursNumber": "2",
+			"Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
+			"LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>",
+			"NewData": true,
+			"Order": 1
+		}],
+		"Order": 0
+	},
+	{
+		"Name": "NP2",
+		"TheoreticalClasses": "2",
+		"PracticalClasses": "2",
+		"CollectiveConsultations": "2",
+		"InstConsultations": "2",
+		"IndividualConsultations": "2",
+		"SubjectObligatory": true,
+		"SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
+		"WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
+		"MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
+		"StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
+		"Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
+		"Themes": [{
+			"Name": "T1",
+			"HoursNumber": "2",
+			"Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
+			"LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>",
+			"Order": 0
+		}, {
+			"Name": "T2",
+			"HoursNumber": "2",
+			"Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
+			"LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>",
+			"Order": 1
+		}],
+		"Order": 0
+	}],
+	"Plan": 
+	{
+		"PlanDays": [
+			{
+			"PlanDaySubjects" : [
+				{
+					"Subject": {
+						"Name": "NP1",
+						"SubjectIndex": 0,
+						"Order": 0
+					}
+				},
+				{
+					"Subject": {
+						"Name": "NP2",
+						"SubjectIndex": 1,
+						"Order": 1
+					}
+				}
+				],
+				"PlanDayThemes": [
+					{
+						"Theme": {
+							"Name": "T1",
+							"Hours": "2",
+							"NewData": true,
+							"Order": 0
+						},
+						"HoursNumber": 2
+					},
+					{
+						"Theme": {
+							"Name": "T2",
+							"Hours": "3",
+							"NewData": true,
+							"Order": 1
+						},
+						"HoursNumber": 2
+					}
+				]
+			},
+			{
+				"PlanDaySubjects": [
+					{
+					"Subject": {
+						"Name": "NP1",
+						"SubjectIndex": 0,
+						"Order": 0
+					}
+				}],
+				"PlanDayThemes": [
+					{
+						"Theme": {
+							"Name": "T1",
+							"Hours": "2",
+							"NewData": true,
+							"Order": 0
+						},
+						"HoursNumber": 2
+					},
+					{
+						"Theme": {
+							"Name": "T2",
+							"Hours": "3",
+							"NewData": true,
+							"Order": 1
+						},
+						"HoursNumber": 2
+					}]
+			}
+	]}
+}
