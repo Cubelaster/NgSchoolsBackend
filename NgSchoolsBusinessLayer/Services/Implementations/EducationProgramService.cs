@@ -135,6 +135,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return await ActionResponse<EducationProgramDto>.ReturnError(subjectResponse.Message);
                     }
 
+                    entityDto.Plan.EducationPogramId = entityDto.Id;
                     if ((await planService.InsertPlanForEducationProgram(entityDto)).IsNotSuccess(out ActionResponse<EducationProgramDto> planResponse, out entityDto))
                     {
                         return planResponse;
@@ -190,9 +191,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                var planEntity = unitOfWork.GetGenericRepository<Plan>().FindBy(p => p.EducationPogramId == id);
+                unitOfWork.GetGenericRepository<Plan>().Delete(planEntity.Id);
                 unitOfWork.GetGenericRepository<EducationProgram>().Delete(id);
                 unitOfWork.Save();
-                return await ActionResponse<EducationProgramDto>.ReturnSuccess(null, "Brisanje programa uspješno.");
+                return await ActionResponse<EducationProgramDto>.ReturnSuccess(null, "Brisanje programa i povezanog plana uspješno.");
             }
             catch (Exception ex)
             {

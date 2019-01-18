@@ -12,6 +12,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<PlanDayTheme, PlanDayThemeDto>()
                 .ForMember(dest => dest.Theme, opt => opt.MapFrom(src => src.Theme));
+
+            CreateMap<PlanDayThemeDto, PlanDayTheme>();
         }
     }
 }
