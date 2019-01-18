@@ -16,5 +16,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<EducationProgramDto>> Insert(EducationProgramDto entityDto);
         Task<ActionResponse<EducationProgramDto>> InsertCompleteProgram(EducationProgramDto entityDto);
         Task<ActionResponse<EducationProgramDto>> Update(EducationProgramDto entityDto);
+        Task<ActionResponse<EducationProgramDto>> UpdateCompleteProgram(EducationProgramDto entityDto);
     }
 }

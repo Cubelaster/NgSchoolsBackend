@@ -409,5 +409,38 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PlanDayThemeDto>.ReturnError("Greška prilikom dodavanja teme u dan plana.");
             }
         }
+
+        public async Task<ActionResponse<EducationProgramDto>> UpdatePlanForEducationProgram(EducationProgramDto completeEduProgram)
+        {
+            try
+            {
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var planDto = completeEduProgram.Plan;
+                    List<PlanDayDto> planDays = new List<PlanDayDto>(planDto.PlanDays);
+                    planDto.PlanDays = null;
+
+                    planDto.PlanDays = new List<PlanDayDto>(planDays);
+                    if ((await PreparePlanForInsertFromEducationProgram(completeEduProgram))
+                        .IsNotSuccess(out ActionResponse<PlanDto> planResponse, out planDto))
+                    {
+                        return await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                    }
+
+                    if ((await ModifyPlanDaysForPlanInEducationProgram(planDto)).IsNotSuccess(out planResponse, out planDto))
+                    {
+                        return await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                    }
+
+                    scope.Complete();
+                    return await ActionResponse<EducationProgramDto>.ReturnSuccess(completeEduProgram, "Plan uspješno upisan.");
+                }
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, completeEduProgram);
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom upisivanja plana.");
+            }
+        }
     }
 }

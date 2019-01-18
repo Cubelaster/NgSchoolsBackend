@@ -41,9 +41,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                             subjects.Select(su => su.EducationProgramId.Value).FirstOrDefault()
                     ));
 
-                var subjectsToUpdate = subjects.Where(s => existingSubjects.Contains(s)).ToList();
-                var subjectsToInsert = subjects.Where(s => !existingSubjects.Contains(s)).ToList();
-                var subjectsToDelete = existingSubjects.Where(es => !subjects.Contains(es)).ToList();
+                var subjectsToUpdate = subjects.Where(s => existingSubjects.Select(ss => ss.Id).Contains(s.Id)).ToList();
+                var subjectsToInsert = subjects.Where(s => !existingSubjects.Select(ss => ss.Id).Contains(s.Id)).ToList();
+                var subjectsToDelete = existingSubjects.Where(es => !subjects.Select(ss => ss.Id).Contains(es.Id)).ToList();
 
                 if ((await InsertSubjects(subjectsToInsert)).IsNotSuccess(out response, out subjects))
                 {

@@ -178,7 +178,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.GetGenericRepository<EducationProgram>().Update(entityToUpdate);
                 unitOfWork.Save();
                 return await ActionResponse<EducationProgramDto>
-                    .ReturnSuccess(mapper.Map<EducationProgram, EducationProgramDto>(entityToUpdate));
+                    .ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
             }
             catch (Exception ex)
             {
@@ -201,6 +201,63 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationProgramDto>.ReturnError("Some sort of fuckup!");
+            }
+        }
+
+        public async Task<ActionResponse<EducationProgramDto>> UpdateCompleteProgram(EducationProgramDto entityDto)
+        {
+            try
+            {
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    if ((await Update(entityDto)).IsNotSuccess(out ActionResponse<EducationProgramDto> response, out entityDto))
+                    {
+                        return response;
+                    }
+
+                    var themesInProgram = entityDto.Subjects
+                        .SelectMany(s => s.Themes)
+                        .GroupBy(t => t.Name)
+                        .Select(g => g.FirstOrDefault())
+                        .Where(t => t != null)
+                        .ToList();
+
+                    if ((await themeService.ModifyThemesForEducationProgram(themesInProgram))
+                        .IsNotSuccess(out ActionResponse<List<ThemeDto>> themesResponse, out themesInProgram))
+                    {
+                        return await ActionResponse<EducationProgramDto>.ReturnError(themesResponse.Message);
+                    }
+
+                    var subjectsInProgram = entityDto.Subjects
+                        .Select(s => {
+                            s.EducationProgramId = entityDto.Id;
+                            s.Themes.ForEach(t => t.Id = themesInProgram
+                                .FirstOrDefault(tip => tip.Name == t.Name).Id);
+                            return s;
+                        })
+                        .ToList();
+
+                    if ((await subjectService.ModifySubjectsForEducationProgram(subjectsInProgram))
+                        .IsNotSuccess(out ActionResponse<List<SubjectDto>> subjectResponse, out List<SubjectDto> modifiedSubjects))
+                    {
+                        return await ActionResponse<EducationProgramDto>.ReturnError(subjectResponse.Message);
+                    }
+
+                    entityDto.Plan.EducationPogramId = entityDto.Id;
+                    if ((await planService.InsertPlanForEducationProgram(entityDto)).IsNotSuccess(out ActionResponse<EducationProgramDto> planResponse, out entityDto))
+                    {
+                        return planResponse;
+                    }
+
+                    scope.Complete();
+                    return await ActionResponse<EducationProgramDto>
+                        .ReturnSuccess(entityDto);
+                }
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom upisivanja programa.");
             }
         }
     }

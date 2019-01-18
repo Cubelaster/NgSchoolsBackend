@@ -48,7 +48,7 @@ namespace NgSchoolsWebApi.Controllers
         [HttpPost]
         public async Task<ActionResponse<EducationProgramDto>> Update([FromBody]EducationProgramDto request)
         {
-            return await educationProgramService.Update(request);
+            return await educationProgramService.UpdateCompleteProgram(request);
         }
 
         [HttpPost]

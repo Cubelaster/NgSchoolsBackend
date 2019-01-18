@@ -240,3 +240,161 @@
     "Message": null,
     "ActionResponseType": 0
 }
+
+// EducationProgram/Update
+
+{
+	"Id": 4052,
+	"Name": "Program 1",
+	"ShorthandName": "PR1",
+	"ProgramDuration": "120",
+	"ProgramDurationTextual": "stodvadeset",
+	"ProgramDurationDays": "3",
+	"FinishedSchool": "Zavrsena skola",
+	"ProgramDate": "2019-01-10T00:31:00.000Z",
+	"TheoreticalClassesDuration": "12",
+	"PracticalClassesDuration": "12",
+	"ApprovalClass": "KL-001/08-22",
+	"UrNumber": "UR-001-01-01",
+	"ComplexityLevel": "<p>Razina složenosti</p>\n<p>&nbsp;</p>",
+	"ProgramJustifiability": "<p>Razina složenosti</p>\n<p>&nbsp;</p>",
+	"EnrollmentConditions": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
+	"WorkingEnvironment": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
+	"ProgramCompetencies": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
+	"PerformingWay": "<p>Način izvođenja</p>\n<p>&nbsp;</p>",
+	"KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>",
+	"Subjects": [{
+		"Id": 2086,
+		"Name": "NP1",
+		"EducationProgramId": 4052,
+		"TheoreticalClasses": "2",
+		"PracticalClasses": "2",
+		"CollectiveConsultations": "2",
+		"InstConsultations": "2",
+		"IndividualConsultations": "2",
+		"SubjectObligatory": true,
+		"SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
+		"WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
+		"MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
+		"StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
+		"Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
+		"Themes": [{
+            "Id": 2099,
+            "Name": "T1",
+            "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
+            "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
+		}, {
+            "Id": 2100,
+            "Name": "T2",
+            "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
+            "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
+		}],
+		"Order": 0
+	},
+	{
+		"Id": 2087,
+		"Name": "NP2",
+		"EducationProgramId": 4052,
+		"TheoreticalClasses": "2",
+		"PracticalClasses": "2",
+		"CollectiveConsultations": "2",
+		"InstConsultations": "2",
+		"IndividualConsultations": "2",
+		"SubjectObligatory": true,
+		"SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
+		"WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
+		"MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
+		"StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
+		"Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
+		"Themes": [{
+            "Id": 2099,
+            "Name": "T1",
+            "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
+            "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
+		}, {
+            "Id": 2100,
+            "Name": "T2",
+            "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
+            "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
+		}],
+		"Order": 0
+	}],
+	"Plan": 
+	{
+		"Id": 49,
+		"EducationPogramId": 4052,
+		"PlanDays": [
+                {
+                    "Id": 2021,
+                    "PlanId": 49,
+                    "PlanDaySubjectIds": [
+                        2086,
+                        2087
+                    ],
+                    "PlanDayThemeIds": [
+                        2099,
+                        2100
+                    ],
+                    "PlanDaySubjects": [
+                        {
+                            "Id": 14,
+                            "PlanDayId": 2021,
+                            "SubjectId": 2086
+                        },
+                        {
+                            "Id": 15,
+                            "PlanDayId": 2021,
+                            "SubjectId": 2087
+                        }
+                    ],
+                    "PlanDayThemes": [
+                        {
+                            "Id": 10,
+                            "PlanDayId": 2021,
+                            "ThemeId": 2099,
+                            "HoursNumber": 2
+                        },
+                        {
+                            "Id": 11,
+                            "PlanDayId": 2021,
+                            "ThemeId": 2100,
+                            "HoursNumber": 2
+                        }
+                    ]
+                },
+                {
+                    "Id": 2022,
+                    "Name": null,
+                    "PlanId": 49,
+                    "PlanDaySubjectIds": [
+                        2086
+                    ],
+                    "PlanDayThemeIds": [
+                        2099,
+                        2100
+                    ],
+                    "PlanDaySubjects": [
+                        {
+                            "Id": 16,
+                            "PlanDayId": 2022,
+                            "SubjectId": 2086
+                        }
+                    ],
+                    "PlanDayThemes": [
+                        {
+                            "Id": 12,
+                            "PlanDayId": 2022,
+                            "ThemeId": 2099,
+                            "HoursNumber": 2
+                        },
+                        {
+                            "Id": 13,
+                            "PlanDayId": 2022,
+                            "ThemeId": 2100,
+                            "HoursNumber": 2
+                        }
+                    ]
+                }
+            ]}
+}
+
