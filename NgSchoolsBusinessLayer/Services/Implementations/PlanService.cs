@@ -170,7 +170,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .Where(nt => !currentDays.Select(cd => cd.Id).Contains(nt.Id))
                     .ToList();
 
-                var daysToModify = currentDays.Where(cd => newDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
+                var daysToModify = newDays.Where(cd => currentDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
 
                 if ((await RemoveDaysFromPlan(daysToRemove))
                     .IsNotSuccess(out ActionResponse<List<PlanDayDto>> actionResponse))
@@ -285,9 +285,22 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entityToUpdate = mapper.Map<PlanDayDto, PlanDay>(entityDto);
+                var entityToUpdate = unitOfWork.GetGenericRepository<PlanDay>().FindSingle(entityDto.Id.Value);
+                mapper.Map(entityDto, entityToUpdate);
                 unitOfWork.GetGenericRepository<PlanDay>().Update(entityToUpdate);
                 unitOfWork.Save();
+
+                if ((await ModifyPlanDaySubjects(entityDto)).IsNotSuccess(out ActionResponse<PlanDayDto> response, out entityDto))
+                {
+                    return response;
+                }
+
+                if ((await ModifyPlanDayThemes(entityDto))
+                    .IsNotSuccess(out ActionResponse<PlanDayDto> pdtResponse, out entityDto))
+                {
+                    return await ActionResponse<PlanDayDto>.ReturnError(pdtResponse.Message);
+                }
+
                 return await ActionResponse<PlanDayDto>
                     .ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
             }
@@ -305,18 +318,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToAdd = mapper.Map<PlanDayDto, PlanDay>(entityDto);
                 unitOfWork.GetGenericRepository<PlanDay>().Add(entityToAdd);
                 unitOfWork.Save();
+                mapper.Map(entityToAdd, entityDto);
 
-                entityDto.PlanDaySubjects.Select(pds => pds.PlanDayId = entityToAdd.Id).ToList();
-                entityDto.PlanDayThemes.Select(pds => pds.PlanDayId = entityToAdd.Id).ToList();
-
-                if ((await InsertPlanDaySubjects(entityDto.PlanDaySubjects))
-                    .IsNotSuccess(out ActionResponse<List<PlanDaySubjectDto>> pdsResponse, out List<PlanDaySubjectDto> insertedPlanDaySubjects))
+                if ((await ModifyPlanDaySubjects(entityDto)).IsNotSuccess(out ActionResponse<PlanDayDto> response, out entityDto))
                 {
-                    return await ActionResponse<PlanDayDto>.ReturnError(pdsResponse.Message);
+                    return response;
                 }
 
-                if ((await InsertPlanDayThemes(entityDto.PlanDayThemes))
-                    .IsNotSuccess(out ActionResponse<List<PlanDayThemeDto>> pdtResponse, out List<PlanDayThemeDto> insertedPlanDayThemes))
+                if ((await ModifyPlanDayThemes(entityDto))
+                    .IsNotSuccess(out ActionResponse<PlanDayDto> pdtResponse, out entityDto))
                 {
                     return await ActionResponse<PlanDayDto>.ReturnError(pdtResponse.Message);
                 }
@@ -330,11 +340,50 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<List<PlanDaySubjectDto>>> InsertPlanDaySubjects(List<PlanDaySubjectDto> entityDtos)
+        public async Task<ActionResponse<PlanDayDto>> ModifyPlanDaySubjects(PlanDayDto entityDto)
+        {
+            var entity = unitOfWork.GetGenericRepository<PlanDay>()
+                    .FindBy(p => p.Id == entityDto.Id, includeProperties: "Subjects");
+
+            var currentSubjects = mapper.Map<List<PlanDaySubject>, List<PlanDaySubjectDto>>(entity.Subjects.ToList());
+
+            var subjectsToRemove = currentSubjects.Where(cd => !entityDto.PlanDaySubjectIds.Contains(cd.SubjectId.Value)).ToList();
+
+            var subjectsToAdd = entityDto.PlanDaySubjectIds
+                .Where(nt => !currentSubjects.Select(cd => cd.SubjectId.Value).Contains(nt))
+                .Select(pds => new PlanDaySubjectDto
+                {
+                    PlanDayId = entity.Id,
+                    SubjectId = pds
+                })
+                .ToList();
+
+            var subjectsToModify = currentSubjects.Where(cd => entityDto.PlanDaySubjectIds.Contains(cd.SubjectId.Value)).ToList();
+
+            if ((await RemoveSubjectsFromPlanDay(subjectsToRemove))
+                .IsNotSuccess(out ActionResponse<List<PlanDaySubjectDto>> actionResponse))
+            {
+                return await ActionResponse<PlanDayDto>.ReturnError("Neuspješno ažuriranje predmeta u danu plana.");
+            }
+
+            if ((await AddSubjectsToPlanDay(subjectsToAdd)).IsNotSuccess(out ActionResponse<List<PlanDaySubjectDto>> subjectsResponse, out subjectsToAdd))
+            {
+                return await ActionResponse<PlanDayDto>.ReturnError("Neuspješno ažuriranje predmeta u danu plana.");
+            }
+
+            if ((await ModifySubjectsInPlanDay(subjectsToModify)).IsNotSuccess(out actionResponse))
+            {
+                return await ActionResponse<PlanDayDto>.ReturnError("Neuspješno ažuriranje predmeta u danu plana.");
+            }
+
+            return await ActionResponse<PlanDayDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni dani plana.");
+        }
+
+        public async Task<ActionResponse<List<PlanDaySubjectDto>>> AddSubjectsToPlanDay(List<PlanDaySubjectDto> entityDtos)
         {
             try
             {
-                var response = await ActionResponse<List<PlanDaySubjectDto>>.ReturnSuccess(null, "Predmeti uspješno dodani u dan plana.");
+                var response = await ActionResponse<List<PlanDaySubjectDto>>.ReturnSuccess(entityDtos, "Predmeti uspješno dodani u dan plana.");
                 entityDtos.ForEach(async pds =>
                 {
                     if ((await InsertPlanDaySubject(pds))
@@ -360,8 +409,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToAdd = mapper.Map<PlanDaySubjectDto, PlanDaySubject>(entityDto);
                 unitOfWork.GetGenericRepository<PlanDaySubject>().Add(entityToAdd);
                 unitOfWork.Save();
-                return await ActionResponse<PlanDaySubjectDto>
-                    .ReturnSuccess(mapper.Map(entityToAdd, entityDto), "Predmet uspješno dodan u dan plana.");
+                mapper.Map(entityToAdd, entityDto);
+                return await ActionResponse<PlanDaySubjectDto>.ReturnSuccess(entityDto, "Predmet uspješno dodan u dan plana.");
             }
             catch (Exception ex)
             {
@@ -370,11 +419,129 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<List<PlanDaySubjectDto>>> RemoveSubjectsFromPlanDay(List<PlanDaySubjectDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<PlanDaySubjectDto>>.ReturnSuccess(null, "Predmeti maknuti iz planskog dana.");
+                entityDtos.ForEach(async pds =>
+                {
+                    if ((await RemoveSubjectFromPlanDay(pds))
+                    .IsNotSuccess(out ActionResponse<PlanDaySubjectDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<PlanDaySubjectDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDtos);
+                return await ActionResponse<List<PlanDaySubjectDto>>.ReturnError("Greška prilikom micanja predmeta iz dana plana.");
+            }
+        }
+
+        public async Task<ActionResponse<PlanDaySubjectDto>> RemoveSubjectFromPlanDay(PlanDaySubjectDto entityDto)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<PlanDaySubject>().Delete(entityDto.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<PlanDaySubjectDto>.ReturnSuccess(null, "Predmet uspješno izbrisan iz planskog dana.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<PlanDaySubjectDto>.ReturnError("Greška prilikom micanja predmeta iz planskog dana.");
+            }
+        }
+
+        public async Task<ActionResponse<List<PlanDaySubjectDto>>> ModifySubjectsInPlanDay(List<PlanDaySubjectDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<PlanDaySubjectDto>>.ReturnSuccess(null, "Predmeti u planskom danu uspješno ažurirani.");
+                entityDtos.ForEach(async pds =>
+                {
+                    if ((await ModifyPlanDaySubject(pds))
+                    .IsNotSuccess(out ActionResponse<PlanDaySubjectDto> insertResponse, out pds))
+                    {
+                        response = await ActionResponse<List<PlanDaySubjectDto>>.ReturnError(insertResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDtos);
+                return await ActionResponse<List<PlanDaySubjectDto>>.ReturnError("Greška prilikom dodavanja predmeta u dan plana.");
+            }
+        }
+
+        public async Task<ActionResponse<PlanDaySubjectDto>> ModifyPlanDaySubject(PlanDaySubjectDto entityDto)
+        {
+            try
+            {
+                var entityToUpdate = unitOfWork.GetGenericRepository<PlanDaySubject>().FindSingle(entityDto.Id.Value);
+                mapper.Map(entityDto, entityToUpdate);
+                unitOfWork.GetGenericRepository<PlanDaySubject>().Update(entityToUpdate);
+                unitOfWork.Save();
+                return await ActionResponse<PlanDaySubjectDto>
+                    .ReturnSuccess(mapper.Map(entityToUpdate, entityDto), "Predmet u danu plana uspješno ažuriran.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<PlanDaySubjectDto>.ReturnError("Greška prilikom ažuriranja predmeta u danu plana.");
+            }
+        }
+
+        public async Task<ActionResponse<PlanDayDto>> ModifyPlanDayThemes(PlanDayDto entityDto)
+        {
+            var entity = unitOfWork.GetGenericRepository<PlanDay>()
+                .FindBy(p => p.Id == entityDto.Id, includeProperties: "Themes");
+
+            var currentThemes = mapper.Map<List<PlanDayTheme>, List<PlanDayThemeDto>>(entity.Themes.ToList());
+
+            var themesToRemove = currentThemes.Where(cd => !entityDto.PlanDayThemeIds.Contains(cd.ThemeId.Value)).ToList();
+
+            var themesToAdd = entityDto.PlanDayThemeIds
+                .Where(nt => !currentThemes.Select(cd => cd.ThemeId.Value).Contains(nt))
+                .Select(pds => new PlanDayThemeDto
+                {
+                    PlanDayId = entity.Id,
+                    ThemeId = pds
+                })
+                .ToList();
+
+            var themesToModify = currentThemes.Where(cd => entityDto.PlanDayThemeIds.Contains(cd.ThemeId.Value)).ToList();
+
+            if ((await RemoveThemesFromPlanDay(themesToRemove))
+                .IsNotSuccess(out ActionResponse<List<PlanDayThemeDto>> actionResponse))
+            {
+                return await ActionResponse<PlanDayDto>.ReturnError("Neuspješno ažuriranje predmeta u danu plana.");
+            }
+
+            if ((await InsertPlanDayThemes(themesToAdd)).IsNotSuccess(out ActionResponse<List<PlanDayThemeDto>> subjectsResponse, out themesToAdd))
+            {
+                return await ActionResponse<PlanDayDto>.ReturnError("Neuspješno ažuriranje predmeta u danu plana.");
+            }
+
+            if ((await ModifyThemesInPlanDay(themesToModify)).IsNotSuccess(out actionResponse))
+            {
+                return await ActionResponse<PlanDayDto>.ReturnError("Neuspješno ažuriranje predmeta u danu plana.");
+            }
+
+            return await ActionResponse<PlanDayDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni dani plana.");
+        }
+
         public async Task<ActionResponse<List<PlanDayThemeDto>>> InsertPlanDayThemes(List<PlanDayThemeDto> entityDtos)
         {
             try
             {
-                var response = await ActionResponse<List<PlanDayThemeDto>>.ReturnSuccess(null, "Teme uspješno dodane u dan plana.");
+                var response = await ActionResponse<List<PlanDayThemeDto>>.ReturnSuccess(entityDtos, "Teme uspješno dodane u dan plana.");
                 entityDtos.ForEach(async pdt =>
                 {
                     if ((await InsertPlanDayTheme(pdt))
@@ -407,6 +574,85 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<PlanDayThemeDto>.ReturnError("Greška prilikom dodavanja teme u dan plana.");
+            }
+        }
+
+        public async Task<ActionResponse<List<PlanDayThemeDto>>> RemoveThemesFromPlanDay(List<PlanDayThemeDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<PlanDayThemeDto>>.ReturnSuccess(null, "Teme maknute iz planskog dana.");
+                entityDtos.ForEach(async pds =>
+                {
+                    if ((await RemoveThemeFromPlanDay(pds))
+                    .IsNotSuccess(out ActionResponse<PlanDayThemeDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<PlanDayThemeDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDtos);
+                return await ActionResponse<List<PlanDayThemeDto>>.ReturnError("Greška prilikom micanja predmeta iz dana plana.");
+            }
+        }
+
+        public async Task<ActionResponse<PlanDayThemeDto>> RemoveThemeFromPlanDay(PlanDayThemeDto entityDto)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<PlanDayTheme>().Delete(entityDto.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<PlanDayThemeDto>.ReturnSuccess(null, "Tema uspješno izbrisana iz planskog dana.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<PlanDayThemeDto>.ReturnError("Greška prilikom micanja teme iz planskog dana.");
+            }
+        }
+
+        public async Task<ActionResponse<List<PlanDayThemeDto>>> ModifyThemesInPlanDay(List<PlanDayThemeDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<PlanDayThemeDto>>.ReturnSuccess(null, "Teme u planskom danu uspješno ažurirani.");
+                entityDtos.ForEach(async pds =>
+                {
+                    if ((await ModifyThemeInPlanDay(pds))
+                    .IsNotSuccess(out ActionResponse<PlanDayThemeDto> insertResponse, out pds))
+                    {
+                        response = await ActionResponse<List<PlanDayThemeDto>>.ReturnError(insertResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDtos);
+                return await ActionResponse<List<PlanDayThemeDto>>.ReturnError("Greška prilikom dodavanja tema u dan plana.");
+            }
+        }
+
+        public async Task<ActionResponse<PlanDayThemeDto>> ModifyThemeInPlanDay(PlanDayThemeDto entityDto)
+        {
+            try
+            {
+                var entityToUpdate = unitOfWork.GetGenericRepository<PlanDayTheme>().FindSingle(entityDto.Id.Value);
+                mapper.Map<PlanDayThemeDto, PlanDayTheme>(entityDto, entityToUpdate);
+                unitOfWork.GetGenericRepository<PlanDayTheme>().Update(entityToUpdate);
+                unitOfWork.Save();
+                return await ActionResponse<PlanDayThemeDto>
+                    .ReturnSuccess(mapper.Map(entityToUpdate, entityDto), "Tema u danu plana uspješno ažuriran.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<PlanDayThemeDto>.ReturnError("Greška prilikom ažuriranja teme u danu plana.");
             }
         }
 

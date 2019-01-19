@@ -244,7 +244,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     }
 
                     entityDto.Plan.EducationPogramId = entityDto.Id;
-                    if ((await planService.InsertPlanForEducationProgram(entityDto)).IsNotSuccess(out ActionResponse<EducationProgramDto> planResponse, out entityDto))
+                    if ((await planService.UpdatePlanForEducationProgram(entityDto)).IsNotSuccess(out ActionResponse<EducationProgramDto> planResponse, out entityDto))
                     {
                         return planResponse;
                     }
@@ -257,7 +257,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, entityDto);
-                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom upisivanja programa.");
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom ažuriranja programa.");
             }
         }
     }

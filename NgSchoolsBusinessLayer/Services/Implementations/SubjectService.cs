@@ -77,8 +77,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.GetGenericRepository<Subject>().Add(entityToAdd);
                 unitOfWork.Save();
                 mapper.Map(entityToAdd, entityDto);
+
+                if ((await ModifySubjectThemes(entityDto)).IsNotSuccess(out ActionResponse<SubjectDto> response, out SubjectDto subjectDto))
+                {
+                    return response;
+                }
+
                 return await ActionResponse<SubjectDto>
-                    .ReturnSuccess(entityDto);
+                    .ReturnSuccess(mapper.Map(entityToAdd, entityDto));
             }
             catch (Exception ex)
             {
@@ -114,11 +120,17 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entityToUpdate = mapper.Map<SubjectDto, Subject>(entityDto);
+                var entityToUpdate = unitOfWork.GetGenericRepository<Subject>().FindSingle(entityDto.Id.Value);
+                mapper.Map(entityDto, entityToUpdate);
                 unitOfWork.GetGenericRepository<Subject>().Update(entityToUpdate);
                 unitOfWork.Save();
-                return await ActionResponse<SubjectDto>
-                    .ReturnSuccess(mapper.Map<Subject, SubjectDto>(entityToUpdate));
+
+                if ((await ModifySubjectThemes(entityDto)).IsNotSuccess(out ActionResponse<SubjectDto> response, out SubjectDto subjectDto))
+                {
+                    return response;
+                }
+
+                return await ActionResponse<SubjectDto>.ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
             }
             catch (Exception ex)
             {
@@ -187,6 +199,135 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<SubjectDto>>.ReturnError($"Greška prilikom brisanja predmeta.");
+            }
+        }
+
+        public async Task<ActionResponse<SubjectDto>> ModifySubjectThemes(SubjectDto entityDto)
+        {
+            try
+            {
+                var response = await ActionResponse<SubjectDto>.ReturnSuccess(entityDto, "Predmetne teme uspješno ažurirane.");
+
+                var currentThemes = mapper.Map<List<SubjectTheme>, List<SubjectThemeDto>>(
+                    unitOfWork.GetGenericRepository<Subject>()
+                    .FindBy(s => s.Id == entityDto.Id, includeProperties: "SubjectThemes.Theme")
+                    .SubjectThemes.ToList());
+
+                var themesToAdd = entityDto.Themes
+                    .Where(t => !currentThemes.Select(ct => ct.ThemeId).Contains(t.Id))
+                    .Select(st => new SubjectThemeDto
+                    {
+                        SubjectId = entityDto.Id,
+                        ThemeId = st.Id
+                    })
+                    .ToList();
+
+                var themesToRemove = currentThemes
+                    .Where(ct => !entityDto.Themes.Select(et => et.Id).Contains(ct.ThemeId))
+                    .Select(st => new SubjectThemeDto
+                    {
+                        Id = st.Id,
+                        ThemeId = st.ThemeId,
+                        SubjectId = st.SubjectId
+                    })
+                    .ToList();
+
+
+                if ((await AddThemesToSubject(themesToAdd)).IsNotSuccess(out ActionResponse<List<SubjectThemeDto>> subjectThemesResponse, out themesToAdd))
+                {
+                    return response;
+                }
+
+                if ((await RemoveThemesFromSubject(themesToRemove)).IsNotSuccess(out subjectThemesResponse, out themesToRemove))
+                {
+                    return response;
+                }
+
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<SubjectDto>.ReturnError($"Greška prilikom mijenjanja predmetnih tema.");
+            }
+        }
+
+        public async Task<ActionResponse<SubjectThemeDto>> AddThemeToSubject(SubjectThemeDto entityDto)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<SubjectThemeDto, SubjectTheme>(entityDto);
+                unitOfWork.GetGenericRepository<SubjectTheme>().Add(entityToAdd);
+                unitOfWork.Save();
+                mapper.Map(entityToAdd, entityDto);
+                return await ActionResponse<SubjectThemeDto>.ReturnSuccess(entityDto);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<SubjectThemeDto>.ReturnError("Greška prilikom dodavanja teme predmetu.");
+            }
+        }
+
+        public async Task<ActionResponse<List<SubjectThemeDto>>> AddThemesToSubject(List<SubjectThemeDto> subjectThemes)
+        {
+            try
+            {
+                var response = await ActionResponse<List<SubjectThemeDto>>.ReturnSuccess(subjectThemes, "Dodavanje tema predmetu uspješno.");
+                subjectThemes.ForEach(async st =>
+                {
+                    if ((await AddThemeToSubject(st)).IsNotSuccess(out ActionResponse<SubjectThemeDto> insertResponse, out st))
+                    {
+                        response = await ActionResponse<List<SubjectThemeDto>>.ReturnError(insertResponse.Message);
+                        return;
+                    }
+                });
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<SubjectThemeDto>>.ReturnError("Greška prilikom dodavanja tema predmetu.");
+            }
+        }
+
+        public async Task<ActionResponse<List<SubjectThemeDto>>> RemoveThemesFromSubject(List<SubjectThemeDto> subjectThemes)
+        {
+            try
+            {
+                var response = await ActionResponse<List<SubjectThemeDto>>.ReturnSuccess(subjectThemes, "Micanje tema iz predmeta usjpešno.");
+                subjectThemes.ForEach(async st =>
+                {
+                    if ((await RemoveThemeFromSubject(st)).IsNotSuccess(out ActionResponse<SubjectThemeDto> insertResponse, out st))
+                    {
+                        response = await ActionResponse<List<SubjectThemeDto>>.ReturnError(insertResponse.Message);
+                        return;
+                    }
+                });
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<SubjectThemeDto>>.ReturnError("Greška prilikom dodavanja tema predmetu.");
+            }
+        }
+
+        public async Task<ActionResponse<SubjectThemeDto>> RemoveThemeFromSubject(SubjectThemeDto subjectTheme)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<SubjectTheme>().Delete(subjectTheme.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<SubjectThemeDto>.ReturnSuccess(null, "Brisanje uspješno.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<SubjectThemeDto>.ReturnError("Greška prilikom brisanja teme iz predmeta.");
             }
         }
     }
