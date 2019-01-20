@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190120100339_Add_Table_Diary")]
+    partial class Add_Table_Diary
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,11 +182,6 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<DateTime?>("CloseDate");
 
-                    b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime?>("DateModified");
-
                     b.Property<int?>("EducationGroupId");
 
                     b.Property<Guid?>("EducationLeaderId");
@@ -202,8 +199,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<string>("PerformingWay");
 
                     b.Property<string>("SchoolYear");
-
-                    b.Property<int>("Status");
 
                     b.Property<int?>("TeachingPlaceId");
 
