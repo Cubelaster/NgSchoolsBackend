@@ -27,6 +27,6 @@ namespace NgSchoolsDataLayer.Models
         public virtual ClassType ClassType { get; set; }
         public int? TeachingPlaceId { get; set; }
         public virtual ClassLocations TeachingPlace { get; set; }
-        public virtual ICollection<StudentGroup> StudentGroups { get; set; }
+        public virtual ICollection<DiaryStudentGroup> StudentGroups { get; set; }
     }
 }

@@ -32,6 +32,7 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<UploadedFile> UploadedFiles { get; set; }
         public DbSet<StudentFiles> StudentFiles { get; set; }
         public DbSet<Diary> Diaries { get; set; }
+        public DbSet<DiaryStudentGroup> DiaryStudentGroups { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
