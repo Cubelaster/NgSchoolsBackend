@@ -125,7 +125,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var existingGroups = mapper.Map<List<DiaryStudentGroup>, List<DiaryStudentGroupDto>>(
                     unitOfWork.GetGenericRepository<DiaryStudentGroup>().GetAll(s => s.DiaryId == entityDto.Id));
 
-                List<DiaryStudentGroupDto> groupsToAdd = entityDto.StudentGroupIds
+                entityDto.StudentGroupIds = entityDto.StudentGroupIds ?? new List<int>();
+
+                var groupsToAdd = entityDto.StudentGroupIds
                     .Where(nsg => !existingGroups.Select(eg => eg.StudentGroupId).Contains(nsg))
                     .Select(dsg => new DiaryStudentGroupDto
                     {
@@ -160,7 +162,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var response = await ActionResponse<List<DiaryStudentGroupDto>>.ReturnSuccess(studentGroupDtos, "Unos predmeta uspješan.");
+                var response = await ActionResponse<List<DiaryStudentGroupDto>>.ReturnSuccess(studentGroupDtos, "Pridruživanje grupa studenata uspješan.");
                 studentGroupDtos.ForEach(async s =>
                 {
                     if ((await InsertDiaryStudentGroup(s)).IsNotSuccess(out ActionResponse<DiaryStudentGroupDto> insertResponse, out s))
@@ -175,7 +177,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<DiaryStudentGroupDto>>.ReturnError("Greška prilikom upisa studenta.");
+                return await ActionResponse<List<DiaryStudentGroupDto>>.ReturnError("Greška prilikom pridruživanja grupa studenata.");
             }
         }
 
@@ -225,13 +227,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entityToAdd = mapper.Map<DiaryStudentGroupDto, DiaryStudentGroup>(entityDto);
-                unitOfWork.GetGenericRepository<DiaryStudentGroup>().Add(entityToAdd);
+                unitOfWork.GetGenericRepository<DiaryStudentGroup>().Delete(entityDto.Id.Value);
                 unitOfWork.Save();
-                mapper.Map(entityToAdd, entityDto);
 
-                return await ActionResponse<DiaryStudentGroupDto>
-                    .ReturnSuccess(mapper.Map(entityToAdd, entityDto));
+                return await ActionResponse<DiaryStudentGroupDto>.ReturnSuccess(null, "Brisanje grupe studenata iz dnevnika rada uspješno.");
             }
             catch (Exception ex)
             {

@@ -452,3 +452,36 @@
     }
 }
 
+// Diary/Insert
+{
+	"Name": "Diary Insert Test",
+	"EducationalGroupMark": "Kita",
+	"SchoolYear": "SchoolYear",
+	"EducationalPeriod": "2019-01-22",
+	"Class": "Class",
+	"EducationProgramType": "EducationProgramType",
+	"PerformingWay": "PerformingWay",
+	"OpenDate": "2019-01-22",
+	"CloseDate": "2019-01-22",
+	"EducationGroupId": 3,
+	"EducationLeaderId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
+	"ClassOfficerId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
+	"ClassTypeId": 2,
+	"TeachingPlaceId": 1002,
+	"StudentGroupIds": [1006]
+}
+
+// Diary/GetAll
+
+// Diary/GetById
+{
+	"Id": 11
+}
+
+// Diary/GetAllPaged
+
+{
+	"PageSize": 1,
+	"PageIndex": 0,
+	"SearchQuery": ""
+}

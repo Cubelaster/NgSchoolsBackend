@@ -4,9 +4,9 @@ using NgSchoolsDataLayer.Models;
 
 namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 {
-    public class EducationGroupMApper : Profile
+    public class EducationGroupMapper : Profile
     {
-        public EducationGroupMApper()
+        public EducationGroupMapper()
         {
             CreateMap<EducationGroups, EducationGroupDto>();
 
