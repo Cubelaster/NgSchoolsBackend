@@ -27,5 +27,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int? TeachingPlaceId { get; set; }
         public ClassLocationsDto TeachingPlace { get; set; }
         public List<StudentGroupDto> StudentGroups { get; set; }
+        public List<int> StudentGroupIds { get; set; }
     }
 }

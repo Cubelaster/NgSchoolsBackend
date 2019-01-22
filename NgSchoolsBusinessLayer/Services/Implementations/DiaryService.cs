@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Services.Contracts;
@@ -6,6 +7,7 @@ using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
@@ -37,10 +39,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 mapper.Map(entityToAdd, entityDto);
 
-                //if ((await ModifySubjectThemes(entityDto)).IsNotSuccess(out ActionResponse<SubjectDto> response, out SubjectDto subjectDto))
-                //{
-                //    return response;
-                //}
+                if ((await ModifyStudentGroupsForDiary(entityDto)).IsNotSuccess(out ActionResponse<DiaryDto> response, out entityDto))
+                {
+                    return response;
+                }
 
                 return await ActionResponse<DiaryDto>
                     .ReturnSuccess(mapper.Map(entityToAdd, entityDto));
@@ -52,114 +54,85 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        //public async Task<ActionResponse<List<DiaryDto>>> ModifySubjectsForEducationProgram(List<SubjectDto> subjects)
-        //{
-        //    try
-        //    {
-        //        var response = await ActionResponse<List<SubjectDto>>.ReturnSuccess(subjects, "Predmeti uspješno ažurirani.");
+        public async Task<ActionResponse<DiaryDto>> ModifyStudentGroupsForDiary(DiaryDto entityDto)
+        {
+            try
+            {
+                var existingGroups = mapper.Map<List<DiaryStudentGroup>, List<DiaryStudentGroupDto>>(
+                    unitOfWork.GetGenericRepository<DiaryStudentGroup>().GetAll(s => s.DiaryId == entityDto.Id));
 
-        //        var existingSubjects = mapper.Map<List<SubjectDto>>(unitOfWork.GetGenericRepository<Subject>()
-        //            .GetAll(s => s.EducationProgramId ==
-        //                    subjects.Select(su => su.EducationProgramId.Value).FirstOrDefault()
-        //            ));
+                List<DiaryStudentGroupDto> groupsToAdd = entityDto.StudentGroupIds
+                    .Where(nsg => !existingGroups.Select(eg => eg.StudentGroupId).Contains(nsg))
+                    .Select(dsg => new DiaryStudentGroupDto
+                    {
+                        DiaryId = entityDto.Id,
+                        StudentGroupId = dsg
+                    })
+                    .ToList();
+                var groupsToRemove = existingGroups
+                    .Where(es => !entityDto.StudentGroupIds.Contains(es.StudentGroupId.Value))
+                    .ToList();
 
-        //        var subjectsToUpdate = subjects.Where(s => existingSubjects.Select(ss => ss.Id).Contains(s.Id)).ToList();
-        //        var subjectsToInsert = subjects.Where(s => !existingSubjects.Select(ss => ss.Id).Contains(s.Id)).ToList();
-        //        var subjectsToDelete = existingSubjects.Where(es => !subjects.Select(ss => ss.Id).Contains(es.Id)).ToList();
+                if ((await AddStudentGroups(groupsToAdd)).IsNotSuccess<List<DiaryStudentGroupDto>>(out ActionResponse<List<DiaryStudentGroupDto>> addResponse, out groupsToAdd))
+                {
+                    return await ActionResponse<DiaryDto>.ReturnError(addResponse.Message);
+                }
 
-        //        if ((await InsertSubjects(subjectsToInsert)).IsNotSuccess(out response, out subjects))
-        //        {
-        //            return response;
-        //        }
+                //if ((await DeleteSubjects(subjectsToDelete)).IsNotSuccess(out response, out subjects))
+                //{
+                //    return response;
+                //}
 
-        //        if ((await UpdateSubjects(subjectsToUpdate)).IsNotSuccess(out response, out subjects))
-        //        {
-        //            return response;
-        //        }
+                return await ActionResponse<DiaryDto>.ReturnSuccess(entityDto, "Dnevnik rada uspješno unesen.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<DiaryDto>.ReturnError("Greška prilikom ažuriranja grupa studenata u dnevniku rada.");
+            }
+        }
 
-        //        if ((await DeleteSubjects(subjectsToDelete)).IsNotSuccess(out response, out subjects))
-        //        {
-        //            return response;
-        //        }
+        public async Task<ActionResponse<List<DiaryStudentGroupDto>>> AddStudentGroups(List<DiaryStudentGroupDto> studentGroupDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<DiaryStudentGroupDto>>.ReturnSuccess(studentGroupDtos, "Unos predmeta uspješan.");
+                studentGroupDtos.ForEach(async s =>
+                {
+                    if ((await InsertDiaryStudentGroup(s)).IsNotSuccess(out ActionResponse<DiaryStudentGroupDto> insertResponse, out s))
+                    {
+                        response = await ActionResponse<List<DiaryStudentGroupDto>>.ReturnError(insertResponse.Message);
+                        return;
+                    }
+                });
 
-        //        return response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        loggerService.LogErrorToEventLog(ex, subjects);
-        //        return await ActionResponse<List<SubjectDto>>.ReturnError("Greška prilikom upisa studenata.");
-        //    }
-        //}
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<DiaryStudentGroupDto>>.ReturnError("Greška prilikom upisa studenta.");
+            }
+        }
 
-        //    public async Task<ActionResponse<List<SubjectDto>>> InsertSubjects(List<SubjectDto> subjects)
-        //    {
-        //        try
-        //        {
-        //            var response = await ActionResponse<List<SubjectDto>>.ReturnSuccess(subjects, "Unos predmeta uspješan.");
-        //            subjects.ForEach(async s =>
-        //            {
-        //                if ((await Insert(s)).IsNotSuccess(out ActionResponse<SubjectDto> insertResponse, out s))
-        //                {
-        //                    response = await ActionResponse<List<SubjectDto>>.ReturnError(insertResponse.Message);
-        //                    return;
-        //                }
-        //            });
+        public async Task<ActionResponse<DiaryStudentGroupDto>> InsertDiaryStudentGroup(DiaryStudentGroupDto entityDto)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<DiaryStudentGroupDto, DiaryStudentGroup>(entityDto);
+                unitOfWork.GetGenericRepository<DiaryStudentGroup>().Add(entityToAdd);
+                unitOfWork.Save();
+                mapper.Map(entityToAdd, entityDto);
 
-        //            return response;
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            loggerService.LogErrorToEventLog(ex);
-        //            return await ActionResponse<List<SubjectDto>>.ReturnError("Greška prilikom upisa studenta.");
-        //        }
-        //    }
-
-        //    public async Task<ActionResponse<SubjectDto>> Update(SubjectDto entityDto)
-        //    {
-        //        try
-        //        {
-        //            var entityToUpdate = unitOfWork.GetGenericRepository<Subject>().FindSingle(entityDto.Id.Value);
-        //            mapper.Map(entityDto, entityToUpdate);
-        //            unitOfWork.GetGenericRepository<Subject>().Update(entityToUpdate);
-        //            unitOfWork.Save();
-
-        //            if ((await ModifySubjectThemes(entityDto)).IsNotSuccess(out ActionResponse<SubjectDto> response, out SubjectDto subjectDto))
-        //            {
-        //                return response;
-        //            }
-
-        //            return await ActionResponse<SubjectDto>.ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            loggerService.LogErrorToEventLog(ex);
-        //            return await ActionResponse<SubjectDto>.ReturnError($"Greška prilikom ažuriranja predmeta: {entityDto.Name}.");
-        //        }
-        //    }
-
-        //    public async Task<ActionResponse<List<SubjectDto>>> UpdateSubjects(List<SubjectDto> subjects)
-        //    {
-        //        try
-        //        {
-        //            var response = ActionResponse<List<SubjectDto>>.ReturnSuccess(subjects, "Ažuriranje predmeta uspješno.");
-
-        //            subjects.ForEach(async s =>
-        //            {
-        //                if ((await Update(s)).IsNotSuccess(out ActionResponse<SubjectDto> updateResponse, out s))
-        //                {
-        //                    response = ActionResponse<List<SubjectDto>>.ReturnError(updateResponse.Message);
-        //                    return;
-        //                }
-        //            });
-
-        //            return await response;
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            loggerService.LogErrorToEventLog(ex);
-        //            return await ActionResponse<List<SubjectDto>>.ReturnError($"Greška prilikom ažuriranja predmeta.");
-        //        }
-        //    }
+                return await ActionResponse<DiaryStudentGroupDto>
+                    .ReturnSuccess(mapper.Map(entityToAdd, entityDto));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<DiaryStudentGroupDto>.ReturnError("Greška prilikom unošenja grupe studenata za dnevnik rada.");
+            }
+        }
 
         //    public async Task<ActionResponse<SubjectDto>> Delete(int id)
         //    {
