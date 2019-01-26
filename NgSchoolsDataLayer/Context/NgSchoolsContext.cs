@@ -24,7 +24,7 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<StudentGroup> StudentGroups { get; set; }
         public DbSet<Theme> Themes { get; set; }
         public DbSet<Subject> Subjects { get; set; }
-        public DbSet<SubjectTheme> SubjectThemes { get; set; }
+        //public DbSet<SubjectTheme> SubjectThemes { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<PlanDay> PlanDays { get; set; }
         public DbSet<PlanDaySubject> PlanDaySubjects { get; set; }

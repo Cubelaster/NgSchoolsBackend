@@ -12,7 +12,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string ProgramDurationTextual { get; set; }
         public double? ProgramDurationDays { get; set; }
         public string FinishedSchool { get; set; }
-        public DateTime? ProgramDate { get; set; }
+        public string ProgramDate { get; set; }
         public double? TheoreticalClassesDuration { get; set; }
         public double? PracticalClassesDuration { get; set; }
         public string ApprovalClass { get; set; }

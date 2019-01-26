@@ -1,5 +1,4 @@
 ﻿using NgSchoolsDataLayer.Models.BaseTypes;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
@@ -13,6 +12,7 @@ namespace NgSchoolsDataLayer.Models
         public string Content { get; set; }
         public string LearningOutcomes { get; set; }
 
-        public virtual ICollection<SubjectTheme> ThemeSubjects { get; set; }
+        public int SubjectId { get; set; }
+        public virtual Subject Subject { get; set; }
     }
 }

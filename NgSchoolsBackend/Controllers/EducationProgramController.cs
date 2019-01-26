@@ -42,13 +42,13 @@ namespace NgSchoolsWebApi.Controllers
         [HttpPost]
         public async Task<ActionResponse<EducationProgramDto>> Insert([FromBody]EducationProgramDto request)
         {
-            return await educationProgramService.InsertCompleteProgram(request);
+            return await educationProgramService.Insert(request);
         }
 
         [HttpPost]
         public async Task<ActionResponse<EducationProgramDto>> Update([FromBody]EducationProgramDto request)
         {
-            return await educationProgramService.UpdateCompleteProgram(request);
+            return await educationProgramService.Update(request);
         }
 
         [HttpPost]

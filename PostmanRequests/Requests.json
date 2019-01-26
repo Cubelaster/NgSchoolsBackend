@@ -29,222 +29,6 @@
 // EducationProgram/Insert
 
 {
-    "Data": {
-        "Id": 4051,
-        "Name": "Program 1",
-        "ShorthandName": "PR1",
-        "ProgramDuration": 120,
-        "ProgramDurationTextual": "stodvadeset",
-        "ProgramDurationDays": 3,
-        "FinishedSchool": "Zavrsena skola",
-        "ProgramDate": "2019-01-10T00:31:00Z",
-        "TheoreticalClassesDuration": 12,
-        "PracticalClassesDuration": 12,
-        "ApprovalClass": "KL-001/08-22",
-        "UrNumber": "UR-001-01-01",
-        "ComplexityLevel": "<p>Razina složenosti</p>\n<p>&nbsp;</p>",
-        "ProgramJustifiability": "<p>Razina složenosti</p>\n<p>&nbsp;</p>",
-        "EnrollmentConditions": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
-        "WorkingEnvironment": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
-        "ProgramCompetencies": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
-        "PerformingWay": "<p>Način izvođenja</p>\n<p>&nbsp;</p>",
-        "KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>",
-        "Subjects": [
-            {
-                "Id": 2084,
-                "Name": "NP1",
-                "SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
-                "WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
-                "MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
-                "StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
-                "Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
-                "EducationProgramId": 4051,
-                "Themes": [
-                    {
-                        "Id": 2097,
-                        "Name": "T1",
-                        "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                        "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                    },
-                    {
-                        "Id": 2098,
-                        "Name": "T2",
-                        "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                        "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                    }
-                ]
-            },
-            {
-                "Id": 2085,
-                "Name": "NP2",
-                "SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
-                "WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
-                "MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
-                "StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
-                "Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
-                "EducationProgramId": 4051,
-                "Themes": [
-                    {
-                        "Id": 2097,
-                        "Name": "T1",
-                        "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                        "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                    },
-                    {
-                        "Id": 2098,
-                        "Name": "T2",
-                        "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                        "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                    }
-                ]
-            }
-        ],
-        "Plan": {
-            "Id": 48,
-            "Name": null,
-            "EducationPogramId": 4051,
-            "PlanDays": [
-                {
-                    "Id": 2019,
-                    "Name": null,
-                    "PlanId": 48,
-                    "PlanDaySubjectIds": [
-                        2084,
-                        2085
-                    ],
-                    "PlanDayThemeIds": [
-                        2097,
-                        2098
-                    ],
-                    "PlanDaySubjects": [
-                        {
-                            "Id": 11,
-                            "PlanDayId": 2019,
-                            "SubjectId": 2084,
-                            "Subject": {
-                                "Id": 2084,
-                                "Name": "NP1",
-                                "SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
-                                "WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
-                                "MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
-                                "StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
-                                "Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
-                                "EducationProgramId": 4051,
-                                "Themes": null
-                            }
-                        },
-                        {
-                            "Id": 12,
-                            "PlanDayId": 2019,
-                            "SubjectId": 2085,
-                            "Subject": {
-                                "Id": 2085,
-                                "Name": "NP2",
-                                "SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
-                                "WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
-                                "MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
-                                "StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
-                                "Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
-                                "EducationProgramId": 4051,
-                                "Themes": null
-                            }
-                        }
-                    ],
-                    "PlanDayThemes": [
-                        {
-                            "Id": 6,
-                            "PlanDayId": 2019,
-                            "ThemeId": 2097,
-                            "Theme": {
-                                "Id": 2097,
-                                "Name": "T1",
-                                "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                                "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                            },
-                            "HoursNumber": 2
-                        },
-                        {
-                            "Id": 7,
-                            "PlanDayId": 2019,
-                            "ThemeId": 2098,
-                            "Theme": {
-                                "Id": 2098,
-                                "Name": "T2",
-                                "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                                "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                            },
-                            "HoursNumber": 2
-                        }
-                    ]
-                },
-                {
-                    "Id": 2020,
-                    "Name": null,
-                    "PlanId": 48,
-                    "PlanDaySubjectIds": [
-                        2084
-                    ],
-                    "PlanDayThemeIds": [
-                        2097,
-                        2098
-                    ],
-                    "PlanDaySubjects": [
-                        {
-                            "Id": 13,
-                            "PlanDayId": 2020,
-                            "SubjectId": 2084,
-                            "Subject": {
-                                "Id": 2084,
-                                "Name": "NP1",
-                                "SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
-                                "WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
-                                "MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
-                                "StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
-                                "Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
-                                "EducationProgramId": 4051,
-                                "Themes": null
-                            }
-                        }
-                    ],
-                    "PlanDayThemes": [
-                        {
-                            "Id": 8,
-                            "PlanDayId": 2020,
-                            "ThemeId": 2097,
-                            "Theme": {
-                                "Id": 2097,
-                                "Name": "T1",
-                                "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                                "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                            },
-                            "HoursNumber": 2
-                        },
-                        {
-                            "Id": 9,
-                            "PlanDayId": 2020,
-                            "ThemeId": 2098,
-                            "Theme": {
-                                "Id": 2098,
-                                "Name": "T2",
-                                "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                                "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                            },
-                            "HoursNumber": 2
-                        }
-                    ]
-                }
-            ],
-            "PlanDaysId": []
-        }
-    },
-    "Message": null,
-    "ActionResponseType": 0
-}
-
-// EducationProgram/Update
-
-{
-    "Id": 5041,
     "Name": "Program 1",
     "ShorthandName": "PR1",
     "ProgramDuration": 120,
@@ -262,194 +46,75 @@
     "WorkingEnvironment": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
     "ProgramCompetencies": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
     "PerformingWay": "<p>Način izvođenja</p>\n<p>&nbsp;</p>",
-    "KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>",
-    "Subjects": [
-        {
-            "Id": 3058,
-            "Name": "NP1",
-            "SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
-            "WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
-            "MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
-            "StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
-            "Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
-            "EducationProgramId": 5041,
-            "Themes": [
-                {
-                    "Id": 3077,
-                    "Name": "T1",
-                    "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                    "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                },
-                {
-                    "Id": 3078,
-                    "Name": "T2",
-                    "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                    "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                }
-            ]
-        },
-        {
-            "Id": 3059,
-            "Name": "NP2",
-            "SubjectCompetence": "<p>Kompetencije predmeta</p>\n<p>&nbsp;</p>",
-            "WorkMethods": "<p>Metode rada</p>\n<p>&nbsp;</p>",
-            "MaterialConditions": "<p>Materijalni uvjeti</p>\n<p>&nbsp;</p>",
-            "StaffingConditions": "<p>Kadrovski ovjeti</p>\n<p>&nbsp;</p>",
-            "Literature": "<p>Literatura</p>\n<p>&nbsp;</p>",
-            "EducationProgramId": 5041,
-            "Themes": [
-                {
-                    "Id": 3077,
-                    "Name": "T1",
-                    "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                    "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                },
-                {
-                    "Id": 3078,
-                    "Name": "T2",
-                    "Content": "<p>Sadržaj teme</p>\n<p>&nbsp;</p>",
-                    "LearningOutcomes": "<p>Ishodi učenja</p>\n<p>&nbsp;</p>"
-                }
-            ]
-        }
-    ],
-    "Plan": {
-        "Id": 1031,
-        "Name": null,
-        "EducationPogramId": 5041,
-        "PlanDays": [
-            {
-                "Id": 3024,
-                "Name": null,
-                "PlanId": 1031,
-                "PlanDaySubjectIds": [
-                    3058,
-                    3059
-                ],
-                "PlanDayThemeIds": [
-                    3077,
-                    3078
-                ],
-                "PlanDaySubjects": [
-                    {
-                        "Id": null,
-                        "PlanDayId": null,
-                        "SubjectId": 3058,
-                        "Subject": {
-                            "Id": null,
-                            "Name": "NP1",
-                            "SubjectCompetence": null,
-                            "WorkMethods": null,
-                            "MaterialConditions": null,
-                            "StaffingConditions": null,
-                            "Literature": null,
-                            "EducationProgramId": null,
-                            "Themes": null
-                        }
-                    },
-                    {
-                        "Id": null,
-                        "PlanDayId": null,
-                        "SubjectId": 3059,
-                        "Subject": {
-                            "Id": null,
-                            "Name": "NP2",
-                            "SubjectCompetence": null,
-                            "WorkMethods": null,
-                            "MaterialConditions": null,
-                            "StaffingConditions": null,
-                            "Literature": null,
-                            "EducationProgramId": null,
-                            "Themes": null
-                        }
-                    }
-                ],
-                "PlanDayThemes": [
-                    {
-                        "Id": null,
-                        "PlanDayId": null,
-                        "ThemeId": 3077,
-                        "Theme": {
-                            "Id": null,
-                            "Name": "T1",
-                            "Content": null,
-                            "LearningOutcomes": null
-                        },
-                        "HoursNumber": 2
-                    },
-                    {
-                        "Id": null,
-                        "PlanDayId": null,
-                        "ThemeId": 3078,
-                        "Theme": {
-                            "Id": null,
-                            "Name": "T2",
-                            "Content": null,
-                            "LearningOutcomes": null
-                        },
-                        "HoursNumber": 2
-                    }
-                ]
-            },
-            {
-                "Id": 3025,
-                "Name": null,
-                "PlanId": 1031,
-                "PlanDaySubjectIds": [
-                    3058
-                ],
-                "PlanDayThemeIds": [
-                    3077,
-                    3078
-                ],
-                "PlanDaySubjects": [
-                    {
-                        "Id": null,
-                        "PlanDayId": null,
-                        "SubjectId": 3058,
-                        "Subject": {
-                            "Id": null,
-                            "Name": "NP1",
-                            "SubjectCompetence": null,
-                            "WorkMethods": null,
-                            "MaterialConditions": null,
-                            "StaffingConditions": null,
-                            "Literature": null,
-                            "EducationProgramId": null,
-                            "Themes": null
-                        }
-                    }
-                ],
-                "PlanDayThemes": [
-                    {
-                        "Id": null,
-                        "PlanDayId": null,
-                        "ThemeId": 3077,
-                        "Theme": {
-                            "Id": null,
-                            "Name": "T1",
-                            "Content": null,
-                            "LearningOutcomes": null
-                        },
-                        "HoursNumber": 2
-                    },
-                    {
-                        "Id": null,
-                        "PlanDayId": null,
-                        "ThemeId": 3078,
-                        "Theme": {
-                            "Id": null,
-                            "Name": "T2",
-                            "Content": null,
-                            "LearningOutcomes": null
-                        },
-                        "HoursNumber": 2
-                    }
-                ]
-            }
-        ],
-        "PlanDaysId": []
-    }
+    "KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>"
+}
+
+// EducationProgram/Update
+
+{
+	"Id": 6023,
+    "Name": "Program 1",
+    "ShorthandName": "PR2",
+    "ProgramDuration": 120,
+    "ProgramDurationTextual": "stodvadeset",
+    "ProgramDurationDays": 3,
+    "FinishedSchool": "Zavrsena skola",
+    "ProgramDate": "2019-01-10T00:31:00Z",
+    "TheoreticalClassesDuration": 12,
+    "PracticalClassesDuration": 12,
+    "ApprovalClass": "KL-001/08-22",
+    "UrNumber": "UR-001-01-01",
+    "ComplexityLevel": "<p>Razina složenosti</p>\n<p>&nbsp;</p>",
+    "ProgramJustifiability": "<p>Razina složenosti</p>\n<p>&nbsp;</p>",
+    "EnrollmentConditions": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
+    "WorkingEnvironment": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
+    "ProgramCompetencies": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
+    "PerformingWay": "<p>Način izvođenja</p>\n<p>&nbsp;</p>",
+    "KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>"
+}
+
+// Subject/Insert
+
+{
+	"EducationProgramId": 6023,
+    "Name": "Program 1",
+    "SubjectCompetence": "PR2",
+    "WorkMethods": 120,
+    "MaterialConditions": "stodvadeset",
+    "StaffingConditions": "bla",
+    "Literature": "Zavrsena skola"
+}
+
+// Subject/Update
+
+{
+	"Id": 4028,
+	"EducationProgramId": 6023,
+    "Name": "Program 2",
+    "SubjectCompetence": "PR2",
+    "WorkMethods": 120,
+    "MaterialConditions": "stodvadeset",
+    "StaffingConditions": "bla",
+    "Literature": "Zavrsena skola"
+}
+
+// Theme/Insert
+
+{
+	"SubjectId": 4028,
+    "Name": "Program 2",
+    "Content": "PR2",
+    "LearningOutcomes": "120"
+}
+
+// Theme/Update
+
+{
+	"Id": 4041,
+	"SubjectId": 4028,
+    "Name": "Tema 2",
+    "Content": "PR2",
+    "LearningOutcomes": "120"
 }
 
 // Diary/Insert

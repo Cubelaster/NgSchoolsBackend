@@ -14,8 +14,13 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<PagedResult<EducationProgramDto>>> GetAllPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<EducationProgramDto>> GetById(int id);
         Task<ActionResponse<EducationProgramDto>> Insert(EducationProgramDto entityDto);
-        Task<ActionResponse<EducationProgramDto>> InsertCompleteProgram(EducationProgramDto entityDto);
         Task<ActionResponse<EducationProgramDto>> Update(EducationProgramDto entityDto);
-        Task<ActionResponse<EducationProgramDto>> UpdateCompleteProgram(EducationProgramDto entityDto);
+
+        //#region Unused
+
+        //Task<ActionResponse<EducationProgramDto>> InsertCompleteProgram(EducationProgramDto entityDto);
+        //Task<ActionResponse<EducationProgramDto>> UpdateCompleteProgram(EducationProgramDto entityDto);
+
+        //#endregion Unused
     }
 }
