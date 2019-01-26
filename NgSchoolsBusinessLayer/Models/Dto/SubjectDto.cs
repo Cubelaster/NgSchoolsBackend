@@ -11,6 +11,11 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string MaterialConditions { get; set; }
         public string StaffingConditions { get; set; }
         public string Literature { get; set; }
+        public int? CollectiveConsultations { get; set; }
+        public int? IndividualConsultations { get; set; }
+        public int? InstConsultations { get; set; }
+        public int? PracticalClasses { get; set; }
+        public int? TheoreticalClasses { get; set; }
 
         public int? EducationProgramId { get; set; }
         public List<ThemeDto> Themes { get; set; }
