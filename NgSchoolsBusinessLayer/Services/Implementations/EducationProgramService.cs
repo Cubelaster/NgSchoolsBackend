@@ -45,7 +45,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .FindBy(c => c.Id == id);
+                    .FindBy(c => c.Id == id, includeProperties: "Subjects.Themes");
                 return await ActionResponse<EducationProgramDto>
                     .ReturnSuccess(mapper.Map<EducationProgram, EducationProgramDto>(entity));
             }
@@ -61,7 +61,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .GetAll();
+                    .GetAll(includeProperties: "Subjects.Themes");
                 return await ActionResponse<List<EducationProgramDto>>
                     .ReturnSuccess(mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(entities));
             }
@@ -77,7 +77,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<EducationProgram>()
-                    .GetAllAsQueryable().GetPaged(pagedRequest);
+                    .GetAllAsQueryable(includeProperties: "Subjects.Themes").GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<EducationProgramDto>
                 {
