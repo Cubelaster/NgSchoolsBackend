@@ -135,8 +135,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var planEntity = unitOfWork.GetGenericRepository<Plan>().FindBy(p => p.EducationPogramId == id);
-                unitOfWork.GetGenericRepository<Plan>().Delete(planEntity.Id);
+                var planEntity = unitOfWork.GetGenericRepository<EducationProgram>().FindBy(p => p.Id == id);
                 unitOfWork.GetGenericRepository<EducationProgram>().Delete(id);
                 unitOfWork.Save();
                 return await ActionResponse<EducationProgramDto>.ReturnSuccess(null, "Brisanje programa i povezanog plana uspješno.");
