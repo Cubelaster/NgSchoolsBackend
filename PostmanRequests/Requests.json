@@ -153,7 +153,7 @@
 
 // Plan/Insert
 
-{
+{ // Ovdje su reference po SubjectId i ThemeId, a isto je i kod update
     "Name": "Nis",
     "EducationProgramId": 7023,
     "PlanDays": [
@@ -175,3 +175,44 @@
 }
 
 // Plan/Update
+
+{
+	"Id": 2051,
+	"Name": "Nis",
+	"EducationProgramId": 7023,
+	"PlanDays": [
+		{
+			"Id": 4033,
+			"Name": "Prvi",
+			"PlanId": 2051,
+			"PlanDaySubjectIds": [ // Ne treba
+				2014
+			],
+			"SubjectIds": null, // Ne treba
+			"PlanDaySubjects": [
+				{
+					"Id": 2014,
+					"PlanDayId": 4033,
+					"SubjectId": 4028, // Treba
+					"Subject": null,
+					"PlanDaySubjectThemeIds": [ // Ne treba
+						11
+					],
+					"ThemeIds": null, // Ne treba
+					"PlanDaySubjectThemes": [
+						{
+							"Id": 11,
+							"PlanDaySubjectId": 2014,
+							"ThemeId": 4041, // Treba
+							"Theme": null,
+							"HoursNumber": 3
+						}
+					]
+				}
+			]
+		}
+	],
+	"PlanDaysId": [ // Ne treba
+		4033
+	]
+}
