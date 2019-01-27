@@ -9,11 +9,6 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         public ThemeMapper()
         {
             CreateMap<Theme, ThemeDto>().ReverseMap();
-
-            CreateMap<PlanDayTheme, PlanDayThemeDto>()
-                .ForMember(dest => dest.Theme, opt => opt.MapFrom(src => src.Theme));
-
-            CreateMap<PlanDayThemeDto, PlanDayTheme>();
         }
     }
 }

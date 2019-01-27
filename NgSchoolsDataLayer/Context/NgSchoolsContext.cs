@@ -24,11 +24,10 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<StudentGroup> StudentGroups { get; set; }
         public DbSet<Theme> Themes { get; set; }
         public DbSet<Subject> Subjects { get; set; }
-        //public DbSet<SubjectTheme> SubjectThemes { get; set; }
         public DbSet<Plan> Plans { get; set; }
         public DbSet<PlanDay> PlanDays { get; set; }
         public DbSet<PlanDaySubject> PlanDaySubjects { get; set; }
-        public DbSet<PlanDayTheme> PlanDayThemes { get; set; }
+        public DbSet<PlanDaySubjectTheme> PlanDaySubjectThemes { get; set; }
         public DbSet<UploadedFile> UploadedFiles { get; set; }
         public DbSet<StudentFiles> StudentFiles { get; set; }
         public DbSet<Diary> Diaries { get; set; }
@@ -62,6 +61,38 @@ namespace NgSchoolsDataLayer.Context
                 .WithOne(ud => ud.User)
                 .HasForeignKey<UserDetails>(ud => ud.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Plan>()
+                .HasMany(p => p.PlanDays)
+                .WithOne(pd => pd.Plan);
+
+            builder.Entity<PlanDay>()
+                .HasMany(pd => pd.Subjects)
+                .WithOne(pds => pds.PlanDay);
+
+            builder.Entity<PlanDaySubject>()
+                .HasOne(pds => pds.PlanDay)
+                .WithMany(pd => pd.Subjects);
+
+            builder.Entity<PlanDaySubject>()
+                .HasOne(pds => pds.Subject)
+                .WithMany(s => s.PlanDaySubjects)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Subject>()
+                .HasMany(s => s.PlanDaySubjects)
+                .WithOne(pds => pds.Subject)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PlanDaySubject>()
+                .HasMany(pds => pds.PlanDaySubjectThemes)
+                .WithOne(pdst => pdst.PlanDaySubject)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Theme>()
+                .HasMany(t => t.PlanDaySubjectThemes)
+                .WithOne(pdst => pdst.Theme)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

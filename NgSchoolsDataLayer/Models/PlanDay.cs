@@ -10,6 +10,5 @@ namespace NgSchoolsDataLayer.Models
         public Plan Plan { get; set; }
 
         public virtual ICollection<PlanDaySubject> Subjects { get; set; }
-        public virtual ICollection<PlanDayTheme> Themes { get; set; }
     }
 }

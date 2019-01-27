@@ -17,6 +17,16 @@
     <Compile Remove="Migrations\20190112133312_Modify_EducationProgram_Connect_Plan.cs" />
     <Compile Remove="Migrations\20190112141841_Modify_PlanDay_Add_Themes.cs" />
     <Compile Remove="Migrations\20190122153137_Add_Table_DiaryStudentGroups.cs" />
+    <Compile Remove="Migrations\20190127080541_Modify_PlanDays_Subject_and_Themes_Change_Relation.cs" />
+    <Compile Remove="Migrations\20190127080726_Modify_PlanDays_Subject_and_Themes_Change_Relation.cs" />
+    <Compile Remove="Migrations\20190127081045_Modify_PlanDays_Subject_and_Themes_Change_Relation.cs" />
+    <Compile Remove="Migrations\20190127081539_Modify_PlanDays_Subject_and_Themes_Change_Relation.cs" />
+    <Compile Remove="Migrations\20190127081722_Modify_PlanDays_Subject_and_Themes_Change_Relation.cs" />
+    <Compile Remove="Migrations\20190127082052_Modify_PlanDays_Subject_and_Themes_Change_Relation.cs" />
+    <Compile Remove="Migrations\20190127083056_Modify_PlanDays_Subject_and_Themes_Change_Relation.cs" />
+    <Compile Remove="Migrations\20190127083318_Modify_PlanDays_Subject_and_Themes_Change_Relation.cs" />
+    <Compile Remove="Migrations\20190127090913_PlanDay_Modify_Subject_Theme_Relation.cs" />
+    <Compile Remove="Migrations\20190127091820_PlanDay_Modify_Subject_Theme_Relation.cs" />
   </ItemGroup>
 
   <ItemGroup>
