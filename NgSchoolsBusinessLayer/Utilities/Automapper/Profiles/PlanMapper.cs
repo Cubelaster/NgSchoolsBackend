@@ -14,7 +14,11 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<PlanDto, Plan>();
 
-            CreateMap<PlanDay, PlanDayDto>().ReverseMap();
+            CreateMap<PlanDay, PlanDayDto>()
+                .ForMember(dest => dest.PlanDaySubjectIds, opt => opt.MapFrom(src => src.Subjects.Select(pds => pds.Id)))
+                .ForMember(dest => dest.PlanDaySubjects, opt => opt.MapFrom(src => src.Subjects));
+
+            CreateMap<PlanDayDto, PlanDay>();
         }
     }
 }

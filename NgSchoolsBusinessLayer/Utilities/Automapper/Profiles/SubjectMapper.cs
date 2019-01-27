@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsDataLayer.Models;
+using System.Linq;
 
 namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 {
@@ -10,9 +11,11 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         {
             CreateMap<Subject, SubjectDto>().ReverseMap();
 
-            CreateMap<PlanDaySubject, PlanDaySubjectDto>().ReverseMap();
+            CreateMap<PlanDaySubjectDto, PlanDaySubject>();
 
-            //CreateMap<SubjectTheme, SubjectThemeDto>().ReverseMap();
+            CreateMap<PlanDaySubject, PlanDaySubjectDto>()
+                .ForMember(dest => dest.PlanDaySubjectThemeIds, opt => opt.MapFrom(src => src.PlanDaySubjectThemes.Select(pdst => pdst.Id)))
+                .ForMember(dest => dest.PlanDaySubjectThemes, opt => opt.MapFrom(src => src.PlanDaySubjectThemes));
         }
     }
 }

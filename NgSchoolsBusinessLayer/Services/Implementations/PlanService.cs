@@ -39,7 +39,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Plan>()
-                    .FindBy(c => c.Id == id, includeProperties: "PlanDays.Subjects.Themes");
+                    .FindBy(c => c.Id == id, includeProperties: "PlanDays.Subjects.PlanDaySubjectThemes");
                 return await ActionResponse<PlanDto>
                     .ReturnSuccess(mapper.Map<Plan, PlanDto>(entity));
             }
@@ -55,7 +55,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<Plan>()
-                    .GetAll(includeProperties: "PlanDays.Subjects.Themes");
+                    .GetAll(includeProperties: "PlanDays.Subjects.PlanDaySubjectThemes");
                 return await ActionResponse<List<PlanDto>>
                     .ReturnSuccess(mapper.Map<List<Plan>, List<PlanDto>>(entities));
             }
@@ -71,7 +71,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<Plan>()
-                    .GetAllAsQueryable(includeProperties: "PlanDays.Subjects.Themes").GetPaged(pagedRequest);
+                    .GetAllAsQueryable(includeProperties: "PlanDays.Subjects.PlanDaySubjectThemes").GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<PlanDto>
                 {
@@ -96,7 +96,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Plan>()
-                    .FindBy(c => c.EducationProgramId == educationPrograMid, includeProperties: "PlanDays.Subjects.Themes");
+                    .FindBy(c => c.EducationProgramId == educationPrograMid, includeProperties: "PlanDays.Subjects.PlanDaySubjectThemes");
                 return await ActionResponse<PlanDto>
                     .ReturnSuccess(mapper.Map<Plan, PlanDto>(entity));
             }
@@ -117,6 +117,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 List<PlanDayDto> planDays = new List<PlanDayDto>(entityDto.PlanDays);
                 entityDto.PlanDays = null;
+                entityDto.PlanDaysId = null;
 
                 var planToAdd = mapper.Map<PlanDto, Plan>(entityDto);
                 unitOfWork.GetGenericRepository<Plan>().Add(planToAdd);
@@ -135,8 +136,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     return modifyDaysResponse;
                 }
 
-                mapper.Map(planToAdd, entityDto);
-                return await ActionResponse<PlanDto>.ReturnSuccess(entityDto, "Plan uspješno upisan.");
+                if ((await GetById(planToAdd.Id)).IsNotSuccess(out ActionResponse<PlanDto> getResponse, out entityDto))
+                {
+                    return await ActionResponse<PlanDto>.ReturnError("Greška prilikom upisivanja podataka za plan.");
+                }
+
+                return await ActionResponse<PlanDto>.ReturnSuccess(entityDto, "Plan uspješno unesen.");
             }
             catch (Exception ex)
             {
@@ -149,12 +154,27 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                List<PlanDayDto> planDays = new List<PlanDayDto>(entityDto.PlanDays);
+                entityDto.PlanDays = null;
+                entityDto.PlanDaysId = null;
+
                 var entityToUpdate = mapper.Map<PlanDto, Plan>(entityDto);
                 unitOfWork.GetGenericRepository<Plan>().Update(entityToUpdate);
                 unitOfWork.Save();
 
-                return await ActionResponse<PlanDto>
-                    .ReturnSuccess(mapper.Map<Plan, PlanDto>(entityToUpdate));
+                entityDto.PlanDays = planDays;
+                if ((await ModifyPlanDays(entityDto))
+                    .IsNotSuccess(out ActionResponse<PlanDto> modifyDaysResponse, out entityDto))
+                {
+                    return modifyDaysResponse;
+                }
+
+                if ((await GetById(entityToUpdate.Id)).IsNotSuccess(out ActionResponse<PlanDto> getResponse, out entityDto))
+                {
+                    return await ActionResponse<PlanDto>.ReturnError("Greška prilikom ažuriranja podataka za plan.");
+                }
+
+                return await ActionResponse<PlanDto>.ReturnSuccess(entityDto, "Plan uspješno ažuriran.");
             }
             catch (Exception ex)
             {
@@ -307,7 +327,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 mapper.Map(entityToAdd, entityDto);
 
-                entityDto.PlanDaySubjects = planDaySubjects;
+                entityDto.PlanDaySubjects = planDaySubjects.Select(pd =>
+                {
+                    pd.PlanDayId = entityDto.Id;
+                    return pd;
+                }).ToList();
+
                 if ((await ModifyPlanDaySubjects(entityDto)).IsNotSuccess(out ActionResponse<PlanDayDto> response, out entityDto))
                 {
                     return response;
@@ -362,7 +387,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.GetGenericRepository<PlanDay>().Update(entityToUpdate);
                 unitOfWork.Save();
 
-                entityDto.PlanDaySubjects = planDaySubjects;
+                entityDto.PlanDaySubjects = planDaySubjects.Select(pd =>
+                {
+                    pd.PlanDayId = entityDto.Id;
+                    return pd;
+                }).ToList();
+
                 if ((await ModifyPlanDaySubjects(entityDto)).IsNotSuccess(out ActionResponse<PlanDayDto> response, out entityDto))
                 {
                     return response;
@@ -386,7 +416,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             var entity = unitOfWork.GetGenericRepository<PlanDay>()
                     .FindBy(p => p.Id == entityDto.Id, includeProperties: "Subjects.PlanDaySubjectThemes.Theme");
-            entityDto.PlanDaySubjects = null;
+            entityDto.PlanDaySubjectIds = null;
 
             var currentSubjects = mapper.Map<List<PlanDaySubject>, List<PlanDaySubjectDto>>(entity.Subjects.ToList());
 
@@ -395,16 +425,17 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 .Contains(cd.SubjectId.Value))
                 .ToList();
 
-            var subjectsToAdd = entityDto.PlanDaySubjects.Select(pds => pds.SubjectId.Value)
-                .Where(nt => !currentSubjects.Select(cd => cd.SubjectId.Value).Contains(nt))
+            var subjectsToAdd = entityDto.PlanDaySubjects
+                .Where(nt => !currentSubjects.Select(cd => cd.SubjectId.Value).Contains(nt.SubjectId.Value))
                 .Select(pds => new PlanDaySubjectDto
                 {
                     PlanDayId = entity.Id,
-                    SubjectId = pds
+                    SubjectId = pds.SubjectId,
+                    PlanDaySubjectThemes = pds.PlanDaySubjectThemes
                 })
                 .ToList();
 
-            var subjectsToModify = currentSubjects.Where(cd => entityDto.PlanDaySubjects
+            var subjectsToModify = entityDto.PlanDaySubjects.Where(cd => currentSubjects
                 .Select(pds => pds.SubjectId.Value)
                 .Contains(cd.SubjectId.Value))
                 .ToList();
@@ -508,7 +539,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 mapper.Map(entityToAdd, entityDto);
 
-                entityDto.PlanDaySubjectThemes = planDaySubjectThemes;
+                entityDto.PlanDaySubjectThemes = planDaySubjectThemes.Select(pd =>
+                {
+                    pd.PlanDaySubjectId = entityDto.Id;
+                    return pd;
+                }).ToList();
+
                 if ((await ModifyPlanDaySubjectsThemes(entityDto))
                     .IsNotSuccess(out ActionResponse<PlanDaySubjectDto> themesResponse, out entityDto))
                 {
@@ -600,12 +636,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 .ToList();
 
             var themesToAdd = entityDto.PlanDaySubjectThemes
-                .Select(pdst => pdst.ThemeId.Value)
-                .Where(nt => !currentThemes.Select(cd => cd.ThemeId.Value).Contains(nt))
+                .Where(nt => !currentThemes.Select(cd => cd.ThemeId.Value).Contains(nt.ThemeId.Value))
                 .Select(pds => new PlanDaySubjectThemeDto
                 {
-                    ThemeId = pds,
-                    PlanDaySubjectId = entity.Id
+                    ThemeId = pds.ThemeId.Value,
+                    PlanDaySubjectId = entity.Id,
+                    HoursNumber = pds.HoursNumber
                 }).ToList();
 
             var themesToModify = currentThemes.Where(cd => entityDto.PlanDaySubjectThemes
@@ -629,7 +665,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PlanDaySubjectDto>.ReturnError(actionResponse.Message);
             }
 
-            return await ActionResponse<PlanDaySubjectDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni dani plana.");
+            return await ActionResponse<PlanDaySubjectDto>.ReturnSuccess(mapper.Map(entity, entityDto), "Uspješno izmijenjeni dani plana.");
         }
 
         public async Task<ActionResponse<List<PlanDaySubjectThemeDto>>> RemoveThemesFromPlanDaySubject(List<PlanDaySubjectThemeDto> entityDtos)
@@ -694,7 +730,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         }
 
         public async Task<ActionResponse<PlanDaySubjectThemeDto>> InsertPlanDaySubjectTheme(PlanDaySubjectThemeDto entityDto)
-        { 
+        {
             try
             {
                 var entityToAdd = mapper.Map<PlanDaySubjectThemeDto, PlanDaySubjectTheme>(entityDto);

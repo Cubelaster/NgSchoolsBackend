@@ -9,6 +9,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         public ThemeMapper()
         {
             CreateMap<Theme, ThemeDto>().ReverseMap();
+
+            CreateMap<PlanDaySubjectThemeDto, PlanDaySubjectTheme>().ReverseMap();
         }
     }
 }

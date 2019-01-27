@@ -154,22 +154,24 @@
 // Plan/Insert
 
 {
-	"Name": "Nis",
-	"EducationProgramId": 1,
-	"PlanDays": [
-		{
-			"Name": "Nis",
-			"PlanDaySubjects": [
-				{
-					"SubjectId": 1,
-					"PlanDaySubjectThemes": [
-						{
-							"ThemeId": 1,
-							"HoursNumber": 2
-						}
-					]
-				}
-			]
-		}
-	]
+    "Name": "Nis",
+    "EducationProgramId": 7023,
+    "PlanDays": [
+        {
+            "Name": "Nis",
+            "PlanDaySubjects": [
+                {
+                    "SubjectId": 4028,
+                    "PlanDaySubjectThemes": [
+                        {
+                            "ThemeId": 4041,
+                            "HoursNumber": 2
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }
+
+// Plan/Update
