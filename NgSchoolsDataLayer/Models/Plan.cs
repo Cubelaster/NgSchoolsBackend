@@ -10,7 +10,7 @@ namespace NgSchoolsDataLayer.Models
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public int? EducationPogramId { get; set; }
+        public int? EducationProgramId { get; set; }
         public virtual EducationProgram EducationProgram { get; set; }
 
         public ICollection<PlanDay> PlanDays { get; set; }

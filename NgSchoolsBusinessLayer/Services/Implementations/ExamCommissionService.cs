@@ -131,7 +131,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ExamCommissionDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ExamCommissionDto>.ReturnError("Greška prilikom ažuriranja ispitne komisije.");
             }
         }
 
@@ -141,12 +141,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<ExamCommission>().Delete(id);
                 unitOfWork.Save();
-                return await ActionResponse<ExamCommissionDto>.ReturnSuccess(null, "Delete successful.");
+                return await ActionResponse<ExamCommissionDto>.ReturnSuccess(null, "Bisanje uspješno.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ExamCommissionDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ExamCommissionDto>.ReturnError("Greška prilikom brisanja ispitne komisije.");
             }
         }
 

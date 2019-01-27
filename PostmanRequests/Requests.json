@@ -150,3 +150,26 @@
 	"PageIndex": 0,
 	"SearchQuery": ""
 }
+
+// Plan/Insert
+
+{
+	"Name": "Nis",
+	"EducationProgramId": 1,
+	"PlanDays": [
+		{
+			"Name": "Nis",
+			"PlanDaySubjects": [
+				{
+					"SubjectId": 1,
+					"PlanDaySubjectThemes": [
+						{
+							"ThemeId": 1,
+							"HoursNumber": 2
+						}
+					]
+				}
+			]
+		}
+	]
+}
