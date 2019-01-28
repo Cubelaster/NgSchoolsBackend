@@ -1,6 +1,6 @@
 ﻿using NgSchoolsBusinessLayer.Enums;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
-using System;
+using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
@@ -8,7 +8,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
     public class StudentDto
     {
         public int Id { get; set; }
-        public string Photo { get; set; }
+        public int? PhotoId { get; set; }
+        public FileDto Photo { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Dob { get; set; }
@@ -52,6 +53,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Vocation { get; set; }
         public bool Gdpr { get; set; }
         public string Notes { get; set; }
-        public string Files { get; set; }
+
+        public List<FileDto> Files { get; set; }
     }
 }

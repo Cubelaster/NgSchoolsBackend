@@ -9,7 +9,8 @@ namespace NgSchoolsDataLayer.Models
     {
         [Key]
         public int Id { get; set; }
-        public string Photo { get; set; }
+        public int? PhotoId { get; set; }
+        public UploadedFile Photo { get; set; }
         [Required]
         public string FirstName { get; set; }
         [Required]

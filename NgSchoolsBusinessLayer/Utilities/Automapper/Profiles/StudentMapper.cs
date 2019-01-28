@@ -8,9 +8,12 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public StudentMapper()
         {
-            CreateMap<Student, StudentDto>();
+            CreateMap<Student, StudentDto>()
+                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.Photo));
 
-            CreateMap<StudentDto, Student>();
+            CreateMap<StudentDto, Student>()
+                .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(src => src.Photo != null ? src.Photo.Id : null))
+                .ForMember(dest => dest.Photo, opt => opt.Ignore());
         }
     }
 }

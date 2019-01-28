@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190128185107_Student_Files_DatabaseEntity")]
+    partial class Student_Files_DatabaseEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -622,7 +624,7 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<string>("Oib");
 
-                    b.Property<int?>("PhotoId");
+                    b.Property<string>("Photo");
 
                     b.Property<string>("Pob");
 
@@ -639,8 +641,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<string>("Vocation");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PhotoId");
 
                     b.ToTable("Students");
                 });
@@ -1113,13 +1113,6 @@ namespace NgSchoolsDataLayer.Migrations
                         .WithMany("PlanDaySubjectThemes")
                         .HasForeignKey("ThemeId")
                         .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.Student", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.UploadedFile", "Photo")
-                        .WithMany()
-                        .HasForeignKey("PhotoId");
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.StudentFiles", b =>

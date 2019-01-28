@@ -39,7 +39,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<Student>().FindBy(c => c.Id == id);
+                var entity = unitOfWork.GetGenericRepository<Student>().FindBy(c => c.Id == id, includeProperties: "Photo,Files.File");
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entity));
             }
@@ -54,7 +54,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<Student>().FindBy(c => c.Oib == oib);
+                var entity = unitOfWork.GetGenericRepository<Student>().FindBy(c => c.Oib == oib, includeProperties: "Photo,Files.File");
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entity));
             }
@@ -70,7 +70,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var allEntities = unitOfWork.GetGenericRepository<Student>().GetAll();
+                var allEntities = unitOfWork.GetGenericRepository<Student>().GetAll(includeProperties: "Photo,Files.File");
                 return await ActionResponse<List<StudentDto>>.ReturnSuccess(
                     mapper.Map<List<Student>, List<StudentDto>>(allEntities));
             }
@@ -85,7 +85,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entities = unitOfWork.GetGenericRepository<Student>().GetAll();
+                var entities = unitOfWork.GetGenericRepository<Student>().GetAll(includeProperties: "Photo,Files.File");
                 return await ActionResponse<List<StudentDto>>
                     .ReturnSuccess(mapper.Map<List<Student>, List<StudentDto>>(entities));
             }
@@ -124,6 +124,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToAdd = mapper.Map<StudentDto, Student>(entityDto);
                 unitOfWork.GetGenericRepository<Student>().Add(entityToAdd);
                 unitOfWork.Save();
+                unitOfWork.GetContext().Entry(entityToAdd).Reference(p => p.Photo).Load();
                 await cacheService.RefreshCache<List<StudentDto>>();
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entityToAdd));
@@ -142,6 +143,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToUpdate = mapper.Map<StudentDto, Student>(entityDto);
                 unitOfWork.GetGenericRepository<Student>().Update(entityToUpdate);
                 unitOfWork.Save();
+                unitOfWork.GetContext().Entry(entityToUpdate).Reference(p => p.Photo).Load();
                 await cacheService.RefreshCache<List<StudentDto>>();
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entityToUpdate));
