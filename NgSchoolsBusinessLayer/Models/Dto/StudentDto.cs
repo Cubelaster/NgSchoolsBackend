@@ -45,10 +45,11 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public bool CitizenshipCertificate { get; set; }
         public bool BirthCertificate { get; set; }
         public bool PracticeDiary { get; set; }
-        public DateTime? EnrolmentDate { get; set; }
-        public DateTime? FinishedSchool { get; set; }
+        public string EnrolmentDate { get; set; }
+        public string FinishedSchool { get; set; }
         public string CertificateNumber { get; set; }
         public string SchoolLevel { get; set; }
+        public string Vocation { get; set; }
         public bool Gdpr { get; set; }
         public string Notes { get; set; }
         public string Files { get; set; }

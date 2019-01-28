@@ -51,6 +51,7 @@ namespace NgSchoolsDataLayer.Models
         public DateTime? EnrolmentDate { get; set; }
         public string FinishedSchool { get; set; }
         public string CertificateNumber { get; set; }
+        public string Vocation { get; set; }
         public string SchoolLevel { get; set; }
         public bool Gdpr { get; set; }
         public string Notes { get; set; }
