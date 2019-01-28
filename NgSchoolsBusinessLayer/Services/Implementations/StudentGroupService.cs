@@ -97,6 +97,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     List<int> studentIds = new List<int>(entityDto.StudentIds);
+                    entityDto.Students = null;
+
+                    List<StudentGroupSubjectTeachersDto> subjectTeachers = new List<StudentGroupSubjectTeachersDto>(entityDto.SubjectTeachers);
+                    entityDto.SubjectTeachers = null;
+
                     var entityToAdd = mapper.Map<StudentGroupDto, StudentGroup>(entityDto);
                     unitOfWork.GetGenericRepository<StudentGroup>().Add(entityToAdd);
                     unitOfWork.Save();
@@ -108,7 +113,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return response;
                     }
 
-                    entityToAdd = unitOfWork.GetGenericRepository<StudentGroup>().FindBy(sg => sg.Id == entityDto.Id, includeProperties: "StudentsInGroups.Student");
+                    entityDto.SubjectTeachers = subjectTeachers;
+                    if ((await ModifySubjectTeachers(entityDto)).IsNotSuccess(out response, out entityDto))
+                    {
+                        return response;
+                    }
+
+                    entityToAdd = unitOfWork.GetGenericRepository<StudentGroup>().FindBy(sg => sg.Id == entityDto.Id, includeProperties: "StudentsInGroups.Student,SubjectTeachers");
 
                     scope.Complete();
                     return await ActionResponse<StudentGroupDto>
@@ -238,6 +249,129 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<StudentGroupDto>> ModifySubjectTeachers(StudentGroupDto studentGroup)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<StudentGroup>()
+                    .FindBy(e => e.Id == studentGroup.Id.Value, includeProperties: "SubjectTeachers");
+                var currentSubjectTeachers = mapper.Map<List<StudentGroupSubjectTeachers>, List<StudentGroupSubjectTeachersDto>>(entity.SubjectTeachers.ToList());
+
+                var newSubjectTeachers = studentGroup.SubjectTeachers != null ? studentGroup.SubjectTeachers : new List<StudentGroupSubjectTeachersDto>();
+
+                var teachersToRemove = currentSubjectTeachers
+                    .Where(cet => newSubjectTeachers
+                        .All(nst => nst.SubjectId != cet.SubjectId || nst.TeacherId != cet.TeacherId)).ToList();
+
+                var teachersToAdd = newSubjectTeachers
+                    .Where(nt => currentSubjectTeachers
+                    .All(nst => nst.SubjectId != nt.SubjectId || nst.TeacherId != nt.TeacherId))
+                    .Select(nst => new StudentGroupSubjectTeachersDto
+                    {
+                        StudentGroupId = entity.Id,
+                        SubjectId = nst.SubjectId,
+                        TeacherId = nst.TeacherId
+                    })
+                    .ToList();
+
+                if ((await RemoveSubjectTeachers(teachersToRemove))
+                    .IsNotSuccess(out ActionResponse<List<StudentGroupSubjectTeachersDto>> actionResponse))
+                {
+                    return await ActionResponse<StudentGroupDto>.ReturnError("Neuspješno ažuriranje učitelja predmeta u grupi.");
+                }
+
+                if ((await AddSubjectTeachers(teachersToAdd)).IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<StudentGroupDto>.ReturnError("Neuspješno ažuriranje učitelja predmeta u grupi.");
+                }
+                return await ActionResponse<StudentGroupDto>.ReturnSuccess(studentGroup, "Ažuriranje učitelja predmeta u grupi uspješno.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, studentGroup);
+                return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom ažuriranja učitelja predmeta.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentGroupSubjectTeachersDto>>> RemoveSubjectTeachers(List<StudentGroupSubjectTeachersDto> sTeachers)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentGroupSubjectTeachersDto>>.ReturnSuccess(null, "Studenti uspješno maknuti iz grupe.");
+                sTeachers.ForEach(async sig =>
+                {
+                    if ((await RemoveSubjectTeacher(sig))
+                        .IsNotSuccess(out ActionResponse<StudentGroupSubjectTeachersDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<StudentGroupSubjectTeachersDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, sTeachers);
+                return await ActionResponse<List<StudentGroupSubjectTeachersDto>>.ReturnError("Greška prilikom micanja učitelja predmeta.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentGroupSubjectTeachersDto>> RemoveSubjectTeacher(StudentGroupSubjectTeachersDto subjectTeacher)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<StudentGroupSubjectTeachers>().Delete(subjectTeacher.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<StudentGroupSubjectTeachersDto>.ReturnSuccess(null, "Učitelj predmeta uspješno izbrisan iz grupe.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, subjectTeacher);
+                return await ActionResponse<StudentGroupSubjectTeachersDto>.ReturnError("Greška prilikom micanja učitelja predmeta iz grupe.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentGroupSubjectTeachersDto>>> AddSubjectTeachers(List<StudentGroupSubjectTeachersDto> students)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentGroupSubjectTeachersDto>>.ReturnSuccess(null, "Učitelji predmeta uspješno dodani u grupu.");
+                students.ForEach(async s =>
+                {
+                    if ((await AddSubjectTeacher(s))
+                    .IsNotSuccess(out ActionResponse<StudentGroupSubjectTeachersDto> actionResponse, out s))
+                    {
+                        response = await ActionResponse<List<StudentGroupSubjectTeachersDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, students);
+                return await ActionResponse<List<StudentGroupSubjectTeachersDto>>.ReturnError("Greška prilikom dodavanja učitelja predmeta u grupu.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentGroupSubjectTeachersDto>> AddSubjectTeacher(StudentGroupSubjectTeachersDto student)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<StudentGroupSubjectTeachersDto, StudentGroupSubjectTeachers>(student);
+                unitOfWork.GetGenericRepository<StudentGroupSubjectTeachers>().Add(entityToAdd);
+                unitOfWork.Save();
+                return await ActionResponse<StudentGroupSubjectTeachersDto>
+                    .ReturnSuccess(mapper.Map<StudentGroupSubjectTeachers, StudentGroupSubjectTeachersDto>(entityToAdd),
+                    "Učitelj predmeta uspješno dodan u grupu.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, student);
+                return await ActionResponse<StudentGroupSubjectTeachersDto>.ReturnError("Greška prilikom dodavanja učitelja predmeta u grupu.");
+            }
+        }
+
         public async Task<ActionResponse<StudentGroupDto>> Update(StudentGroupDto entityDto)
         {
             try
@@ -249,6 +383,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     unitOfWork.Save();
 
                     if ((await ModifyStudentsInGroup(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> response, out entityDto))
+                    {
+                        return response;
+                    }
+
+                    if ((await ModifySubjectTeachers(entityDto)).IsNotSuccess(out response, out entityDto))
                     {
                         return response;
                     }

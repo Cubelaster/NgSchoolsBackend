@@ -322,3 +322,22 @@
 		}
 	]
 }
+
+// StudentGroup/Insert
+
+{
+	"ClassLocationId": 1002,
+	"CredentialDate": "23.01.2019",
+	"EndDate": "23.01.2019",
+	"FirstExamDate": "16.01.2019",
+	"Name": "Ime",
+	"Notes": "<p>ffdgdgf</p>",
+	"ProgramId": 3005,
+	"SecondExamDate": "23.01.2019",
+	"StartDate": "22.01.2019",
+	"StudentIds": [1],
+	"SubjectTeachers": [
+		{
+			"SubjectName": "fsdfs", "SubjectId": 4029, "TeacherId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb"}
+		]
+}

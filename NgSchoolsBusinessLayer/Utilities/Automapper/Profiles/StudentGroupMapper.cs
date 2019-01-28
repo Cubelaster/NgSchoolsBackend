@@ -19,6 +19,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.StudentGroupId))
                 .ForMember(dest => dest.StudentId, opt => opt.MapFrom(src => src.StudentId))
                 .ReverseMap();
+
+            CreateMap<StudentGroupSubjectTeachers, StudentGroupSubjectTeachersDto>().ReverseMap();
         }
     }
 }
