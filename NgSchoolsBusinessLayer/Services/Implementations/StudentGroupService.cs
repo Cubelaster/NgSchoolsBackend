@@ -70,7 +70,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<StudentGroup>()
-                    .GetAllAsQueryable(includeProperties: "StudentsInGroup.Student").GetPaged(pagedRequest);
+                    .GetAllAsQueryable(includeProperties: "StudentsInGroups.Student").GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<StudentGroupDto>
                 {
