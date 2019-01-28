@@ -11,7 +11,9 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         {
             CreateMap<UserDetails, UserDetailsDto>();
 
-            CreateMap<UserDetailsDto, UserDetails>();
+            CreateMap<UserDetailsDto, UserDetails>()
+                .ForMember(dest => dest.Avatar, opt => opt.Ignore())
+                .ForMember(dest => dest.Signature, opt => opt.Ignore());
 
             CreateMap<UserViewModel, UserDetailsDto>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())

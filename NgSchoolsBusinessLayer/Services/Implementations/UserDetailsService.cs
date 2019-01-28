@@ -36,17 +36,33 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 var userDetailsEntity = new UserDetails
                 {
-                    Avatar = userDetails.Avatar,
                     FirstName = userDetails.FirstName,
                     LastName = userDetails.LastName,
                     Mobile = userDetails.Mobile,
                     Mobile2 = userDetails.Mobile2,
                     Phone = userDetails.Phone,
-                    Signature = userDetails.Signature,
                     Title = userDetails.Title,
                     UserId = userDetails.Id,
                     DateCreated = DateTime.UtcNow
                 };
+
+                if (userDetails.Avatar != null)
+                {
+                    userDetailsEntity.AvatarId = userDetails.Avatar.Id.Value;
+                }
+                else
+                {
+                    userDetailsEntity.Avatar = null;
+                }
+
+                if (userDetails.Signature != null)
+                {
+                    userDetailsEntity.SignatureId = userDetails.Signature.Id.Value;
+                }
+                else
+                {
+                    userDetailsEntity.Signature = null;
+                }
 
                 unitOfWork.GetGenericRepository<UserDetails>().Add(userDetailsEntity);
                 unitOfWork.Save();
@@ -100,14 +116,31 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var userDetailsEntity = unitOfWork.GetGenericRepository<UserDetails>().FindBy(ud => ud.Id == userDetails.UserDetailsId);
-                userDetailsEntity.Avatar = userDetails.Avatar;
                 userDetailsEntity.FirstName = userDetails.FirstName;
                 userDetailsEntity.LastName = userDetails.LastName;
                 userDetailsEntity.Mobile = userDetails.Mobile;
                 userDetailsEntity.Mobile2 = userDetails.Mobile2;
                 userDetailsEntity.Phone = userDetails.Phone;
-                userDetailsEntity.Signature = userDetails.Signature;
                 userDetailsEntity.Title = userDetails.Title;
+
+                if (userDetails.Avatar != null)
+                {
+                    userDetailsEntity.AvatarId = userDetails.Avatar.Id.Value;
+                }
+                else
+                {
+                    userDetailsEntity.Avatar = null;
+                }
+
+                if (userDetails.Signature != null)
+                {
+                    userDetailsEntity.SignatureId = userDetails.Signature.Id.Value;
+                }
+                else
+                {
+                    userDetailsEntity.Signature = null;
+                }
+
                 unitOfWork.GetGenericRepository<UserDetails>().Update(userDetailsEntity);
 
                 return await ActionResponse<UserViewModel>.ReturnSuccess(userDetails);

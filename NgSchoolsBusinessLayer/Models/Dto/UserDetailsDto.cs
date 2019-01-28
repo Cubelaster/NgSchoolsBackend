@@ -9,8 +9,10 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string FirstName { get; set; }
         public string MiddleName { get; set; }
         public string LastName { get; set; }
-        public string Avatar { get; set; }
-        public string Signature { get; set; }
+        public int? AvatarId { get; set; }
+        public FileDto Avatar { get; set; }
+        public int? SignatureId { get; set; }
+        public FileDto Signature { get; set; }
         public string Title { get; set; }
         public string Mobile { get; set; }
         public string Mobile2 { get; set; }

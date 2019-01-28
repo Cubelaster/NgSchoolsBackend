@@ -52,6 +52,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.GetGenericRepository<Institution>().Add(institutionToAdd);
                 unitOfWork.Save();
                 unitOfWork.GetContext().Entry(institutionToAdd).Reference(p => p.Principal).Load();
+                unitOfWork.GetContext().Entry(institutionToAdd).Reference(p => p.Logo).Load();
                 return await ActionResponse<InstitutionDto>
                     .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institutionToAdd));
             }
@@ -70,6 +71,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.GetGenericRepository<Institution>().Update(institutionToUpdate);
                 unitOfWork.Save();
                 unitOfWork.GetContext().Entry(institutionToUpdate).Reference(p => p.Principal).Load();
+                unitOfWork.GetContext().Entry(institutionToUpdate).Reference(p => p.Logo).Load();
                 return await ActionResponse<InstitutionDto>
                     .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institutionToUpdate));
             }

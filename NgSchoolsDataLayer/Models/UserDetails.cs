@@ -15,8 +15,10 @@ namespace NgSchoolsDataLayer.Models
         public string MiddleName { get; set; }
         [Required]
         public string LastName { get; set; }
-        public string Avatar { get; set; }
-        public string Signature { get; set; }
+        public int? AvatarId { get; set; }
+        public UploadedFile Avatar { get; set; }
+        public int? SignatureId { get; set; }
+        public UploadedFile Signature { get; set; }
         public string Title { get; set; }
         public string Mobile { get; set; }
         public string Mobile2 { get; set; }

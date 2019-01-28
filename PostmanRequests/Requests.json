@@ -216,3 +216,86 @@
 		4033
 	]
 }
+
+// Institution/Insert
+
+{
+	"City": "Zaprešić",
+	"InstitutionClassFirstPart": "12",
+	"InstitutionClassSecondPart": "12",
+	"InstitutionCode": "123",
+	"InstitutionUrNumber": "12",
+	"Logo": {
+		"Id": 1,
+		"FileName": "apf21920.jpg"
+	},
+	"Name": "Institucija",
+	"PrincipalId": "5863f206-5681-435d-6b10-08d652bdcec8",
+	"currentYear": "19"
+}
+
+// Institution/Update
+
+{
+	"Id": 12,
+	"City": "Zaprešić",
+	"InstitutionClassFirstPart": "12",
+	"InstitutionClassSecondPart": "12",
+	"InstitutionCode": "123",
+	"InstitutionUrNumber": "113",
+	"Name": "Institucija",
+	"PrincipalId": "5863f206-5681-435d-6b10-08d652bdcec8",
+	"currentYear": "19"
+}
+
+// User/Update
+
+{
+	"Avatar": 
+	{
+		"Id": 2,
+		"FileName": "ED3.jpg"
+	},
+	"Email": "david.cubela@gmail.com",
+	"FirstName": "David",
+	"Id": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
+	"LastName": "Čubela",
+	"Mobile": "09983339000",
+	"Mobile2": null,
+	"Phone": null,
+	"Roles": ["c569d8bd-f090-4756-37d9-08d64e49da16", "fabf0604-36bf-4358-37da-08d64e49da16"],
+	"Signature": 
+		{
+			"Id": 2,
+			"FileName": "ED3.jpg"
+		},
+	"Title": "Mr.",
+	"UserDetailsId": 1,
+	"UserName": "Cubelaster"
+}
+
+// User/Create
+
+{
+	"Avatar": 
+		{
+			"Id": 2,
+			"FileName": "ED3.jpg"
+		},
+	"Email": "david.cubelrtzra@gmail.com",
+	"FirstName": "tztzrtz",
+	"LastName": "rtzrtzr",
+	"Mobile": "rtzr",
+	"Mobile2": "rtzrt",
+	"Password": "Lozinka!!__2",
+	"PasswordConfirm": "Lozinka!!__2",
+	"Phone": "rtzrtz",
+	"Roles": ["c3952341-3e3d-4579-37dc-08d64e49da16"],
+	"Signature": 
+			{
+				"Id": 2,
+				"FileName": "ED3.jpg"
+			},
+	"Title": "tzrtzr",
+	"UserName": "rtzrtzr",
+	}

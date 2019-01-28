@@ -1,4 +1,5 @@
-﻿using NgSchoolsBusinessLayer.Utilities.Attributes;
+﻿using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
 using System;
 using System.Collections.Generic;
 
@@ -17,8 +18,10 @@ namespace NgSchoolsBusinessLayer.Models.ViewModels
         [Searchable]
         public string LastName { get; set; }
         public string Password { get; set; }
-        public string Avatar { get; set; }
-        public string Signature { get; set; }
+        public int? AvatarId { get; set; }
+        public FileDto Avatar { get; set; }
+        public int? SignatureId { get; set; }
+        public FileDto Signature { get; set; }
         public string Title { get; set; }
         public string Mobile { get; set; }
         public string Mobile2 { get; set; }
