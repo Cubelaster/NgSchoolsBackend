@@ -121,13 +121,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                List<FileDto> files = new List<FileDto>(entityDto.Files);
+                entityDto.Files = null;
+
                 var entityToAdd = mapper.Map<StudentDto, Student>(entityDto);
                 unitOfWork.GetGenericRepository<Student>().Add(entityToAdd);
                 unitOfWork.Save();
-                unitOfWork.GetContext().Entry(entityToAdd).Reference(p => p.Photo).Load();
+
+                mapper.Map(entityToAdd, entityDto);
+                entityDto.Files = files;
+                if ((await ModifyStudentFiles(entityDto))
+                    .IsNotSuccess(out ActionResponse<StudentDto> fileResponse, out entityDto))
+                {
+                    return fileResponse;
+                }
+
                 await cacheService.RefreshCache<List<StudentDto>>();
-                return await ActionResponse<StudentDto>
-                    .ReturnSuccess(mapper.Map<Student, StudentDto>(entityToAdd));
+                return await ActionResponse<StudentDto>.ReturnSuccess(entityDto);
             }
             catch (Exception ex)
             {
@@ -140,10 +150,22 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                List<FileDto> files = new List<FileDto>(entityDto.Files);
+                entityDto.Files = null;
+
                 var entityToUpdate = mapper.Map<StudentDto, Student>(entityDto);
                 unitOfWork.GetGenericRepository<Student>().Update(entityToUpdate);
                 unitOfWork.Save();
                 unitOfWork.GetContext().Entry(entityToUpdate).Reference(p => p.Photo).Load();
+
+                mapper.Map(entityToUpdate, entityDto);
+                entityDto.Files = files;
+                if ((await ModifyStudentFiles(entityDto))
+                    .IsNotSuccess(out ActionResponse<StudentDto> fileResponse, out entityDto))
+                {
+                    return fileResponse;
+                }
+
                 await cacheService.RefreshCache<List<StudentDto>>();
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entityToUpdate));
@@ -168,6 +190,126 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<StudentDto>.ReturnError("Greška prilikom brisanja studenta.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentDto>> ModifyStudentFiles(StudentDto entityDto)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<Student>()
+                    .FindBy(e => e.Id == entityDto.Id, includeProperties: "Files.File");
+
+                var currentFiles = mapper.Map<List<StudentFiles>, List<StudentFileDto>>(entity.Files.ToList());
+
+                var newFiles = entityDto.Files;
+
+                var filesToRemove = currentFiles.Where(cet => !newFiles.Select(f => f.Id).Contains(cet.FileId)).ToList();
+
+                var filesToAdd = newFiles
+                    .Where(nt => !currentFiles.Select(uec => uec.FileId).Contains(nt.Id))
+                    .Select(sf => new StudentFileDto
+                    {
+                        FileId = sf.Id,
+                        StudentId = entityDto.Id
+                    })
+                    .ToList();
+
+                if ((await RemoveFilesFromStudent(filesToRemove))
+                    .IsNotSuccess(out ActionResponse<List<StudentFileDto>> removeResponse))
+                {
+                    return await ActionResponse<StudentDto>.ReturnError("Neuspješno micanje dokumenata.");
+                }
+
+                if ((await AddFilesToStudent(filesToAdd)).IsNotSuccess(out ActionResponse<List<StudentFileDto>> addResponse, out filesToAdd))
+                {
+                    return await ActionResponse<StudentDto>.ReturnError("Neuspješno dodavanje dokumenata studfentu.");
+                }
+                return await ActionResponse<StudentDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni dokumenti studenta.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<StudentDto>.ReturnError("Greška prilikom izmjene dokumenata studenta.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentFileDto>>> RemoveFilesFromStudent(List<StudentFileDto> entities)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentFileDto>>.ReturnSuccess(null, "Datoteke uspješno maknute sa studenta.");
+                entities.ForEach(async file =>
+                {
+                    if ((await RemoveFileFromStudent(file))
+                        .IsNotSuccess(out ActionResponse<StudentFileDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<StudentFileDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entities);
+                return await ActionResponse<List<StudentFileDto>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentFileDto>> RemoveFileFromStudent(StudentFileDto entity)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<StudentFiles>().Delete(entity.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<StudentFileDto>.ReturnSuccess(null, "Student upsješno izbrisan iz grupe.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entity);
+                return await ActionResponse<StudentFileDto>.ReturnError("Greška prilikom micanja studenta iz grupe.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentFileDto>>> AddFilesToStudent(List<StudentFileDto> entities)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentFileDto>>.ReturnSuccess(null, "Datoteka uspješno dodani studentu.");
+                entities.ForEach(async s =>
+                {
+                    if ((await AddFileToStudent(s))
+                        .IsNotSuccess(out ActionResponse<StudentFileDto> actionResponse, out s))
+                    {
+                        response = await ActionResponse<List<StudentFileDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entities);
+                return await ActionResponse<List<StudentFileDto>>.ReturnError("Greška prilikom dodavanja datoteka studentu.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentFileDto>> AddFileToStudent(StudentFileDto file)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<StudentFileDto, StudentFiles>(file);
+                unitOfWork.GetGenericRepository<StudentFiles>().Add(entityToAdd);
+                unitOfWork.Save();
+                return await ActionResponse<StudentFileDto>
+                    .ReturnSuccess(mapper.Map<StudentFiles, StudentFileDto>(entityToAdd),
+                    "Datoteka uspješno dodana studentu.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, file);
+                return await ActionResponse<StudentFileDto>.ReturnError("Greška prilikom dodavanja datoteke studentu.");
             }
         }
     }

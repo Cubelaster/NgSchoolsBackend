@@ -299,3 +299,26 @@
 	"Title": "tzrtzr",
 	"UserName": "rtzrtzr",
 	}
+
+
+// Student/Insert
+
+{
+	"FirstName": "David Čubela",
+	"LastName": "Čubela",
+	"Oib": "38761800703",
+	"Photo": {
+		"Id": 1008,
+		"FileName": "wallpaper-2770084.jpg"
+	},
+	"Files": [
+		{
+			"Id": 1008,
+			"FileName": "wallpaper-2770084.jpg"
+		},
+		{
+			"Id": 1,
+			"FileName": "wallpaper-2770084.jpg"
+		}
+	]
+}
