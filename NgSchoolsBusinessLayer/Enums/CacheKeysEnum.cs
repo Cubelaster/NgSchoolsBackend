@@ -3,7 +3,8 @@
     public enum CacheKeysEnum
     {
         Country,
-        County,
+        Region,
+        City,
         User,
         ClassType,
         ClassLocation,

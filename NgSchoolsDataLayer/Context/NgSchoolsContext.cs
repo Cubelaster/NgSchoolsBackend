@@ -32,6 +32,9 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<StudentFiles> StudentFiles { get; set; }
         public DbSet<Diary> Diaries { get; set; }
         public DbSet<DiaryStudentGroup> DiaryStudentGroups { get; set; }
+        public DbSet<Country> Countries { get; set; }
+        public DbSet<Region> Regions { get; set; }
+        public DbSet<City> Cities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -92,6 +95,11 @@ namespace NgSchoolsDataLayer.Context
             builder.Entity<Theme>()
                 .HasMany(t => t.PlanDaySubjectThemes)
                 .WithOne(pdst => pdst.Theme)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<City>()
+                .HasOne(c => c.Region)
+                .WithMany(r => r.Cities)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

@@ -159,6 +159,7 @@ namespace NgSchoolsBackend
             services.AddScoped<ISubjectService, SubjectService>();
             services.AddScoped<IThemeService, ThemeService>();
             services.AddScoped<IDiaryService, DiaryService>();
+            services.AddScoped<ILocationService, LocationService>();
         }
 
         private void ConfigureJWT(IServiceCollection services)
@@ -245,5 +246,10 @@ namespace NgSchoolsBackend
                 }
             }
         }
+
+        //private async Task FillGeoData()
+        //{
+        //    return null;
+        //}
     }
 }

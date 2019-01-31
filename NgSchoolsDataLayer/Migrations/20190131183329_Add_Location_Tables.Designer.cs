@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190131183329_Add_Location_Tables")]
+    partial class Add_Location_Tables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -130,11 +132,6 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<int>("CountryId");
 
-                    b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime?>("DateModified");
-
                     b.Property<string>("Latitude");
 
                     b.Property<string>("Longtitude");
@@ -144,8 +141,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<string>("NameDomestic");
 
                     b.Property<int>("RegionId");
-
-                    b.Property<int>("Status");
 
                     b.HasKey("Id");
 
@@ -212,18 +207,11 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<int?>("CountryCallingCode");
 
-                    b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime?>("DateModified");
-
                     b.Property<int?>("InternationalDiallingPrefix");
 
                     b.Property<string>("Name");
 
                     b.Property<string>("NameDomestic");
-
-                    b.Property<int>("Status");
 
                     b.Property<int?>("UnCode");
 
@@ -585,16 +573,9 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<int>("CountryId");
 
-                    b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime?>("DateModified");
-
                     b.Property<string>("Name");
 
                     b.Property<string>("NameDomestic");
-
-                    b.Property<int>("Status");
 
                     b.HasKey("Id");
 

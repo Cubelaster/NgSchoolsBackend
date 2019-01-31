@@ -155,43 +155,5 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<ThemeDto>.ReturnError("Greška prilikom brisanja teme.");
             }
         }
-
-        #region Unused
-
-        //public async Task<ActionResponse<List<ThemeDto>>> ModifyThemesForEducationProgram(List<ThemeDto> entityDtos)
-        //{
-        //    try
-        //    {
-        //        var response = ActionResponse<List<ThemeDto>>.ReturnSuccess(entityDtos, "Teme uspješno ažurirane.");
-        //        entityDtos.ForEach(async s =>
-        //        {
-        //            if (s.Id.HasValue)
-        //            {
-        //                if ((await Update(s)).IsNotSuccess(out ActionResponse<ThemeDto> updateResponse, out s))
-        //                {
-        //                    response = ActionResponse<List<ThemeDto>>.ReturnError(updateResponse.Message);
-        //                    return;
-        //                }
-        //            }
-        //            else
-        //            {
-        //                if ((await Insert(s)).IsNotSuccess(out ActionResponse<ThemeDto> insertResponse, out s))
-        //                {
-        //                    response = ActionResponse<List<ThemeDto>>.ReturnError(insertResponse.Message);
-        //                    return;
-        //                }
-        //            }
-        //        });
-
-        //        return await response;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        loggerService.LogErrorToEventLog(ex, entityDtos);
-        //        return await ActionResponse<List<ThemeDto>>.ReturnError("Greška prilikom upisa tema.");
-        //    }
-        //}
-
-        #endregion Unused
     }
 }

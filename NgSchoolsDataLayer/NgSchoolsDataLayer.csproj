@@ -27,6 +27,8 @@
     <Compile Remove="Migrations\20190127083318_Modify_PlanDays_Subject_and_Themes_Change_Relation.cs" />
     <Compile Remove="Migrations\20190127090913_PlanDay_Modify_Subject_Theme_Relation.cs" />
     <Compile Remove="Migrations\20190127091820_PlanDay_Modify_Subject_Theme_Relation.cs" />
+    <Compile Remove="Migrations\20190131182705_Add_Location_Tables.cs" />
+    <Compile Remove="Migrations\20190131182808_Add_Location_Tables.cs" />
   </ItemGroup>
 
   <ItemGroup>
