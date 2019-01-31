@@ -10,7 +10,9 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int Id { get; set; }
         public int? PhotoId { get; set; }
         public FileDto Photo { get; set; }
+        [Searchable]
         public string FirstName { get; set; }
+        [Searchable]
         public string LastName { get; set; }
         public string Dob { get; set; }
         public string Mentor { get; set; }

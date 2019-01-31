@@ -34,6 +34,12 @@ namespace NgSchoolsWebApi.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResponse<PagedResult<EducationProgramDto>>> GetBySearchQuery([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await educationProgramService.GetBySearchQuery(pagedRequest);
+        }
+
+        [HttpPost]
         public async Task<ActionResponse<EducationProgramDto>> GetById(SimpleRequestBase request)
         {
             return await educationProgramService.GetById(request.Id);

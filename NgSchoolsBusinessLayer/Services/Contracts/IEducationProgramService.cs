@@ -11,16 +11,11 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
     {
         Task<ActionResponse<EducationProgramDto>> Delete(int id);
         Task<ActionResponse<List<EducationProgramDto>>> GetAll();
+        Task<ActionResponse<List<EducationProgramDto>>> GetAllForCache();
         Task<ActionResponse<PagedResult<EducationProgramDto>>> GetAllPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<EducationProgramDto>> GetById(int id);
         Task<ActionResponse<EducationProgramDto>> Insert(EducationProgramDto entityDto);
         Task<ActionResponse<EducationProgramDto>> Update(EducationProgramDto entityDto);
-
-        //#region Unused
-
-        //Task<ActionResponse<EducationProgramDto>> InsertCompleteProgram(EducationProgramDto entityDto);
-        //Task<ActionResponse<EducationProgramDto>> UpdateCompleteProgram(EducationProgramDto entityDto);
-
-        //#endregion Unused
+        Task<ActionResponse<PagedResult<EducationProgramDto>>> GetBySearchQuery(BasePagedRequest pagedRequest);
     }
 }

@@ -61,6 +61,12 @@ namespace NgSchoolsWebApi.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResponse<PagedResult<StudentDto>>> GetBySearchQuery([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await studentService.GetBySearchQuery(pagedRequest);
+        }
+
+        [HttpPost]
         public async Task<ActionResponse<StudentDto>> Delete([FromBody] SimpleRequestBase request)
         {
             return await studentService.Delete(request.Id);

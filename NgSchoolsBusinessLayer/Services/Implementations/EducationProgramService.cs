@@ -5,13 +5,13 @@ using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Services.Contracts;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Transactions;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -25,10 +25,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IPlanService planService;
         private readonly ISubjectService subjectService;
         private readonly IThemeService themeService;
+        private readonly ICacheService cacheService;
 
         public EducationProgramService(IMapper mapper, ILoggerService loggerService,
             IUnitOfWork unitOfWork, IPlanService planService, ISubjectService subjectService,
-            IThemeService themeService)
+            IThemeService themeService, ICacheService cacheService)
         {
             this.mapper = mapper;
             this.loggerService = loggerService;
@@ -36,6 +37,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             this.planService = planService;
             this.subjectService = subjectService;
             this.themeService = themeService;
+            this.cacheService = cacheService;
         }
 
         #endregion Ctors and Members
@@ -72,22 +74,56 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        [CacheRefreshSource(typeof(EducationProgramDto))]
+        public async Task<ActionResponse<List<EducationProgramDto>>> GetAllForCache()
+        {
+            try
+            {
+                var allEntities = unitOfWork.GetGenericRepository<EducationProgram>()
+                    .GetAll(includeProperties: "Subjects.Themes");
+                return await ActionResponse<List<EducationProgramDto>>.ReturnSuccess(
+                    mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(allEntities));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<EducationProgramDto>>.ReturnError("Greška prilikom dohvata svih edukacijskih programa.");
+            }
+        }
+
         public async Task<ActionResponse<PagedResult<EducationProgramDto>>> GetAllPaged(BasePagedRequest pagedRequest)
         {
             try
             {
-                var pagedEntityResult = await unitOfWork.GetGenericRepository<EducationProgram>()
-                    .GetAllAsQueryable(includeProperties: "Subjects.Themes").GetPaged(pagedRequest);
-
-                var pagedResult = new PagedResult<EducationProgramDto>
+                List<EducationProgramDto> eduPrograms = new List<EducationProgramDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<EducationProgramDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out eduPrograms))
                 {
-                    CurrentPage = pagedEntityResult.CurrentPage,
-                    PageSize = pagedEntityResult.PageSize,
-                    PageCount = pagedEntityResult.PageCount,
-                    RowCount = pagedEntityResult.RowCount,
-                    Results = mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(pagedEntityResult.Results)
-                };
+                    eduPrograms = (await GetAll()).GetData();
+                }
 
+                var pagedResult = await eduPrograms.AsQueryable().GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<EducationProgramDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<EducationProgramDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za programe.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<EducationProgramDto>>> GetBySearchQuery(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<EducationProgramDto> eduPrograms = new List<EducationProgramDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<EducationProgramDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out eduPrograms))
+                {
+                    eduPrograms = (await GetAll()).GetData();
+                }
+
+                var pagedResult = await eduPrograms.AsQueryable().GetBySearchQuery(pagedRequest);
                 return await ActionResponse<PagedResult<EducationProgramDto>>.ReturnSuccess(pagedResult);
             }
             catch (Exception ex)
@@ -112,6 +148,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom ažuriranja programa.");
             }
+            finally
+            {
+                await cacheService.RefreshCache<List<EducationProgramDto>>();
+            }
         }
 
         public async Task<ActionResponse<EducationProgramDto>> Update(EducationProgramDto entityDto)
@@ -129,6 +169,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom ažuriranja programa.");
             }
+            finally
+            {
+                await cacheService.RefreshCache<List<EducationProgramDto>>();
+            }
         }
 
         public async Task<ActionResponse<EducationProgramDto>> Delete(int id)
@@ -145,123 +189,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationProgramDto>.ReturnError("Some sort of fuckup!");
             }
+            finally
+            {
+                await cacheService.RefreshCache<List<EducationProgramDto>>();
+            }
         }
-
-        #region Unused
-
-        //public async Task<ActionResponse<EducationProgramDto>> UpdateCompleteProgram(EducationProgramDto entityDto)
-        //{
-        //    try
-        //    {
-        //        using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-        //        {
-        //            if ((await Update(entityDto)).IsNotSuccess(out ActionResponse<EducationProgramDto> response, out entityDto))
-        //            {
-        //                return response;
-        //            }
-
-        //            var themesInProgram = entityDto.Subjects
-        //                .SelectMany(s => s.Themes)
-        //                .GroupBy(t => t.Name)
-        //                .Select(g => g.FirstOrDefault())
-        //                .Where(t => t != null)
-        //                .ToList();
-
-        //            if ((await themeService.ModifyThemesForEducationProgram(themesInProgram))
-        //                .IsNotSuccess(out ActionResponse<List<ThemeDto>> themesResponse, out themesInProgram))
-        //            {
-        //                return await ActionResponse<EducationProgramDto>.ReturnError(themesResponse.Message);
-        //            }
-
-        //            var subjectsInProgram = entityDto.Subjects
-        //                .Select(s => {
-        //                    s.EducationProgramId = entityDto.Id;
-        //                    s.Themes.ForEach(t => t.Id = themesInProgram
-        //                        .FirstOrDefault(tip => tip.Name == t.Name).Id);
-        //                    return s;
-        //                })
-        //                .ToList();
-
-        //            if ((await subjectService.ModifySubjectsForEducationProgram(subjectsInProgram))
-        //                .IsNotSuccess(out ActionResponse<List<SubjectDto>> subjectResponse, out List<SubjectDto> modifiedSubjects))
-        //            {
-        //                return await ActionResponse<EducationProgramDto>.ReturnError(subjectResponse.Message);
-        //            }
-
-        //            entityDto.Plan.EducationPogramId = entityDto.Id;
-        //            if ((await planService.UpdatePlanForEducationProgram(entityDto)).IsNotSuccess(out ActionResponse<EducationProgramDto> planResponse, out entityDto))
-        //            {
-        //                return planResponse;
-        //            }
-
-        //            scope.Complete();
-        //            return await ActionResponse<EducationProgramDto>
-        //                .ReturnSuccess(entityDto);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        loggerService.LogErrorToEventLog(ex, entityDto);
-        //        return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom ažuriranja programa.");
-        //    }
-        //}
-
-        //public async Task<ActionResponse<EducationProgramDto>> InsertCompleteProgram(EducationProgramDto entityDto)
-        //{
-        //    try
-        //    {
-        //        using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-        //        {
-        //            if ((await Insert(entityDto)).IsNotSuccess(out ActionResponse<EducationProgramDto> response, out entityDto))
-        //            {
-        //                return response;
-        //            }
-
-        //            var themesInProgram = entityDto.Subjects
-        //                .SelectMany(s => s.Themes)
-        //                .GroupBy(t => t.Name)
-        //                .Select(g => g.FirstOrDefault())
-        //                .Where(t => t != null)
-        //                .ToList();
-
-        //            if ((await themeService.ModifyThemesForEducationProgram(themesInProgram))
-        //                .IsNotSuccess(out ActionResponse<List<ThemeDto>> themesResponse, out themesInProgram))
-        //            {
-        //                return await ActionResponse<EducationProgramDto>.ReturnError(themesResponse.Message);
-        //            }
-
-        //            var subjectsInProgram = entityDto.Subjects
-        //                .Select(s => {
-        //                    s.EducationProgramId = entityDto.Id;
-        //                    s.Themes.ForEach(t => t.Id = themesInProgram
-        //                        .FirstOrDefault(tip => tip.Name == t.Name).Id);
-        //                    return s;
-        //                })
-        //                .ToList();
-
-        //            if ((await subjectService.ModifySubjectsForEducationProgram(subjectsInProgram)).IsNotSuccess(out ActionResponse<List<SubjectDto>> subjectResponse, out List<SubjectDto> modifiedSubjects))
-        //            {
-        //                return await ActionResponse<EducationProgramDto>.ReturnError(subjectResponse.Message);
-        //            }
-
-        //            entityDto.Plan.EducationPogramId = entityDto.Id;
-        //            if ((await planService.InsertPlanForEducationProgram(entityDto)).IsNotSuccess(out ActionResponse<EducationProgramDto> planResponse, out entityDto))
-        //            {
-        //                return planResponse;
-        //            }
-
-        //            scope.Complete();
-        //            return await ActionResponse<EducationProgramDto>
-        //                .ReturnSuccess(entityDto);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        loggerService.LogErrorToEventLog(ex, entityDto);
-        //        return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom upisivanja programa.");
-        //    }
-        //}
-
-        #endregion Unused
     }
 }

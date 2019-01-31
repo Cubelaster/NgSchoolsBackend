@@ -96,6 +96,27 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<PagedResult<StudentDto>>> GetBySearchQuery(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<StudentDto> students = new List<StudentDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<StudentDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out students))
+                {
+                    students = (await GetAll()).GetData();
+                }
+
+                var pagedResult = await students.AsQueryable().GetBySearchQuery(pagedRequest);
+                return await ActionResponse<PagedResult<StudentDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<StudentDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za studente.");
+            }
+        }
+
         public async Task<ActionResponse<PagedResult<StudentDto>>> GetAllPaged(BasePagedRequest pagedRequest)
         {
             try

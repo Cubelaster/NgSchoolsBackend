@@ -13,6 +13,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<StudentDto>> GetById(int id);
         Task<ActionResponse<StudentDto>> GetByOib(string oib);
         Task<ActionResponse<List<StudentDto>>> GetAll();
+        Task<ActionResponse<PagedResult<StudentDto>>> GetBySearchQuery(BasePagedRequest pagedRequest);
         Task<ActionResponse<PagedResult<StudentDto>>> GetAllPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<StudentDto>> Insert(StudentDto entityDto);
         Task<ActionResponse<StudentDto>> Update(StudentDto entityDto);

@@ -341,3 +341,9 @@
 			"SubjectName": "fsdfs", "SubjectId": 4029, "TeacherId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb"}
 		]
 }
+
+// Student/GetBySearchQuery
+
+{
+	"SearchQuery": "Dav"
+}

@@ -7,6 +7,7 @@
         User,
         ClassType,
         ClassLocation,
-        Student
+        Student,
+        EducationProgram
     }
 }

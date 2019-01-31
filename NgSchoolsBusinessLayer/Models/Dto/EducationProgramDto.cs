@@ -1,12 +1,16 @@
-﻿using System;
+﻿using NgSchoolsBusinessLayer.Enums;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
 using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
+    [Cached(CacheKeysEnum.EducationProgram)]
     public class EducationProgramDto
     {
         public int? Id { get; set; }
+        [Searchable]
         public string Name { get; set; }
+        [Searchable]
         public string ShorthandName { get; set; }
         public double? ProgramDuration { get; set; }
         public string ProgramDurationTextual { get; set; }

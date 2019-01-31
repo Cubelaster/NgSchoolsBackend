@@ -55,10 +55,13 @@ namespace NgSchoolsBusinessLayer.Extensions
                         .Where(p => p.GetCustomAttributes().OfType<Searchable>().Any())
                         .ToList();
 
-                    query = query
+                    if (searchableProperties.Any())
+                    {
+                        query = query
                         .Where(q => searchableProperties
                             .Any(p => p.GetValue(q).ToString()
                             .Contains(pagedRequest.SearchQuery, StringComparison.OrdinalIgnoreCase)));
+                    }
                 }
 
                 result.RowCount = query.Count();
@@ -72,6 +75,43 @@ namespace NgSchoolsBusinessLayer.Extensions
                 );
 
 
+                return result;
+            }
+
+            return new PagedResult<T>
+            {
+                Results = new List<T>()
+            };
+        }
+
+        public static async Task<PagedResult<T>> GetBySearchQuery<T>(this IQueryable<T> query, BasePagedRequest pagedRequest) where T : class
+        {
+            Type objectType = query.FirstOrDefault()?.GetType();
+            if (objectType != null)
+            {
+                List<PropertyInfo> searchableProperties;
+                if (!string.IsNullOrEmpty(pagedRequest.SearchQuery))
+                {
+                    searchableProperties = objectType
+                        .GetProperties()
+                        .Where(p => p.GetCustomAttributes().OfType<Searchable>().Any())
+                        .ToList();
+
+                    if (searchableProperties.Any())
+                    {
+                        query = query
+                        .Where(q => searchableProperties
+                            .Any(p => p.GetValue(q).ToString()
+                            .Contains(pagedRequest.SearchQuery, StringComparison.OrdinalIgnoreCase)));
+                    }
+                }
+
+                var result = new PagedResult<T>
+                {
+                    RowCount = query.Count()
+                };
+
+                result.Results = await Task.FromResult(query.ToList());
                 return result;
             }
 
