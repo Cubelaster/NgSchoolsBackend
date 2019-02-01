@@ -39,7 +39,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<Student>().FindBy(c => c.Id == id, includeProperties: "Photo,Files.File");
+                var entity = unitOfWork.GetGenericRepository<Student>()
+                    .FindBy(c => c.Id == id, includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entity));
             }
@@ -54,7 +55,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<Student>().FindBy(c => c.Oib == oib, includeProperties: "Photo,Files.File");
+                var entity = unitOfWork.GetGenericRepository<Student>()
+                    .FindBy(c => c.Oib == oib, includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entity));
             }
@@ -70,7 +72,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var allEntities = unitOfWork.GetGenericRepository<Student>().GetAll(includeProperties: "Photo,Files.File");
+                var allEntities = unitOfWork.GetGenericRepository<Student>()
+                    .GetAll(includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
                 return await ActionResponse<List<StudentDto>>.ReturnSuccess(
                     mapper.Map<List<Student>, List<StudentDto>>(allEntities));
             }
@@ -85,9 +88,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entities = unitOfWork.GetGenericRepository<Student>().GetAll(includeProperties: "Photo,Files.File");
+                var allEntities = unitOfWork.GetGenericRepository<Student>()
+                    .GetAll(includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
                 return await ActionResponse<List<StudentDto>>
-                    .ReturnSuccess(mapper.Map<List<Student>, List<StudentDto>>(entities));
+                    .ReturnSuccess(mapper.Map<List<Student>, List<StudentDto>>(allEntities));
             }
             catch (Exception ex)
             {
@@ -158,7 +162,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
 
                 await cacheService.RefreshCache<List<StudentDto>>();
-                return await ActionResponse<StudentDto>.ReturnSuccess(entityDto);
+
+                if((await cacheService.GetFromCache<List<StudentDto>>())
+                    .IsNotSuccess(out ActionResponse<List<StudentDto>> cacheResponse, 
+                        out List<StudentDto> students))
+                {
+                    return await ActionResponse<StudentDto>.ReturnError("Greška prilikom povrata podataka studenta.");
+                }
+
+                return await ActionResponse<StudentDto>.ReturnSuccess(students.FirstOrDefault(s => s.Id == entityDto.Id));
             }
             catch (Exception ex)
             {
@@ -194,7 +206,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<StudentDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<StudentDto>.ReturnError("Greška prilikom ažuriranja podataka za studenta.");
             }
         }
 

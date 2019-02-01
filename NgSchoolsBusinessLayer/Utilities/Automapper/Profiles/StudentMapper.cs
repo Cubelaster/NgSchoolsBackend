@@ -10,12 +10,19 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         public StudentMapper()
         {
             CreateMap<Student, StudentDto>()
-                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.Photo))
                 .ForMember(dest => dest.Files, opt => opt.MapFrom(src => src.Files.Select(sf => new FileDto { Id = sf.File.Id, FileName = sf.File.FileName })));
 
             CreateMap<StudentDto, Student>()
                 .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(src => src.Photo != null ? src.Photo.Id : null))
-                .ForMember(dest => dest.Photo, opt => opt.Ignore());
+                .ForMember(dest => dest.AddressCity, opt => opt.Ignore())
+                .ForMember(dest => dest.AddressCountry, opt => opt.Ignore())
+                .ForMember(dest => dest.AddressRegion, opt => opt.Ignore())
+                .ForMember(dest => dest.EmployerAddress, opt => opt.Ignore())
+                .ForMember(dest => dest.EmployerCity, opt => opt.Ignore())
+                .ForMember(dest => dest.EmployerCountry, opt => opt.Ignore())
+                .ForMember(dest => dest.StudentsInGroups, opt => opt.Ignore())
+                .ForMember(dest => dest.Photo, opt => opt.Ignore())
+                .ForMember(dest => dest.Files, opt => opt.Ignore());
 
             CreateMap<StudentFiles, StudentFileDto>().ReverseMap();
         }

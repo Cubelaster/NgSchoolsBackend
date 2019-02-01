@@ -29,9 +29,14 @@ namespace NgSchoolsDataLayer.Models
         public string MothersFullName { get; set; }
         public string Gender { get; set; }
         public string AddressStreet { get; set; }
-        public string AddressCity { get; set; }
-        public string AddressCounty { get; set; }
-        public string AddressCountry { get; set; }
+
+        public int? AddressCountryId { get; set; }
+        public virtual Country AddressCountry { get; set; }
+        public int? AddressCityId { get; set; }
+        public virtual City AddressCity { get; set; }
+        public int? AddressRegionId { get; set; }
+        public virtual Region AddressRegion { get; set; }
+
         public string AddressMuncipality { get; set; }
         public string Mobile { get; set; }
         public string Email { get; set; }
@@ -56,6 +61,17 @@ namespace NgSchoolsDataLayer.Models
         public string SchoolLevel { get; set; }
         public bool Gdpr { get; set; }
         public string Notes { get; set; }
+
+        public int? EmployerCountryId { get; set; }
+        public virtual Country EmployerCountry { get; set; }
+        public int? EmployerCityId { get; set; }
+        public virtual City EmployerCity { get; set; }
+        public int? EmployerRegionId { get; set; }
+        public virtual Region EmployerRegion { get; set; }
+        public string EmployerAddress { get; set; }
+        public string EmployerPhone { get; set; }
+        public string EmployerMobile { get; set; }
+        public string EmployerEmail { get; set; }
 
         public ICollection<StudentsInGroups> StudentsInGroups { get; set; }
         public ICollection<StudentFiles> Files { get; set; }
