@@ -12,6 +12,5 @@ namespace NgSchoolsDataLayer.Models
         public string NameDomestic { get; set; }
 
         public virtual ICollection<City> Cities { get; set; }
-        public virtual Institution Institution { get; set; }
     }
 }

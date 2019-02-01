@@ -450,3 +450,15 @@
 //Location/GetAllCitiesPaged
 //Location/GetCitiesBySearchQuery
 //Location/DeleteCity
+
+//ClassLocations/Insert
+{
+	"Name": "ClassLocation 2",
+	"Address": "Bla",
+	"CityId": 53,
+	"Email": "Bla23",
+	"Telephone": "U3",
+	"Address": "Adresa3",
+	"CountryId": 518,
+	"RegionId": 47
+}

@@ -39,7 +39,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<ClassLocations>().FindBy(c => c.Id == id);
+                var entity = unitOfWork.GetGenericRepository<ClassLocations>()
+                    .FindBy(c => c.Id == id, includeProperties: "Country, Region, City");
                 return await ActionResponse<ClassLocationsDto>
                     .ReturnSuccess(mapper.Map<ClassLocations, ClassLocationsDto>(entity));
             }
@@ -54,7 +55,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entities = unitOfWork.GetGenericRepository<ClassLocations>().GetAll();
+                var entities = unitOfWork.GetGenericRepository<ClassLocations>()
+                    .GetAll(includeProperties: "Country, Region, City");
                 return await ActionResponse<List<ClassLocationsDto>>
                     .ReturnSuccess(mapper.Map<List<ClassLocations>, List<ClassLocationsDto>>(entities));
             }
@@ -66,11 +68,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         }
 
         [CacheRefreshSource(typeof(ClassLocationsDto))]
-        public async Task<ActionResponse<List<ClassLocationsDto>>> GetAllUsersForCache()
+        public async Task<ActionResponse<List<ClassLocationsDto>>> GetAllForCache()
         {
             try
             {
-                var allClassLocations = unitOfWork.GetGenericRepository<ClassLocations>().GetAll();
+                var allClassLocations = unitOfWork.GetGenericRepository<ClassLocations>()
+                    .GetAll(includeProperties: "Country, Region, City");
                 return await ActionResponse<List<ClassLocationsDto>>.ReturnSuccess(
                     mapper.Map<List<ClassLocations>, List<ClassLocationsDto>>(allClassLocations));
             }

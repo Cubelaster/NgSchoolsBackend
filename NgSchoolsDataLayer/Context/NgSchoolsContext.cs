@@ -104,12 +104,27 @@ namespace NgSchoolsDataLayer.Context
 
             builder.Entity<Institution>()
                 .HasOne(i => i.Region)
-                .WithOne(r => r.Institution)
+                .WithOne()
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Institution>()
                 .HasOne(i => i.Country)
-                .WithOne(r => r.Institution)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ClassLocations>()
+                .HasOne(cl => cl.Country)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ClassLocations>()
+                .HasOne(cl => cl.City)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<ClassLocations>()
+                .HasOne(cl => cl.Region)
+                .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
