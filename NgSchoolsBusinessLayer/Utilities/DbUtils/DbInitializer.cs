@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using NgSchoolsBusinessLayer.Utilities.DbUtils.Contracts;
 using NgSchoolsDataLayer.Context;
 using NgSchoolsDataLayer.Models;
+using System;
 
 namespace NgSchoolsBusinessLayer.Utilities.DbUtils
 {
@@ -11,14 +12,14 @@ namespace NgSchoolsBusinessLayer.Utilities.DbUtils
         private readonly NgSchoolsContext dbContext;
         private readonly UserManager<User> userManager;
 
-        public DbInitializer(NgSchoolsContext dbContext, UserManager<User> userManager)
-        {
-            this.dbContext = dbContext;
-            this.userManager = userManager;
-        }
-
         public void Initialize(IConfigurationRoot Configuration)
         {
+            throw new System.NotImplementedException();
+        }
+
+        public static void Initialize(NgSchoolsContext context)
+        {
+            throw new NotImplementedException();
         }
     }
 }
