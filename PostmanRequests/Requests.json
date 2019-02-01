@@ -408,14 +408,14 @@
 //Location/GetRegionById
 //Location/InsertRegion
 {
-	"Name": "Ime",
+	"Region": "Ime",
 	"CountryId": 1,
 	"NameDomestic": ""
 }
 //Location/UpdateRegion
 {
 	"Id": 1,
-	"Name": "Ime",
+	"Region": "Ime",
 	"CountryId": 1,
 	"NameDomestic": ""
 }
@@ -427,7 +427,7 @@
 //Location/GetCityById
 //Location/InsertCity
 {
-	"Name": "Ime",
+	"City": "Ime",
 	"NameDomestic": "Ime",
 	"RegionId": 1,
 	"CountryId": 1,
@@ -437,7 +437,7 @@
 //Location/UpdateCity
 {
 	"Id": 1,
-	"Name": "Ime",
+	"City": "Ime",
 	"NameDomestic": "Ime",
 	"RegionId": 1,
 	"CountryId": 1,
