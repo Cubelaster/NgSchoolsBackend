@@ -220,32 +220,34 @@
 // Institution/Insert
 
 {
-	"City": "Zaprešić",
-	"InstitutionClassFirstPart": "12",
-	"InstitutionClassSecondPart": "12",
-	"InstitutionCode": "123",
-	"InstitutionUrNumber": "12",
-	"Logo": {
-		"Id": 1,
-		"FileName": "apf21920.jpg"
-	},
 	"Name": "Institucija",
-	"PrincipalId": "5863f206-5681-435d-6b10-08d652bdcec8",
-	"currentYear": "19"
+	"InstitutionCode": "Bla",
+	"CityId": 51,
+	"InstitutionClassFirstPart": "Bla2",
+	"InstitutionClassSecondPart": "Bla3",
+	"InstitutionUrNumber": "Ur",
+	"Address": "Adresa",
+	"LogoId": 1,
+	"PrincipalId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
+	"CountryId": 517,
+	"RegionId": 46
 }
 
 // Institution/Update
 
 {
-	"Id": 12,
-	"City": "Zaprešić",
-	"InstitutionClassFirstPart": "12",
-	"InstitutionClassSecondPart": "12",
-	"InstitutionCode": "123",
-	"InstitutionUrNumber": "113",
-	"Name": "Institucija",
-	"PrincipalId": "5863f206-5681-435d-6b10-08d652bdcec8",
-	"currentYear": "19"
+	"Id": 1015,
+	"Name": "Institucija 2",
+	"InstitutionCode": "Bla",
+	"CityId": 52,
+	"InstitutionClassFirstPart": "Bla23",
+	"InstitutionClassSecondPart": "Bla33",
+	"InstitutionUrNumber": "U3",
+	"Address": "Adresa3",
+	"LogoId": 1,
+	"PrincipalId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
+	"CountryId": 518,
+	"RegionId": 47
 }
 
 // User/Update

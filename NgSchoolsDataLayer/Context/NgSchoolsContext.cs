@@ -101,6 +101,16 @@ namespace NgSchoolsDataLayer.Context
                 .HasOne(c => c.Region)
                 .WithMany(r => r.Cities)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Institution>()
+                .HasOne(i => i.Region)
+                .WithOne(r => r.Institution)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Institution>()
+                .HasOne(i => i.Country)
+                .WithOne(r => r.Institution)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

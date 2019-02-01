@@ -33,7 +33,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var institution = unitOfWork.GetGenericRepository<Institution>()
-                    .GetAll(includeProperties: "Principal").FirstOrDefault();
+                    .GetAll(includeProperties: "Principal,Country,Region").FirstOrDefault();
                 return await ActionResponse<InstitutionDto>
                     .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institution));
             }
@@ -53,13 +53,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 unitOfWork.GetContext().Entry(institutionToAdd).Reference(p => p.Principal).Load();
                 unitOfWork.GetContext().Entry(institutionToAdd).Reference(p => p.Logo).Load();
+                unitOfWork.GetContext().Entry(institutionToAdd).Reference(p => p.Country).Load();
+                unitOfWork.GetContext().Entry(institutionToAdd).Reference(p => p.Region).Load();
+                unitOfWork.GetContext().Entry(institutionToAdd).Reference(p => p.City).Load();
                 return await ActionResponse<InstitutionDto>
                     .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institutionToAdd));
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<InstitutionDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<InstitutionDto>.ReturnError("Greška prilikom dohvata podataka za instituciju.");
             }
         }
 
@@ -72,6 +75,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 unitOfWork.GetContext().Entry(institutionToUpdate).Reference(p => p.Principal).Load();
                 unitOfWork.GetContext().Entry(institutionToUpdate).Reference(p => p.Logo).Load();
+                unitOfWork.GetContext().Entry(institutionToUpdate).Reference(p => p.Country).Load();
+                unitOfWork.GetContext().Entry(institutionToUpdate).Reference(p => p.Region).Load();
+                unitOfWork.GetContext().Entry(institutionToUpdate).Reference(p => p.City).Load();
                 return await ActionResponse<InstitutionDto>
                     .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institutionToUpdate));
             }

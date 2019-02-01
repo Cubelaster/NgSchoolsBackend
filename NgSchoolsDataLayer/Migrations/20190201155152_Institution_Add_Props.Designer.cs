@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190201155152_Institution_Add_Props")]
+    partial class Institution_Add_Props
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -441,7 +443,8 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<string>("Address");
 
-                    b.Property<int>("CityId");
+                    b.Property<string>("City")
+                        .IsRequired();
 
                     b.Property<int>("CountryId");
 
@@ -474,8 +477,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<int>("Status");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CityId");
 
                     b.HasIndex("CountryId")
                         .IsUnique();
@@ -1202,11 +1203,6 @@ namespace NgSchoolsDataLayer.Migrations
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Institution", b =>
                 {
-                    b.HasOne("NgSchoolsDataLayer.Models.City", "City")
-                        .WithMany()
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("NgSchoolsDataLayer.Models.Country", "Country")
                         .WithOne("Institution")
                         .HasForeignKey("NgSchoolsDataLayer.Models.Institution", "CountryId")

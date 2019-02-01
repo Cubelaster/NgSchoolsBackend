@@ -13,17 +13,23 @@ namespace NgSchoolsDataLayer.Models
         [Required]
         public string InstitutionCode { get; set; }
         [Required]
-        public string City { get; set; }
+        public int CityId { get; set; }
+        public virtual City City { get; set; }
         [Required]
         public string InstitutionClassFirstPart { get; set; }
         [Required]
         public string InstitutionClassSecondPart { get; set; }
         [Required]
         public string InstitutionUrNumber { get; set; }
+        public string Address { get; set; }
 
         public int? LogoId { get; set; }
-        public UploadedFile Logo { get; set; }
+        public virtual UploadedFile Logo { get; set; }
         public Guid? PrincipalId { get; set; }
         public User Principal { get; set; }
+        public int CountryId { get; set; }
+        public virtual Country Country { get; set; }
+        public int RegionId { get; set; }
+        public virtual Region Region { get; set; }
     }
 }
