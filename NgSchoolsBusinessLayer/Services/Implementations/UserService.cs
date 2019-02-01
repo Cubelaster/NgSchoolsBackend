@@ -60,14 +60,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll(includeProperties: "Roles.Role");
+                var allUsers = unitOfWork.GetGenericRepository<User>()
+                    .GetAll(includeProperties: "Roles.Role,UserDetails.Avatar,UserDetails.Signature");
                 return await ActionResponse<List<UserDto>>
                     .ReturnSuccess(mapper.Map<List<User>, List<UserDto>>(allUsers));
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<UserDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<List<UserDto>>.ReturnError("Greška prilikom dohvata podataka za korisnike.");
             }
         }
 
@@ -87,7 +88,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<UserViewModel>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<List<UserViewModel>>.ReturnError("Greška prilikom dohvata podataka za korisnike.");
             }
         }
 
@@ -96,14 +97,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var allUsers = unitOfWork.GetGenericRepository<User>().GetAll(includeProperties: "Roles.Role, UserDetails");
+                var allUsers = unitOfWork.GetGenericRepository<User>()
+                    .GetAll(includeProperties: "Roles.Role,UserDetails.Avatar,UserDetails.Signature");
                 return await ActionResponse<List<UserDto>>.ReturnSuccess(
                     mapper.Map<List<User>, List<UserDto>>(allUsers));
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<UserDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<List<UserDto>>.ReturnError("Greška prilikom dohvata podataka za korisnika.");
             }
         }
 
@@ -111,7 +113,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var user = unitOfWork.GetGenericRepository<User>().FindBy(u => u.Email == email, includeProperties: "Roles.Role, UserDetails");
+                var user = unitOfWork.GetGenericRepository<User>()
+                    .FindBy(u => u.Email == email, includeProperties: "Roles.Role,UserDetails.Avatar,UserDetails.Signature");
                 return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
             }
             catch (Exception ex)
@@ -125,7 +128,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var user = unitOfWork.GetGenericRepository<User>().FindBy(u => u.Id == userId, includeProperties: "Roles.Role, UserDetails");
+                var user = unitOfWork.GetGenericRepository<User>()
+                    .FindBy(u => u.Id == userId, includeProperties: "Roles.Role,UserDetails.Avatar,UserDetails.Signature");
                 return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
             }
             catch (Exception ex)
@@ -188,8 +192,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<UserViewModel>>
-                    .ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<PagedResult<UserViewModel>>.ReturnError("Greška prilikom dohvata podataka korisnika.");
             }
         }
 
@@ -263,7 +266,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, request);
-                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<UserViewModel>.ReturnError("Dogodila se greška, molimo kontaktirajte svog administratora.");
             }
             finally
             {
