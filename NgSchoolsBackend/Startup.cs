@@ -46,6 +46,8 @@ namespace NgSchoolsBackend
         {
             services.AddMemoryCache();
 
+            services.AddHttpClient();
+
             services.AddDbContext<NgSchoolsContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"),
                 opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
@@ -113,6 +115,7 @@ namespace NgSchoolsBackend
 
             CreateDefaultRoles(serviceProvider).Wait();
             CreateDefaultUsers(serviceProvider).Wait();
+            FillGeoData(serviceProvider).Wait();
         }
 
         private void ConfigureFileServer(IApplicationBuilder app)
@@ -247,9 +250,10 @@ namespace NgSchoolsBackend
             }
         }
 
-        //private async Task FillGeoData()
-        //{
-        //    return null;
-        //}
+        private async Task FillGeoData(IServiceProvider serviceProvider)
+        {
+            var locationService = serviceProvider.GetService<ILocationService>();
+            await locationService.SeedLocationData();
+        }
     }
 }

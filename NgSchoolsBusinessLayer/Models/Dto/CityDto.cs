@@ -8,7 +8,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
     {
         public int? Id { get; set; }
         [Searchable]
-        public string Name { get; set; }
+        public string City { get; set; }
         [Searchable]
         public string NameDomestic { get; set; }
         public string Latitude { get; set; }

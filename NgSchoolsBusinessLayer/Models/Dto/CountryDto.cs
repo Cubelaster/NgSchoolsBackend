@@ -13,7 +13,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         [Searchable]
         public string NameDomestic { get; set; }
         [Searchable]
-        public string Alpha2Code { get; set; }
+        public string Code { get; set; }
         [Searchable]
         public string Alpha3Code { get; set; }
         [Searchable]

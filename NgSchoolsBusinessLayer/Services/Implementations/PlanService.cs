@@ -299,7 +299,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 planDays.ForEach(async pd =>
                 {
                     if ((await AddDayToPlan(pd))
-                    .IsNotSuccess(out ActionResponse<PlanDayDto> actionResponse, out pd))
+                        .IsNotSuccess(out ActionResponse<PlanDayDto> actionResponse, out pd))
                     {
                         response = await ActionResponse<List<PlanDayDto>>.ReturnError(actionResponse.Message);
                         return;

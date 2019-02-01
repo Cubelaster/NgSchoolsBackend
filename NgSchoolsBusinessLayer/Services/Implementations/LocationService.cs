@@ -9,8 +9,10 @@ using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
@@ -23,14 +25,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
+        private readonly IHttpClientFactory httpClientFactory;
+        private readonly string battutaBaseUrl = "http://battuta.medunes.net/api/";
+        private readonly string battutaApiKey = "key=ee64538820e420c329c5f164c550336b";
+        private readonly object myLock = new object();
 
         public LocationService(IMapper mapper, ILoggerService loggerService, IUnitOfWork unitOfWork,
-            ICacheService cacheService)
+            ICacheService cacheService, IHttpClientFactory httpClientFactory)
         {
             this.mapper = mapper;
             this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
+            this.httpClientFactory = httpClientFactory;
         }
 
         #endregion Ctors and Members
@@ -131,6 +138,53 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<CountryDto>.ReturnError("Greška prilikom dohvata države.");
+            }
+        }
+
+        public async Task<ActionResponse<CountryDto>> GetCountryByCode(string alpha2Code)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<Country>()
+                    .FindBy(c => c.Alpha2Code == alpha2Code, includeProperties: "Regions.Cities,Cities");
+                return await ActionResponse<CountryDto>
+                    .ReturnSuccess(mapper.Map<Country, CountryDto>(entity));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<CountryDto>.ReturnError("Greška prilikom dohvata države.");
+            }
+        }
+
+        public async Task<ActionResponse<List<CountryDto>>> InsertCountries(List<CountryDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<CountryDto>>.ReturnSuccess(entityDtos, "Države uspješno dodane.");
+                entityDtos.ForEach(async country =>
+                {
+                    if ((await InsertCountry(country))
+                        .IsNotSuccess(out ActionResponse<CountryDto> actionResponse, out country))
+                    {
+                        response = await ActionResponse<List<CountryDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDtos);
+                return await ActionResponse<List<CountryDto>>.ReturnError($"Greška prilikom upisa države.");
+            }
+            finally
+            {
+                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
+                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
+                var cityTask = cacheService.RefreshCache<List<CityDto>>();
+
+                await Task.WhenAll(countryTask, regionTask, cityTask);
             }
         }
 
@@ -359,6 +413,37 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<List<RegionDto>>> InsertRegions(List<RegionDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<RegionDto>>.ReturnSuccess(entityDtos, "Regije uspješno dodane.");
+                entityDtos.ForEach(async region =>
+                {
+                    if ((await InsertRegion(region))
+                        .IsNotSuccess(out ActionResponse<RegionDto> actionResponse, out region))
+                    {
+                        response = await ActionResponse<List<RegionDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDtos);
+                return await ActionResponse<List<RegionDto>>.ReturnError($"Greška prilikom upisa regija.");
+            }
+            finally
+            {
+                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
+                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
+                var cityTask = cacheService.RefreshCache<List<CityDto>>();
+
+                await Task.WhenAll(countryTask, regionTask, cityTask);
+            }
+        }
+
         [CacheRefreshSource(typeof(RegionDto))]
         public async Task<ActionResponse<List<RegionDto>>> GetAllRegionsForCache()
         {
@@ -503,6 +588,62 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<List<CityDto>>> InsertCitiesForRegion(RegionDto region)
+        {
+            try
+            {
+                if ((await GetCitiesForCountryCodeAndRegionBattuta("hr", region.Region))
+                    .IsNotSuccess(out ActionResponse<List<CityDto>> citiesResponse, out List<CityDto> cities))
+                {
+                    return await ActionResponse<List<CityDto>>.ReturnError(citiesResponse.Message);
+                }
+
+                cities.ForEach(city =>
+                {
+                    city.CountryId = region.CountryId;
+                    city.RegionId = region.Id;
+                });
+
+                return await InsertCities(cities);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, region);
+                return await ActionResponse<List<CityDto>>.ReturnError($"Greška prilikom upisa gradova za regiju.");
+            }
+        }
+
+        public async Task<ActionResponse<List<CityDto>>> InsertCities(List<CityDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<CityDto>>.ReturnSuccess(entityDtos, "Gradovi uspješno dodani.");
+                entityDtos.ForEach(async city =>
+                {
+                    if ((await InsertCity(city))
+                        .IsNotSuccess(out ActionResponse<CityDto> actionResponse, out city))
+                    {
+                        response = await ActionResponse<List<CityDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDtos);
+                return await ActionResponse<List<CityDto>>.ReturnError($"Greška prilikom upisa gradova.");
+            }
+            finally
+            {
+                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
+                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
+                var cityTask = cacheService.RefreshCache<List<CityDto>>();
+
+                await Task.WhenAll(countryTask, regionTask, cityTask);
+            }
+        }
+
         public async Task<ActionResponse<CityDto>> UpdateCity(CityDto entityDto)
         {
             try
@@ -546,5 +687,150 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         }
 
         #endregion City
+
+        #region BattutaClient
+
+        public async Task<ActionResponse<List<CountryDto>>> GetAllCountriesBattuta()
+        {
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{battutaBaseUrl}country/all/?{battutaApiKey}");
+                var client = httpClientFactory.CreateClient();
+                var response = await client.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var countriesData = await response.Content.ReadAsAsync<List<CountryDto>>();
+                    return await ActionResponse<List<CountryDto>>.ReturnSuccess(countriesData);
+                }
+                return await ActionResponse<List<CountryDto>>.ReturnError("Greška kod dohvata podataka svih država s online referenta." + response.ReasonPhrase);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<CountryDto>>.ReturnError("Greška prilikom dohvata svih država s battute.");
+            }
+        }
+
+        public async Task<ActionResponse<List<RegionDto>>> GetRegionsForCountryCodeBattuta(string countryCode)
+        {
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{battutaBaseUrl}region/{countryCode}/all/?{battutaApiKey}");
+                var client = httpClientFactory.CreateClient();
+                var response = await client.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var regionsData = await response.Content.ReadAsAsync<List<RegionDto>>();
+                    return await ActionResponse<List<RegionDto>>.ReturnSuccess(regionsData);
+                }
+                return await ActionResponse<List<RegionDto>>.ReturnError("Greška kod dohvata podataka regija sa online referenta." + response.ReasonPhrase);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<RegionDto>>.ReturnError("Greška prilikom dohvata svih država s battute.");
+            }
+        }
+
+        public async Task<ActionResponse<List<CityDto>>> GetCitiesForCountryCodeAndRegionBattuta(string countryCode, string regionHint)
+        {
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, $"{battutaBaseUrl}city/{countryCode}/search/?region={regionHint}&{battutaApiKey}");
+                var client = httpClientFactory.CreateClient();
+                var response = await client.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var citiesData = await response.Content.ReadAsAsync<List<CityDto>>();
+                    return await ActionResponse<List<CityDto>>.ReturnSuccess(citiesData);
+                }
+                return await ActionResponse<List<CityDto>>.ReturnError("Greška kod dohvata podataka gradova sa online referenta." + response.ReasonPhrase);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<CityDto>>.ReturnError("Greška prilikom dohvata gradova s battute.");
+            }
+        }
+
+        public async Task<ActionResponse<List<CountryDto>>> SeedLocationData()
+        {
+            try
+            {
+                if ((await GetAllCountries()).IsNotSuccess(out ActionResponse<List<CountryDto>> getResponse, out List<CountryDto> countries))
+                {
+                    return getResponse;
+                }
+
+                if (countries.Count < 1)
+                {
+                    if ((await GetAllCountriesBattuta()).IsNotSuccess(out getResponse, out countries))
+                    {
+                        return getResponse;
+                    }
+
+                    if ((await InsertCountries(countries)).IsNotSuccess(out getResponse, out countries))
+                    {
+                        return getResponse;
+                    }
+                }
+
+                if ((await GetCountryByCode("hr")).IsNotSuccess(out ActionResponse<CountryDto> croResponse, out CountryDto croatia))
+                {
+                    return await ActionResponse<List<CountryDto>>.ReturnError(croResponse.Message);
+                }
+
+                if ((await GetAllRegions()).IsNotSuccess(out ActionResponse<List<RegionDto>> getRegionResponse, out List<RegionDto> regions))
+                {
+                    return await ActionResponse<List<CountryDto>>.ReturnError(getResponse.Message);
+                }
+
+                if (regions.Count < 1)
+                {
+                    if ((await GetRegionsForCountryCodeBattuta(croatia.Code)).IsNotSuccess(out getRegionResponse, out regions))
+                    {
+                        return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
+                    }
+
+                    regions.ForEach(reg =>
+                    {
+                        reg.CountryId = croatia.Id;
+                    });
+
+                    if ((await InsertRegions(regions)).IsNotSuccess(out getRegionResponse, out regions))
+                    {
+                        return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
+                    }
+                }
+
+                if ((await GetAllCities()).IsNotSuccess(out ActionResponse<List<CityDto>> citiesResponse, out List<CityDto> cities))
+                {
+                    return await ActionResponse<List<CountryDto>>.ReturnError(citiesResponse.Message);
+                }
+
+                if (cities.Count < 1)
+                {
+                    foreach(var region in regions)
+                    {
+                        if((await InsertCitiesForRegion(region)).IsNotSuccess(out citiesResponse, out cities))
+                        {
+                            return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
+                        }
+                    }
+                }
+
+                return getResponse;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<CountryDto>>.ReturnError("Greška prilikom dohvata svih država s battute.");
+            }
+        }
+
+        #endregion BattutaClient
     }
 }

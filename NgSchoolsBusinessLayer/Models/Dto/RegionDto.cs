@@ -10,7 +10,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int? Id { get; set; }
         public int? CountryId { get; set; }
         [Searchable]
-        public string Name { get; set; }
+        public string Region { get; set; }
         [Searchable]
         public string NameDomestic { get; set; }
 
