@@ -9,6 +9,7 @@ using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
@@ -34,7 +35,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<BusinessPartner>().FindBy(c => c.Id == id);
+                var entity = unitOfWork.GetGenericRepository<BusinessPartner>()
+                    .FindBy(c => c.Id == id, includeProperties: "BusinessPartnerContacts");
                 return await ActionResponse<BusinessPartnerDto>
                     .ReturnSuccess(mapper.Map<BusinessPartner, BusinessPartnerDto>(entity));
             }
@@ -49,7 +51,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entities = unitOfWork.GetGenericRepository<BusinessPartner>().GetAll();
+                var entities = unitOfWork.GetGenericRepository<BusinessPartner>()
+                    .GetAll(includeProperties: "BusinessPartnerContacts");
                 return await ActionResponse<List<BusinessPartnerDto>>
                     .ReturnSuccess(mapper.Map<List<BusinessPartner>, List<BusinessPartnerDto>>(entities));
             }
@@ -65,7 +68,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<BusinessPartner>()
-                    .GetAllAsQueryable().GetPaged(pagedRequest);
+                    .GetAllAsQueryable(includeProperties: "BusinessPartnerContacts").GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<BusinessPartnerDto>
                 {
@@ -89,11 +92,21 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                List<ContactPersonDto> contacts = new List<ContactPersonDto>(entityDto.BusinessPartnerContacts);
+
                 var entityToAdd = mapper.Map<BusinessPartnerDto, BusinessPartner>(entityDto);
                 unitOfWork.GetGenericRepository<BusinessPartner>().Add(entityToAdd);
                 unitOfWork.Save();
-                return await ActionResponse<BusinessPartnerDto>
-                    .ReturnSuccess(mapper.Map<BusinessPartner, BusinessPartnerDto>(entityToAdd));
+                mapper.Map(entityToAdd, entityDto);
+                entityDto.BusinessPartnerContacts = contacts;
+
+                if((await ModifyBusinessPartnerContacts(entityDto))
+                    .IsNotSuccess(out ActionResponse<BusinessPartnerDto> contactResponse, out entityDto))
+                {
+                    return contactResponse;
+                }
+
+                return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(entityDto);
             }
             catch (Exception ex)
             {
@@ -106,11 +119,22 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                List<ContactPersonDto> contacts = new List<ContactPersonDto>(entityDto.BusinessPartnerContacts);
+
                 var entityToUpdate = mapper.Map<BusinessPartnerDto, BusinessPartner>(entityDto);
                 unitOfWork.GetGenericRepository<BusinessPartner>().Update(entityToUpdate);
                 unitOfWork.Save();
-                return await ActionResponse<BusinessPartnerDto>
-                    .ReturnSuccess(mapper.Map<BusinessPartner, BusinessPartnerDto>(entityToUpdate));
+
+                mapper.Map(entityToUpdate, entityDto);
+                entityDto.BusinessPartnerContacts = contacts;
+
+                if ((await ModifyBusinessPartnerContacts(entityDto))
+                    .IsNotSuccess(out ActionResponse<BusinessPartnerDto> contactResponse, out entityDto))
+                {
+                    return contactResponse;
+                }
+
+                return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(entityDto);
             }
             catch (Exception ex)
             {
@@ -131,6 +155,180 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<BusinessPartnerDto>.ReturnError("Some sort of fuckup!");
+            }
+        }
+
+        public async Task<ActionResponse<BusinessPartnerDto>> ModifyBusinessPartnerContacts(BusinessPartnerDto entityDto)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<BusinessPartner>()
+                    .FindBy(e => e.Id == entityDto.Id, includeProperties: "BusinessPartnerContacts");
+
+                var currentContacts = mapper.Map<List<ContactPerson>, List<ContactPersonDto>>(entity.BusinessPartnerContacts.ToList());
+
+                var newContacts = entityDto.BusinessPartnerContacts
+                    .Select(c =>
+                    {
+                        c.BusinessPartnerId = entityDto.Id;
+                        return c;
+                    }).ToList();
+
+                var contactsToRemove = currentContacts.Where(cet => !newContacts
+                    .Select(f => f.Id).Contains(cet.Id)).ToList();
+
+                var contactsToAdd = newContacts
+                    .Where(nt => !currentContacts.Select(cd => cd.Id).Contains(nt.Id))
+                    .Select(c =>
+                    {
+                        c.BusinessPartnerId = entityDto.Id;
+                        return c;
+                    }).ToList();
+
+                var contactsToModify = newContacts.Where(cd => currentContacts
+                    .Select(nd => nd.Id).Contains(cd.Id)).ToList();
+
+                if ((await RemoveContacts(contactsToRemove))
+                    .IsNotSuccess(out ActionResponse<List<ContactPersonDto>> removeResponse))
+                {
+                    return await ActionResponse<BusinessPartnerDto>.ReturnError("Neuspješno micanje kontakata za poslovnog partnera.");
+                }
+
+                if ((await AddContacts(contactsToAdd)).IsNotSuccess(out ActionResponse<List<ContactPersonDto>> addResponse, out contactsToAdd))
+                {
+                    return await ActionResponse<BusinessPartnerDto>.ReturnError("Neuspješno dodavanje kontakata za poslovnog partnera.");
+                }
+
+                if ((await ModifyContacts(contactsToModify)).IsNotSuccess(out ActionResponse<List<ContactPersonDto>> modifyResponse, out contactsToAdd))
+                {
+                    return await ActionResponse<BusinessPartnerDto>.ReturnError("Neuspješno ažuriranje kontakata za poslovnog partnera.");
+                }
+
+                return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni dokumenti studenta.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<BusinessPartnerDto>.ReturnError($"Greška prilikom ažuriranja kontakata za poslovnog partnera.");
+            }
+        }
+
+        public async Task<ActionResponse<List<ContactPersonDto>>> RemoveContacts(List<ContactPersonDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<ContactPersonDto>>.ReturnSuccess(null, "Dani uspješno maknuti iz plana.");
+                entityDtos.ForEach(async pd =>
+                {
+                    if ((await RemoveContact(pd))
+                        .IsNotSuccess(out ActionResponse<ContactPersonDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<ContactPersonDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDtos);
+                return await ActionResponse<List<ContactPersonDto>>.ReturnError("Greška prilikom brisanja kontakata za poslovnog partnera.");
+            }
+        }
+
+        public async Task<ActionResponse<ContactPersonDto>> RemoveContact(ContactPersonDto entityDto)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<ContactPerson>().Delete(entityDto.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<ContactPersonDto>.ReturnSuccess(null, "Kontakt za poslovnog partnera uspješno izbrisan obrisan.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<ContactPersonDto>.ReturnError("Greška prilikom brisanja kontakta za poslovnog partnera.");
+            }
+        }
+
+        public async Task<ActionResponse<List<ContactPersonDto>>> AddContacts(List<ContactPersonDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<ContactPersonDto>>.ReturnSuccess(null, "Kontakti uspješno dodani.");
+                entityDtos.ForEach(async pd =>
+                {
+                    if ((await AddContact(pd))
+                        .IsNotSuccess(out ActionResponse<ContactPersonDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<ContactPersonDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDtos);
+                return await ActionResponse<List<ContactPersonDto>>.ReturnError("Greška prilikom brisanja kontakata za poslovnog partnera.");
+            }
+        }
+
+        public async Task<ActionResponse<ContactPersonDto>> AddContact(ContactPersonDto entityDto)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<ContactPersonDto, ContactPerson>(entityDto);
+                unitOfWork.GetGenericRepository<ContactPerson>().Add(entityToAdd);
+                unitOfWork.Save();
+                mapper.Map(entityToAdd, entityDto);
+                return await ActionResponse<ContactPersonDto>.ReturnSuccess(entityDto, "Kontakt za poslovnog partnera uspješno dodan.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<ContactPersonDto>.ReturnError("Greška prilikom dodavanja kontakta za poslovnog partnera.");
+            }
+        }
+
+        public async Task<ActionResponse<List<ContactPersonDto>>> ModifyContacts(List<ContactPersonDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<ContactPersonDto>>.ReturnSuccess(null, "Kontakti uspješno ažurirani.");
+                entityDtos.ForEach(async pd =>
+                {
+                    if ((await ModifyContact(pd))
+                        .IsNotSuccess(out ActionResponse<ContactPersonDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<ContactPersonDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDtos);
+                return await ActionResponse<List<ContactPersonDto>>.ReturnError("Greška prilikom brisanja kontakata za poslovnog partnera.");
+            }
+        }
+
+        public async Task<ActionResponse<ContactPersonDto>> ModifyContact(ContactPersonDto entityDto)
+        {
+            try
+            {
+                var entityToUpdate = unitOfWork.GetGenericRepository<ContactPerson>().FindBy(c => c.Id == entityDto.Id.Value);
+                mapper.Map<ContactPersonDto, ContactPerson>(entityDto, entityToUpdate);
+                unitOfWork.GetGenericRepository<ContactPerson>().Update(entityToUpdate);
+                unitOfWork.Save();
+                mapper.Map(entityToUpdate, entityDto);
+                return await ActionResponse<ContactPersonDto>.ReturnSuccess(entityDto, "Kontakt za poslovnog partnera uspješno ažuriran.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<ContactPersonDto>.ReturnError("Greška prilikom ažuriranja kontakta za poslovnog partnera.");
             }
         }
     }

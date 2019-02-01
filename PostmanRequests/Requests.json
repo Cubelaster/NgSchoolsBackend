@@ -578,3 +578,48 @@
 	"CountryId": 518,
 	"RegionId": 47
 }
+
+//BusinessPartner/Insert
+
+{
+	"Name": "Name",
+	"City": "City",
+	"Phone": "Phone",
+	"Mobile": "Mobile",
+	"Email": "Email",
+	"Oib": "Oib",
+	"Address": "Address",
+	"BusinessPartnerContacts": [
+		{
+			"FullName": "FullName",
+			"Mobile": "Mobile",
+			"Email": "Email"
+		}	
+	]
+}
+
+//BusinessPartner/Update
+
+{
+	"Id": 1008,
+	"Name": "1008",
+	"City": "City",
+	"Phone": "Phone",
+	"Mobile": "Mobile",
+	"Email": "Email",
+	"Oib": "Oib",
+	"Address": "Address",
+	"BusinessPartnerContacts": [
+		{
+			"Id": 2,
+			"FullName": "Name",
+			"Mobile": "Mobile",
+			"Email": "Email"
+		},
+		{
+			"FullName": "FullName2",
+			"Mobile": "Mobile",
+			"Email": "Email"
+		}
+	]
+}

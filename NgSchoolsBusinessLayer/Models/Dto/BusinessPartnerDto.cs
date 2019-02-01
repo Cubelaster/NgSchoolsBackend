@@ -13,6 +13,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Oib { get; set; }
         public string Address { get; set; }
 
-        public List<ContactPersonDto> ContactPeople { get; set; }
+        public List<ContactPersonDto> BusinessPartnerContacts { get; set; }
     }
 }
