@@ -1,4 +1,6 @@
-﻿namespace NgSchoolsBusinessLayer.Models.Dto
+﻿using System.Collections.Generic;
+
+namespace NgSchoolsBusinessLayer.Models.Dto
 {
     public class BusinessPartnerDto
     {
@@ -10,5 +12,7 @@
         public string Email { get; set; }
         public string Oib { get; set; }
         public string Address { get; set; }
+
+        public List<ContactPersonDto> ContactPeople { get; set; }
     }
 }

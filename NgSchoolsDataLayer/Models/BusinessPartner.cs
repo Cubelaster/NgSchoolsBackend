@@ -1,4 +1,5 @@
 ﻿using NgSchoolsDataLayer.Models.BaseTypes;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
@@ -15,5 +16,7 @@ namespace NgSchoolsDataLayer.Models
         public string Email { get; set; }
         public string Oib { get; set; }
         public string Address { get; set; }
+
+        public virtual ICollection<ContactPerson> BusinessPartnerContacts { get; set; }
     }
 }

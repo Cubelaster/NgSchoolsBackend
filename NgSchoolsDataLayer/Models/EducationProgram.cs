@@ -1,4 +1,5 @@
 ﻿using NgSchoolsDataLayer.Models.BaseTypes;
+using System;
 using System.Collections.Generic;
 
 namespace NgSchoolsDataLayer.Models
@@ -11,10 +12,7 @@ namespace NgSchoolsDataLayer.Models
         public double? ProgramDuration { get; set; }
         public string ProgramDurationTextual { get; set; }
         public double? ProgramDurationDays { get; set; }
-        public string FinishedSchool { get; set; }
         public string ProgramDate { get; set; }
-        public double? TheoreticalClassesDuration { get; set; }
-        public double? PracticalClassesDuration { get; set; }
         public string ApprovalClass { get; set; }
         public string UrNumber { get; set; }
         public string ComplexityLevel { get; set; }
@@ -24,6 +22,15 @@ namespace NgSchoolsDataLayer.Models
         public string ProgramCompetencies { get; set; }
         public string PerformingWay { get; set; }
         public string KnoweledgeVerification { get; set; }
+
+        public DateTime? AgencyProgramDate { get; set; }
+        public string AgencyApprovalClass { get; set; }
+        public string AgencyUrNumber { get; set; }
+        public string RegularClassesTeoretical { get; set; }
+        public string RegularClassesPractical { get; set; }
+        public string CIClassesGroup { get; set; }
+        public string CIClassesIndividual { get; set; }
+        public string CIClassesPractical { get; set; }
 
         public ICollection<Subject> Subjects { get; set; }
     }

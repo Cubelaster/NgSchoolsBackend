@@ -10,7 +10,10 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         {
             CreateMap<BusinessPartner, BusinessPartnerDto>();
 
-            CreateMap<BusinessPartnerDto, BusinessPartner>();
+            CreateMap<BusinessPartnerDto, BusinessPartner>()
+                .ForMember(dest => dest.BusinessPartnerContacts, opt => opt.Ignore());
+
+            CreateMap<ContactPerson, ContactPersonDto>().ReverseMap();
         }
     }
 }

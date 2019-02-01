@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190201181911_BusinessPartner_Modify_Props")]
+    partial class BusinessPartner_Modify_Props
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,6 +124,25 @@ namespace NgSchoolsDataLayer.Migrations
                     b.ToTable("BusinessPartners");
                 });
 
+            modelBuilder.Entity("NgSchoolsDataLayer.Models.BusinessPartnerContacts", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("BusinessPartnerId");
+
+                    b.Property<int>("ContactPersonId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessPartnerId");
+
+                    b.HasIndex("ContactPersonId");
+
+                    b.ToTable("BusinessPartnerContacts");
+                });
+
             modelBuilder.Entity("NgSchoolsDataLayer.Models.City", b =>
                 {
                     b.Property<int>("Id")
@@ -222,26 +243,15 @@ namespace NgSchoolsDataLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("BusinessPartnerId");
-
-                    b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime?>("DateModified");
-
                     b.Property<string>("Email");
 
                     b.Property<string>("FullName");
 
                     b.Property<string>("Mobile");
 
-                    b.Property<int>("Status");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessPartnerId");
-
-                    b.ToTable("ContactPeople");
+                    b.ToTable("ContactPerson");
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Country", b =>
@@ -409,19 +419,7 @@ namespace NgSchoolsDataLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("AgencyApprovalClass");
-
-                    b.Property<DateTime?>("AgencyProgramDate");
-
-                    b.Property<string>("AgencyUrNumber");
-
                     b.Property<string>("ApprovalClass");
-
-                    b.Property<string>("CIClassesGroup");
-
-                    b.Property<string>("CIClassesIndividual");
-
-                    b.Property<string>("CIClassesPractical");
 
                     b.Property<string>("ComplexityLevel");
 
@@ -432,11 +430,15 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<string>("EnrollmentConditions");
 
+                    b.Property<string>("FinishedSchool");
+
                     b.Property<string>("KnoweledgeVerification");
 
                     b.Property<string>("Name");
 
                     b.Property<string>("PerformingWay");
+
+                    b.Property<double?>("PracticalClassesDuration");
 
                     b.Property<string>("ProgramCompetencies");
 
@@ -450,13 +452,11 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<string>("ProgramJustifiability");
 
-                    b.Property<string>("RegularClassesPractical");
-
-                    b.Property<string>("RegularClassesTeoretical");
-
                     b.Property<string>("ShorthandName");
 
                     b.Property<int>("Status");
+
+                    b.Property<double?>("TheoreticalClassesDuration");
 
                     b.Property<string>("UrNumber");
 
@@ -465,32 +465,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("EducationPrograms");
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.EducationProgramClassType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ClassTypeId");
-
-                    b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<DateTime?>("DateModified");
-
-                    b.Property<int>("EducationProgramId");
-
-                    b.Property<int>("Status");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ClassTypeId");
-
-                    b.HasIndex("EducationProgramId");
-
-                    b.ToTable("EducationProgramClassTypes");
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.ExamCommission", b =>
@@ -1257,6 +1231,19 @@ namespace NgSchoolsDataLayer.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("NgSchoolsDataLayer.Models.BusinessPartnerContacts", b =>
+                {
+                    b.HasOne("NgSchoolsDataLayer.Models.BusinessPartner", "BusinessPartner")
+                        .WithMany("BusinessPartnerContacts")
+                        .HasForeignKey("BusinessPartnerId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("NgSchoolsDataLayer.Models.ContactPerson", "ContactPerson")
+                        .WithMany()
+                        .HasForeignKey("ContactPersonId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("NgSchoolsDataLayer.Models.City", b =>
                 {
                     b.HasOne("NgSchoolsDataLayer.Models.Country", "Country")
@@ -1286,14 +1273,6 @@ namespace NgSchoolsDataLayer.Migrations
                         .WithMany()
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Restrict);
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.ContactPerson", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.BusinessPartner", "BusinessPartner")
-                        .WithMany("BusinessPartnerContacts")
-                        .HasForeignKey("BusinessPartnerId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Diary", b =>
@@ -1329,19 +1308,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasOne("NgSchoolsDataLayer.Models.StudentGroup", "StudentGroup")
                         .WithMany()
                         .HasForeignKey("StudentGroupId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.EducationProgramClassType", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.ClassType", "ClassType")
-                        .WithMany()
-                        .HasForeignKey("ClassTypeId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("NgSchoolsDataLayer.Models.EducationProgram", "EducationProgram")
-                        .WithMany()
-                        .HasForeignKey("EducationProgramId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
