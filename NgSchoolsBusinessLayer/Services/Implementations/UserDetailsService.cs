@@ -130,6 +130,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 else
                 {
                     userDetailsEntity.Avatar = null;
+                    userDetailsEntity.AvatarId = null;
                 }
 
                 if (userDetails.Signature != null)
@@ -139,6 +140,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 else
                 {
                     userDetailsEntity.Signature = null;
+                    userDetailsEntity.SignatureId = null;
                 }
 
                 unitOfWork.GetGenericRepository<UserDetails>().Update(userDetailsEntity);
