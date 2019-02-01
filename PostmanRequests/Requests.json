@@ -347,3 +347,104 @@
 {
 	"SearchQuery": "Dav"
 }
+
+// EducationProgram/GetBySearchQuery
+{
+	"SearchQuery": "Cache Test"
+}
+
+//Location/InsertCountry
+{
+    "Name": "Insert Test",
+	"NameDomestic": "",
+	"Alpha2Code": "HR",
+	"Alpha3Code": "",
+	"UnCode": 0,
+	"CountryCallingCode": 0,
+	"InternationalDiallingPrefix": 0,
+}
+
+//Location/UpdateCountry
+
+{
+	"Id": 1,
+    "Name": "Update Test",
+	"NameDomestic": "",
+	"Alpha2Code": "HR",
+	"Alpha3Code": "",
+	"UnCode": 0,
+	"CountryCallingCode": 0,
+	"InternationalDiallingPrefix": 0,
+}
+
+//Location/GetCountryById 
+{
+	"Id": 1
+}
+
+//Location/GetAllCountries
+
+//Location/GetAllCountriesPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0
+}
+
+//Location/GetCountriesBySearchQuery
+{
+	"SearchQuery": ""
+}
+
+//Location/DeleteCountry
+{
+	"Id": 1
+}
+
+//Location/GetRegionById
+//Location/InsertRegion
+{
+	"Name": "Ime",
+	"CountryId": 1,
+	"NameDomestic": ""
+}
+//Location/UpdateRegion
+{
+	"Id": 1,
+	"Name": "Ime",
+	"CountryId": 1,
+	"NameDomestic": ""
+}
+//Location/GetAllRegions
+//Location/GetAllRegionsPaged
+//Location/GetRegionsBySearchQuery
+//Location/DeleteRegion
+
+//Location/GetCityById
+//Location/InsertCity
+{
+	"Name": "Ime",
+	"NameDomestic": "Ime",
+	"RegionId": 1,
+	"CountryId": 1,
+	"Latitude": "",
+	"Longtitude": ""
+}
+//Location/UpdateCity
+{
+	"Id": 1,
+	"Name": "Ime",
+	"NameDomestic": "Ime",
+	"RegionId": 1,
+	"CountryId": 1,
+	"Latitude": "",
+	"Longtitude": ""
+}
+//Location/GetAllCities
+//Location/GetAllCitiesPaged
+//Location/GetCitiesBySearchQuery
+//Location/DeleteCity

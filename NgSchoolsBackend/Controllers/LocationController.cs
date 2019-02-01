@@ -38,7 +38,7 @@ namespace NgSchoolsWebApi.Controllers
 
         // TODO: Authorize
         [HttpPost]
-        public async Task<ActionResponse<CountryDto>> Update([FromBody] CountryDto entityDto)
+        public async Task<ActionResponse<CountryDto>> UpdateCountry([FromBody] CountryDto entityDto)
         {
             return await locationService.UpdateCountry(entityDto);
         }
@@ -88,7 +88,7 @@ namespace NgSchoolsWebApi.Controllers
 
         // TODO: Authorize
         [HttpPost]
-        public async Task<ActionResponse<RegionDto>> Update([FromBody] RegionDto entityDto)
+        public async Task<ActionResponse<RegionDto>> UpdateRegion([FromBody] RegionDto entityDto)
         {
             return await locationService.UpdateRegion(entityDto);
         }
@@ -138,7 +138,7 @@ namespace NgSchoolsWebApi.Controllers
 
         // TODO: Authorize
         [HttpPost]
-        public async Task<ActionResponse<CityDto>> Update([FromBody] CityDto entityDto)
+        public async Task<ActionResponse<CityDto>> UpdateCity([FromBody] CityDto entityDto)
         {
             return await locationService.UpdateCity(entityDto);
         }
