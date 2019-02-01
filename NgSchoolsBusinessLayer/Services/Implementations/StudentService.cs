@@ -146,7 +146,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<FileDto> files = new List<FileDto>(entityDto.Files);
+                List<FileDto> files = entityDto.Files != null ? new List<FileDto>(entityDto.Files) : new List<FileDto>();
                 entityDto.Files = null;
 
                 var entityToAdd = mapper.Map<StudentDto, Student>(entityDto);
