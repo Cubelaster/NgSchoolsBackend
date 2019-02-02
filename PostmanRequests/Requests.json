@@ -46,15 +46,18 @@
     "WorkingEnvironment": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
     "ProgramCompetencies": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
     "PerformingWay": "<p>Način izvođenja</p>\n<p>&nbsp;</p>",
-    "KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>"
+    "KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>",
+    "ClassTypes": [{
+    	"Id" : 2
+    }]
 }
 
 // EducationProgram/Update
 
 {
-	"Id": 6023,
+	"Id": 8033,
     "Name": "Program 1",
-    "ShorthandName": "PR2",
+    "ShorthandName": "PR1",
     "ProgramDuration": 120,
     "ProgramDurationTextual": "stodvadeset",
     "ProgramDurationDays": 3,
@@ -70,7 +73,13 @@
     "WorkingEnvironment": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
     "ProgramCompetencies": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
     "PerformingWay": "<p>Način izvođenja</p>\n<p>&nbsp;</p>",
-    "KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>"
+    "KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>",
+    "ClassTypes": [{
+    	"Id" : 3
+    },
+    {
+    	"Id" : 2
+    }]
 }
 
 // Subject/Insert

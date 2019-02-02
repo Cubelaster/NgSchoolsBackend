@@ -47,7 +47,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .FindBy(c => c.Id == id, includeProperties: "Subjects.Themes");
+                    .FindBy(c => c.Id == id, includeProperties: "Subjects.Themes,EducationProgramClassTypes.ClassType");
                 return await ActionResponse<EducationProgramDto>
                     .ReturnSuccess(mapper.Map<EducationProgram, EducationProgramDto>(entity));
             }
@@ -63,7 +63,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .GetAll(includeProperties: "Subjects.Themes");
+                    .GetAll(includeProperties: "Subjects.Themes,EducationProgramClassTypes.ClassType");
                 return await ActionResponse<List<EducationProgramDto>>
                     .ReturnSuccess(mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(entities));
             }
@@ -80,7 +80,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var allEntities = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .GetAll(includeProperties: "Subjects.Themes");
+                    .GetAll(includeProperties: "Subjects.Themes,EducationProgramClassTypes.ClassType");
                 return await ActionResponse<List<EducationProgramDto>>.ReturnSuccess(
                     mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(allEntities));
             }
@@ -137,16 +137,31 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                List<ClassTypeDto> classTypes = entityDto.ClassTypes != null ?
+                    new List<ClassTypeDto>(entityDto.ClassTypes) : new List<ClassTypeDto>();
+
                 var entityToAdd = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
                 unitOfWork.GetGenericRepository<EducationProgram>().Add(entityToAdd);
                 unitOfWork.Save();
-                return await ActionResponse<EducationProgramDto>
-                    .ReturnSuccess(mapper.Map(entityToAdd, entityDto));
+                mapper.Map(entityToAdd, entityDto);
+                entityDto.ClassTypes = classTypes;
+
+                if ((await ModifyClassTypes(entityDto))
+                    .IsNotSuccess(out ActionResponse<EducationProgramDto> ctResponse, out entityDto))
+                {
+                    return ctResponse;
+                }
+
+                entityToAdd = unitOfWork.GetGenericRepository<EducationProgram>()
+                    .FindBy(e => e.Id == entityToAdd.Id, 
+                    includeProperties: "Subjects.Themes,EducationProgramClassTypes.ClassType");
+
+                return await ActionResponse<EducationProgramDto>.ReturnSuccess(mapper.Map(entityToAdd, entityDto));
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom ažuriranja programa.");
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom upisa programa.");
             }
             finally
             {
@@ -158,11 +173,27 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                List<ClassTypeDto> classTypes = entityDto.ClassTypes != null ?
+                    new List<ClassTypeDto>(entityDto.ClassTypes) : new List<ClassTypeDto>();
+
                 var entityToUpdate = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
                 unitOfWork.GetGenericRepository<EducationProgram>().Update(entityToUpdate);
                 unitOfWork.Save();
-                return await ActionResponse<EducationProgramDto>
-                    .ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
+
+                mapper.Map(entityToUpdate, entityDto);
+                entityDto.ClassTypes = classTypes;
+
+                if ((await ModifyClassTypes(entityDto))
+                    .IsNotSuccess(out ActionResponse<EducationProgramDto> ctResponse, out entityDto))
+                {
+                    return ctResponse;
+                }
+
+                entityToUpdate = unitOfWork.GetGenericRepository<EducationProgram>()
+                    .FindBy(e => e.Id == entityToUpdate.Id,
+                    includeProperties: "Subjects.Themes,EducationProgramClassTypes.ClassType");
+
+                return await ActionResponse<EducationProgramDto>.ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
             }
             catch (Exception ex)
             {
@@ -192,6 +223,128 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             finally
             {
                 await cacheService.RefreshCache<List<EducationProgramDto>>();
+            }
+        }
+
+        public async Task<ActionResponse<EducationProgramDto>> ModifyClassTypes(EducationProgramDto entityDto)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<EducationProgram>()
+                    .FindBy(e => e.Id == entityDto.Id, includeProperties: "EducationProgramClassTypes.ClassType");
+
+                var currentClassTypes = mapper.Map<List<EducationProgramClassType>, List<EducationProgramClassTypeDto>>(
+                    entity.EducationProgramClassTypes.ToList());
+
+                var newClassTypes = entityDto.ClassTypes;
+
+                var classTypesToRemove = currentClassTypes
+                    .Where(cet => !newClassTypes.Select(f => f.Id).Contains(cet.ClassTypeId))
+                    .ToList();
+
+                var classTypesToAdd = newClassTypes
+                    .Where(nt => !currentClassTypes.Select(uec => uec.ClassTypeId).Contains(nt.Id))
+                    .Select(sf => new EducationProgramClassTypeDto
+                    {
+                        ClassTypeId = sf.Id,
+                        EducationProgramId = entityDto.Id
+                    }).ToList();
+
+                if ((await RemoveClassTypes(classTypesToRemove))
+                    .IsNotSuccess(out ActionResponse<List<EducationProgramClassTypeDto>> removeResponse))
+                {
+                    return await ActionResponse<EducationProgramDto>.ReturnError("Neuspješno micanje tipova nastave s edukacijskog programa.");
+                }
+
+                if ((await AddClassTypes(classTypesToAdd)).IsNotSuccess(out ActionResponse<List<EducationProgramClassTypeDto>> addResponse, out classTypesToAdd))
+                {
+                    return await ActionResponse<EducationProgramDto>.ReturnError("Neuspješno dodavanje tipova nastave edukacijskom programu.");
+                }
+                return await ActionResponse<EducationProgramDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni tipovi nastave edukacijskog programa.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom izmjene tipova nastave edukacijskog programa.");
+            }
+        }
+
+        public async Task<ActionResponse<List<EducationProgramClassTypeDto>>> RemoveClassTypes(List<EducationProgramClassTypeDto> entities)
+        {
+            try
+            {
+                var response = await ActionResponse<List<EducationProgramClassTypeDto>>.ReturnSuccess(null, "Datoteke uspješno maknute sa studenta.");
+                entities.ForEach(async ct =>
+                {
+                    if ((await RemoveClassType(ct))
+                        .IsNotSuccess(out ActionResponse<EducationProgramClassTypeDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<EducationProgramClassTypeDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entities);
+                return await ActionResponse<List<EducationProgramClassTypeDto>>.ReturnError("Greška prilikom micanja vrsta nastave s edukacijskog programa.");
+            }
+        }
+
+        public async Task<ActionResponse<EducationProgramClassTypeDto>> RemoveClassType(EducationProgramClassTypeDto entity)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<EducationProgramClassType>().Delete(entity.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<EducationProgramClassTypeDto>.ReturnSuccess(null, "Vrsta nastave uspješno izbrisana iz edukacijskog programa.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entity);
+                return await ActionResponse<EducationProgramClassTypeDto>.ReturnError("Greška prilikom brisanja vrste nastave iz edukacijskog programa.");
+            }
+        }
+
+        public async Task<ActionResponse<List<EducationProgramClassTypeDto>>> AddClassTypes(List<EducationProgramClassTypeDto> entities)
+        {
+            try
+            {
+                var response = await ActionResponse<List<EducationProgramClassTypeDto>>.ReturnSuccess(null, "Vrste nastave uspješno dodane edukacijskom progreamu.");
+                entities.ForEach(async s =>
+                {
+                    if ((await AddClassType(s))
+                        .IsNotSuccess(out ActionResponse<EducationProgramClassTypeDto> actionResponse, out s))
+                    {
+                        response = await ActionResponse<List<EducationProgramClassTypeDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entities);
+                return await ActionResponse<List<EducationProgramClassTypeDto>>.ReturnError("Greška prilikom dodavanja vrsta nastave edukacijskom programu.");
+            }
+        }
+
+        public async Task<ActionResponse<EducationProgramClassTypeDto>> AddClassType(EducationProgramClassTypeDto eduCt)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<EducationProgramClassTypeDto, EducationProgramClassType>(eduCt);
+                unitOfWork.GetGenericRepository<EducationProgramClassType>().Add(entityToAdd);
+                unitOfWork.Save();
+                return await ActionResponse<EducationProgramClassTypeDto>
+                    .ReturnSuccess(mapper.Map<EducationProgramClassType, EducationProgramClassTypeDto>(entityToAdd),
+                    "Vrsta nastave uspješno dodana edukacijskom programu.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, eduCt);
+                return await ActionResponse<EducationProgramClassTypeDto>.ReturnError("Greška prilikom dodavanja vrste nastave edukacijskom programu.");
             }
         }
     }

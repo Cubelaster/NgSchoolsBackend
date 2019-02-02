@@ -31,6 +31,7 @@
     <Compile Remove="Migrations\20190131182808_Add_Location_Tables.cs" />
     <Compile Remove="Migrations\20190201154240_Institution_Add_Props.cs" />
     <Compile Remove="Migrations\20190201163330_ClassLocations_Modify_Props.cs" />
+    <Compile Remove="Migrations\20190202081918_Modify_EducationProgram_Add_Connection.cs" />
   </ItemGroup>
 
   <ItemGroup>
