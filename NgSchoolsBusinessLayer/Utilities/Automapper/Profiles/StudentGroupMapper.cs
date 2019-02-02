@@ -14,7 +14,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.StudentNames, opt => opt.MapFrom(src => src.StudentsInGroups.Select(sig => $"{sig.Student.FirstName} {sig.Student.LastName}")))
                 .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.StudentsInGroups.Select(sig => sig.Student)));
 
-            CreateMap<StudentGroupDto, StudentGroup>();
+            CreateMap<StudentGroupDto, StudentGroup>()
+                .ForMember(dest => dest.StudentGroupClassAttendances, opt => opt.Ignore());
 
             CreateMap<StudentsInGroups, StudentInGroupDto>()
                 .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.StudentGroupId))
@@ -22,6 +23,13 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ReverseMap();
 
             CreateMap<StudentGroupSubjectTeachers, StudentGroupSubjectTeachersDto>().ReverseMap();
+
+            CreateMap<StudentClassAttendance, StudentClassAttendanceDto>().ReverseMap();
+
+            CreateMap<StudentGroupClassAttendance, StudentGroupClassAttendanceDto>();
+
+            CreateMap<StudentGroupClassAttendanceDto, StudentGroupClassAttendance>()
+                .ForMember(dest => dest.StudentClassAttendances, opt => opt.Ignore());
         }
     }
 }

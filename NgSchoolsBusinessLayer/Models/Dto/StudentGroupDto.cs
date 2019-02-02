@@ -29,5 +29,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
 
         public int? ExamCommissionId { get; set; }
         public ExamCommissionDto ExamCommission { get; set; }
+
+        public List<StudentGroupClassAttendanceDto> StudentGroupClassAttendances { get; set; }
     }
 }

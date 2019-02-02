@@ -7,20 +7,33 @@
     "SecondExamDate": "2019-12-01",
     "Notes": "Exam Commission",
     "EnrolmentDate": "2019-12-01",
-	"ProgramId": 3006,
-	"EducationLeaderId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
+    "ProgramId": 3006,
     "ClassLocationId": 2004,
+    "EducationLeaderId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
     "StudentIds": [
     	1006, 1007, 1008
     	],
-    "ExamCommissionId": 3,
     "ExamCommission": {
-    	"Id": 3,
     	"Name": "Komisija",
     	"TeacherIds": [
     		"1a1bfa81-53ee-4cd3-c039-08d652b91ccb"
 		]
-    }
+    },
+    "StudentGroupClassAttendances": [
+    	{
+	    	"Date": "2019-01-01",
+	    	"StudentClassAttendances": [
+	    		{
+	    			"StudentId": 1006,
+	    			"Attendance": true
+	    		},
+	    		{
+	    			"StudentId": 1007,
+	    			"Attendance": false
+	    		}
+			]
+    	}
+	]
 }
 
 // StudentGroup/Update
@@ -47,7 +60,28 @@
     	"TeacherIds": [
     		"1a1bfa81-53ee-4cd3-c039-08d652b91ccb"
 		]
-    }
+    },
+    "StudentGroupClassAttendances": [
+    	{
+    		"Id": 8,
+	    	"StudentGroupId": 2012,
+	    	"Date": "2019-01-01",
+	    	"StudentClassAttendances": [
+	    		{
+	    			"Id": 10,
+	    			"StudentId": 1006,
+	    			"StudentGroupClassAttendanceId": 8,
+	    			"Attendance": true
+	    		},
+	    		{
+	    			"Id": 11,
+	    			"StudentId": 1007,
+	    			"StudentGroupClassAttendanceId": 8,
+	    			"Attendance": false
+	    		}
+			]
+    	}
+	]
 }
 
 // EducationProgram/Insert
