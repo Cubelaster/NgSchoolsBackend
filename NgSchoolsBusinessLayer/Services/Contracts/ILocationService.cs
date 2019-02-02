@@ -21,6 +21,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<PagedResult<CountryDto>>> GetCountriesBySearchQuery(BasePagedRequest pagedRequest);
         Task<ActionResponse<CountryDto>> DeleteCountry(int id);
         Task<ActionResponse<RegionDto>> GetRegionById(int id);
+        Task<ActionResponse<RegionDto>> GetRegionByCountryId(int id);
         Task<ActionResponse<RegionDto>> InsertRegion(RegionDto entityDto);
         Task<ActionResponse<RegionDto>> UpdateRegion(RegionDto entityDto);
         Task<ActionResponse<List<RegionDto>>> GetAllRegions();
@@ -28,6 +29,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<PagedResult<RegionDto>>> GetRegionsBySearchQuery(BasePagedRequest pagedRequest);
         Task<ActionResponse<RegionDto>> DeleteRegion(int id);
         Task<ActionResponse<CityDto>> GetCityById(int id);
+        Task<ActionResponse<CityDto>> GetCityByRegionId(int id);
         Task<ActionResponse<CityDto>> InsertCity(CityDto entityDto);
         Task<ActionResponse<CityDto>> UpdateCity(CityDto entityDto);
         Task<ActionResponse<List<CityDto>>> GetAllCities();

@@ -339,6 +339,22 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<RegionDto>> GetRegionByCountryId(int id)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<Region>()
+                    .FindBy(c => c.CountryId == id, includeProperties: "Cities");
+                return await ActionResponse<RegionDto>
+                    .ReturnSuccess(mapper.Map<Region, RegionDto>(entity));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<RegionDto>.ReturnError("Greška prilikom dohvata regije za državu.");
+            }
+        }
+
         public async Task<ActionResponse<PagedResult<RegionDto>>> GetRegionsBySearchQuery(BasePagedRequest pagedRequest)
         {
             try
@@ -559,6 +575,22 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<CityDto>.ReturnError("Greška prilikom dohvata države.");
+            }
+        }
+
+        public async Task<ActionResponse<CityDto>> GetCityByRegionId(int id)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<City>()
+                    .FindBy(c => c.RegionId == id);
+                return await ActionResponse<CityDto>
+                    .ReturnSuccess(mapper.Map<City, CityDto>(entity));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<CityDto>.ReturnError("Greška prilikom dohvata grada za regiju.");
             }
         }
 

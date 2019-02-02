@@ -79,6 +79,12 @@ namespace NgSchoolsWebApi.Controllers
             return await locationService.GetRegionById(request.Id);
         }
 
+        [HttpPost]
+        public async Task<ActionResponse<RegionDto>> GetRegionByCountryId(SimpleRequestBase request)
+        {
+            return await locationService.GetRegionByCountryId(request.Id);
+        }
+
         // TODO: Authorize
         [HttpPost]
         public async Task<ActionResponse<RegionDto>> InsertRegion([FromBody] RegionDto entityDto)
@@ -128,6 +134,14 @@ namespace NgSchoolsWebApi.Controllers
         {
             return await locationService.GetCityById(request.Id);
         }
+
+        // TODO: Authorize
+        [HttpPost]
+        public async Task<ActionResponse<CityDto>> GetCityByRegionId(SimpleRequestBase request)
+        {
+            return await locationService.GetCityByRegionId(request.Id);
+        }
+
 
         // TODO: Authorize
         [HttpPost]
