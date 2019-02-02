@@ -80,7 +80,7 @@ namespace NgSchoolsWebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResponse<RegionDto>> GetRegionsByCountryId(SimpleRequestBase request)
+        public async Task<ActionResponse<List<RegionDto>>> GetRegionsByCountryId(SimpleRequestBase request)
         {
             return await locationService.GetRegionsByCountryId(request.Id);
         }
@@ -137,7 +137,7 @@ namespace NgSchoolsWebApi.Controllers
 
         // TODO: Authorize
         [HttpPost]
-        public async Task<ActionResponse<CityDto>> GetCitiesByRegionId(SimpleRequestBase request)
+        public async Task<ActionResponse<List<CityDto>>> GetCitiesByRegionId(SimpleRequestBase request)
         {
             return await locationService.GetCitiesByRegionId(request.Id);
         }

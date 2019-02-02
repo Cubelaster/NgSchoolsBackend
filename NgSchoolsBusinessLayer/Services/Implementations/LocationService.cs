@@ -339,19 +339,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<RegionDto>> GetRegionsByCountryId(int id)
+        public async Task<ActionResponse<List<RegionDto>>> GetRegionsByCountryId(int id)
         {
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Region>()
                     .GetAll(c => c.CountryId == id, includeProperties: "Cities");
-                return await ActionResponse<RegionDto>
+                return await ActionResponse<List<RegionDto>>
                     .ReturnSuccess(mapper.Map<List<Region>, List<RegionDto>>(entity));
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<RegionDto>.ReturnError("Greška prilikom dohvata regije za državu.");
+                return await ActionResponse<List<RegionDto>>.ReturnError("Greška prilikom dohvata regija za državu.");
             }
         }
 
@@ -578,18 +578,18 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<CityDto>> GetCitiesByRegionId(int id)
+        public async Task<ActionResponse<List<CityDto>>> GetCitiesByRegionId(int id)
         {
             try
             {
                 var entity = unitOfWork.GetGenericRepository<City>().GetAll(c => c.RegionId == id);
-                return await ActionResponse<CityDto>
+                return await ActionResponse<List<CityDto>>
                     .ReturnSuccess(mapper.Map<List<City>, List<CityDto>>(entity));
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<CityDto>.ReturnError("Greška prilikom dohvata grada za regiju.");
+                return await ActionResponse<List<CityDto>>.ReturnError("Greška prilikom dohvata gradova za regiju.");
             }
         }
 
