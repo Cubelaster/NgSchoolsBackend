@@ -11,10 +11,19 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string FirstExamDate { get; set; }
         public string SecondExamDate { get; set; }
         public string Notes { get; set; }
+        public string EnrolmentDate { get; set; }
+
         public int ProgramId { get; set; }
+        public EducationProgramDto EducationProgram { get; set; }
+
         public int ClassLocationId { get; set; }
+        public ClassLocationsDto ClassLocation { get; set; }
+
         public List<int> StudentIds { get; set; }
         public List<string> Students { get; set; }
         public List<StudentGroupSubjectTeachersDto> SubjectTeachers { get; set; }
+
+        public int? ExamCommissionId { get; set; }
+        public ExamCommissionDto ExamCommission { get; set; }
     }
 }

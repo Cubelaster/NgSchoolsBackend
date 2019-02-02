@@ -15,6 +15,7 @@ namespace NgSchoolsDataLayer.Models
         public DateTime FirstExamDate { get; set; }
         public DateTime SecondExamDate { get; set; }
         public string Notes { get; set; }
+        public DateTime? EnrolmentDate { get; set; }
 
         [Required]
         public int ProgramId { get; set; }
@@ -25,5 +26,11 @@ namespace NgSchoolsDataLayer.Models
 
         public ICollection<StudentsInGroups> StudentsInGroups { get; set; }
         public ICollection<StudentGroupSubjectTeachers> SubjectTeachers { get; set; }
+
+        public Guid? EducationLeaderId { get; set; }
+        public virtual User EducationLeader { get; set; }
+
+        public int? ExamCommissionId { get; set; }
+        public virtual ExamCommission ExamCommission { get; set; }
     }
 }
