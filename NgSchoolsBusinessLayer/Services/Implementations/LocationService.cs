@@ -339,14 +339,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<RegionDto>> GetRegionByCountryId(int id)
+        public async Task<ActionResponse<RegionDto>> GetRegionsByCountryId(int id)
         {
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Region>()
-                    .FindBy(c => c.CountryId == id, includeProperties: "Cities");
+                    .GetAll(c => c.CountryId == id, includeProperties: "Cities");
                 return await ActionResponse<RegionDto>
-                    .ReturnSuccess(mapper.Map<Region, RegionDto>(entity));
+                    .ReturnSuccess(mapper.Map<List<Region>, List<RegionDto>>(entity));
             }
             catch (Exception ex)
             {
@@ -578,14 +578,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<CityDto>> GetCityByRegionId(int id)
+        public async Task<ActionResponse<CityDto>> GetCitiesByRegionId(int id)
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<City>()
-                    .FindBy(c => c.RegionId == id);
+                var entity = unitOfWork.GetGenericRepository<City>().GetAll(c => c.RegionId == id);
                 return await ActionResponse<CityDto>
-                    .ReturnSuccess(mapper.Map<City, CityDto>(entity));
+                    .ReturnSuccess(mapper.Map<List<City>, List<CityDto>>(entity));
             }
             catch (Exception ex)
             {
