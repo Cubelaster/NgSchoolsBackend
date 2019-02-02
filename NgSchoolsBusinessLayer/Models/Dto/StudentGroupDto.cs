@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
@@ -20,8 +21,11 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public ClassLocationsDto ClassLocation { get; set; }
 
         public List<int> StudentIds { get; set; }
-        public List<string> Students { get; set; }
+        public List<string> StudentNames { get; set; }
+        public List<StudentDto> Students { get; set; }
         public List<StudentGroupSubjectTeachersDto> SubjectTeachers { get; set; }
+
+        public Guid? EducationLeaderId { get; set; }
 
         public int? ExamCommissionId { get; set; }
         public ExamCommissionDto ExamCommission { get; set; }

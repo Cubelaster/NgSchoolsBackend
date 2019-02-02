@@ -11,7 +11,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         {
             CreateMap<StudentGroup, StudentGroupDto>()
                 .ForMember(dest => dest.StudentIds, opt => opt.MapFrom(src => src.StudentsInGroups.Select(sig => sig.StudentId)))
-                .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.StudentsInGroups.Select(sig => $"{sig.Student.FirstName} {sig.Student.LastName}")));
+                .ForMember(dest => dest.StudentNames, opt => opt.MapFrom(src => src.StudentsInGroups.Select(sig => $"{sig.Student.FirstName} {sig.Student.LastName}")))
+                .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.StudentsInGroups.Select(sig => sig.Student)));
 
             CreateMap<StudentGroupDto, StudentGroup>();
 

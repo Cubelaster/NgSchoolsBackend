@@ -104,8 +104,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     return actionResponse;
                 }
 
-                return await ActionResponse<ExamCommissionDto>
-                    .ReturnSuccess(mapper.Map<ExamCommission, ExamCommissionDto>(entityToAdd));
+                if ((await GetById(entityToAdd.Id)).IsNotSuccess(out actionResponse, out entityDto))
+                {
+                    return actionResponse;
+                }
+
+                return await ActionResponse<ExamCommissionDto>.ReturnSuccess(entityDto);
             }
             catch (Exception ex)
             {
@@ -125,8 +129,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     return response;
                 }
                 unitOfWork.Save();
-                return await ActionResponse<ExamCommissionDto>
-                    .ReturnSuccess(mapper.Map<ExamCommission, ExamCommissionDto>(entityToUpdate));
+
+                if ((await GetById(entityToUpdate.Id)).IsNotSuccess(out response, out entityDto))
+                {
+                    return response;
+                }
+
+                return await ActionResponse<ExamCommissionDto>.ReturnSuccess(entityDto);
             }
             catch (Exception ex)
             {

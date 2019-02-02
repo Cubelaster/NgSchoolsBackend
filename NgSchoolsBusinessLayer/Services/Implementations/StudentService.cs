@@ -40,7 +40,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Student>()
-                    .FindBy(c => c.Id == id, includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
+                    .FindBy(c => c.Id == id, 
+                    includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entity));
             }
@@ -163,8 +164,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 await cacheService.RefreshCache<List<StudentDto>>();
 
-                if((await cacheService.GetFromCache<List<StudentDto>>())
-                    .IsNotSuccess(out ActionResponse<List<StudentDto>> cacheResponse, 
+                if ((await cacheService.GetFromCache<List<StudentDto>>())
+                    .IsNotSuccess(out ActionResponse<List<StudentDto>> cacheResponse,
                         out List<StudentDto> students))
                 {
                     return await ActionResponse<StudentDto>.ReturnError("Greška prilikom povrata podataka studenta.");
@@ -186,10 +187,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 List<FileDto> files = new List<FileDto>(entityDto.Files);
                 entityDto.Files = null;
 
-                var entityToUpdate = mapper.Map<StudentDto, Student>(entityDto);
+                var entityToUpdate = unitOfWork.GetGenericRepository<Student>()
+                    .FindBy(c => c.Id == entityDto.Id, 
+                    includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
+
+                mapper.Map(entityDto, entityToUpdate);
                 unitOfWork.GetGenericRepository<Student>().Update(entityToUpdate);
                 unitOfWork.Save();
-                unitOfWork.GetContext().Entry(entityToUpdate).Reference(p => p.Photo).Load();
 
                 mapper.Map(entityToUpdate, entityDto);
                 entityDto.Files = files;
@@ -343,6 +347,29 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex, file);
                 return await ActionResponse<StudentFileDto>.ReturnError("Greška prilikom dodavanja datoteke studentu.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentDto>> UpdateEnrollmentDate(StudentDto entityDto)
+        {
+            try
+            {
+                if ((await GetById(entityDto.Id)).IsNotSuccess(out ActionResponse<StudentDto> getResponse, out StudentDto student))
+                {
+                    return getResponse;
+                }
+
+                if (string.IsNullOrEmpty(student.EnrolmentDate))
+                {
+                    student.EnrolmentDate = entityDto.EnrolmentDate.ToString();
+                }
+
+                return await Update(student);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<StudentDto>.ReturnError($"Greška prilikom ažuriranja datuma upisa za studenta.");
             }
         }
     }

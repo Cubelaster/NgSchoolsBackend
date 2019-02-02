@@ -22,13 +22,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IMapper mapper;
         private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
+        private readonly IExamCommissionService examCommissionService;
+        private readonly IStudentService studentService;
 
         public StudentGroupService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork, IExamCommissionService examCommissionService,
+            IStudentService studentService
+            )
         {
             this.mapper = mapper;
             this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
+            this.examCommissionService = examCommissionService;
+            this.studentService = studentService;
         }
 
         #endregion Ctors and Members
@@ -38,7 +44,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<StudentGroup>()
-                    .FindBy(c => c.Id == id, includeProperties: "StudentsInGroup.Student");
+                    .FindBy(c => c.Id == id,
+                    includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission");
                 return await ActionResponse<StudentGroupDto>
                     .ReturnSuccess(mapper.Map<StudentGroup, StudentGroupDto>(entity));
             }
@@ -54,7 +61,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<StudentGroup>()
-                    .GetAll(includeProperties: "StudentsInGroup.Student");
+                    .GetAll(includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission");
                 return await ActionResponse<List<StudentGroupDto>>
                     .ReturnSuccess(mapper.Map<List<StudentGroup>, List<StudentGroupDto>>(entities));
             }
@@ -70,7 +77,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<StudentGroup>()
-                    .GetAllAsQueryable(includeProperties: "StudentsInGroups.Student").GetPaged(pagedRequest);
+                    .GetAllAsQueryable(includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission")
+                    .GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<StudentGroupDto>
                 {
@@ -97,10 +105,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
                     List<int> studentIds = new List<int>(entityDto.StudentIds);
-                    entityDto.Students = null;
+                    entityDto.StudentNames = null;
 
-                    List<StudentGroupSubjectTeachersDto> subjectTeachers = new List<StudentGroupSubjectTeachersDto>(entityDto.SubjectTeachers);
+                    List<StudentGroupSubjectTeachersDto> subjectTeachers = entityDto.SubjectTeachers != null ?
+                        new List<StudentGroupSubjectTeachersDto>(entityDto.SubjectTeachers) : new List<StudentGroupSubjectTeachersDto>();
                     entityDto.SubjectTeachers = null;
+
+                    if ((await ModifyExamCommission(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> commissionResponse, out entityDto))
+                    {
+                        return commissionResponse;
+                    }
 
                     var entityToAdd = mapper.Map<StudentGroupDto, StudentGroup>(entityDto);
                     unitOfWork.GetGenericRepository<StudentGroup>().Add(entityToAdd);
@@ -119,17 +133,100 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return response;
                     }
 
-                    entityToAdd = unitOfWork.GetGenericRepository<StudentGroup>().FindBy(sg => sg.Id == entityDto.Id, includeProperties: "StudentsInGroups.Student,SubjectTeachers");
+                    if ((await GetById(entityToAdd.Id)).IsNotSuccess(out response, out entityDto))
+                    {
+                        return response;
+                    }
+
+                    if (!string.IsNullOrEmpty(entityDto.EnrolmentDate))
+                    {
+                        if ((await UpdateEnrolmentDate(entityDto)).IsNotSuccess(out response, out entityDto))
+                        {
+                            return response;
+                        }
+                    }
 
                     scope.Complete();
-                    return await ActionResponse<StudentGroupDto>
-                        .ReturnSuccess(mapper.Map<StudentGroup, StudentGroupDto>(entityToAdd), "Grupa studenata uspješno upisana.");
+                    return await ActionResponse<StudentGroupDto>.ReturnSuccess(entityDto, "Grupa studenata uspješno upisana.");
                 }
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom upisa grupe studenata.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentGroupDto>> UpdateEnrolmentDate(StudentGroupDto entityDto)
+        {
+            try
+            {
+                var response = await ActionResponse<StudentGroupDto>.ReturnSuccess(entityDto, "Datumi upisa za studente uspješno izmijenjeni.");
+                entityDto.Students.ForEach(async studentDto =>
+                {
+                    studentDto.EnrolmentDate = entityDto.EnrolmentDate;
+                    if ((await studentService.UpdateEnrollmentDate(studentDto)).IsNotSuccess(out ActionResponse<StudentDto> sUpResponse, out studentDto))
+                    {
+                        response = await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom izmjene datuima upisa za studente u grupi.");
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<StudentGroupDto>.ReturnError($"Greška prilikom ažuriranja datuma upisa za studente u grupi.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentGroupDto>> ModifyExamCommission(StudentGroupDto entityDto)
+        {
+            try
+            {
+                if (entityDto.ExamCommissionId.HasValue)
+                {
+                    if ((await examCommissionService.Update(entityDto.ExamCommission))
+                        .IsNotSuccess(out ActionResponse<ExamCommissionDto> examCommissionResponse, out ExamCommissionDto examCommission))
+                    {
+                        return await ActionResponse<StudentGroupDto>.ReturnError(examCommissionResponse.Message);
+                    }
+                    entityDto.ExamCommission = examCommission;
+                }
+                else
+                {
+                    if (entityDto.Id.HasValue)
+                    {
+                        var entityToCheck = unitOfWork.GetGenericRepository<StudentGroup>().FindBy(sg => sg.Id == entityDto.Id);
+                        if (entityToCheck.ExamCommissionId.HasValue)
+                        {
+                            if ((await examCommissionService.Delete(entityToCheck.ExamCommissionId.Value))
+                                .IsNotSuccess(out ActionResponse<ExamCommissionDto> deleteResponse))
+                            {
+                                return await ActionResponse<StudentGroupDto>.ReturnError(deleteResponse.Message);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (entityDto.ExamCommission != null)
+                        {
+                            if ((await examCommissionService.Insert(entityDto.ExamCommission))
+                                .IsNotSuccess(out ActionResponse<ExamCommissionDto> insertResponse, out ExamCommissionDto examCommission))
+                            {
+                                return await ActionResponse<StudentGroupDto>.ReturnError(insertResponse.Message);
+                            }
+                            entityDto.ExamCommission = examCommission;
+                            entityDto.ExamCommissionId = examCommission.Id;
+                        }
+                    }
+                }
+                return await ActionResponse<StudentGroupDto>.ReturnSuccess(entityDto, "Ispitna komisija za grupu studenata uspješno izmijenjena.");
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<StudentGroupDto>.ReturnError($"Greška prilikom ažuriranja ispitne komisije za grupu studenata.");
             }
         }
 
@@ -378,9 +475,24 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
+                    List<int> studentIds = new List<int>(entityDto.StudentIds);
+                    entityDto.StudentNames = null;
+
+                    List<StudentGroupSubjectTeachersDto> subjectTeachers = entityDto.SubjectTeachers != null ?
+                        new List<StudentGroupSubjectTeachersDto>(entityDto.SubjectTeachers) : new List<StudentGroupSubjectTeachersDto>();
+                    entityDto.SubjectTeachers = null;
+
+                    if ((await ModifyExamCommission(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> commissionResponse, out entityDto))
+                    {
+                        return commissionResponse;
+                    }
+
                     var entityToUpdate = mapper.Map<StudentGroupDto, StudentGroup>(entityDto);
                     unitOfWork.GetGenericRepository<StudentGroup>().Update(entityToUpdate);
                     unitOfWork.Save();
+
+                    mapper.Map(entityToUpdate, entityDto);
+                    entityDto.StudentIds = new List<int>(studentIds);
 
                     if ((await ModifyStudentsInGroup(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> response, out entityDto))
                     {
@@ -392,9 +504,21 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return response;
                     }
 
+                    if ((await GetById(entityToUpdate.Id)).IsNotSuccess(out response, out entityDto))
+                    {
+                        return response;
+                    }
+
+                    if (!string.IsNullOrEmpty(entityDto.EnrolmentDate))
+                    {
+                        if ((await UpdateEnrolmentDate(entityDto)).IsNotSuccess(out response, out entityDto))
+                        {
+                            return response;
+                        }
+                    }
+
                     scope.Complete();
-                    return await ActionResponse<StudentGroupDto>
-                        .ReturnSuccess(entityDto, "Grupa studenata uspješno izmijenjena.");
+                    return await ActionResponse<StudentGroupDto>.ReturnSuccess(entityDto, "Grupa studenata uspješno izmijenjena.");
                 }
             }
             catch (Exception ex)
