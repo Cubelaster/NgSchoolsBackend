@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using NgSchoolsDataLayer.Models.BaseTypes;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
 {
-    public class Subject
+    public class Subject : DatabaseEntity
     {
         [Key]
         public int Id { get; set; }

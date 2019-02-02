@@ -37,6 +37,8 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<City> Cities { get; set; }
         public DbSet<ContactPerson> ContactPeople { get; set; }
         public DbSet<EducationProgramClassType> EducationProgramClassTypes { get; set; }
+        public DbSet<StudentGroupClassAttendance> StudentGroupClassAttendances { get; set; }
+        public DbSet<StudentClassAttendance> StudentClassAttendances{ get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
