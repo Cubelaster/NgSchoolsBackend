@@ -11,9 +11,11 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         public EducationProgramMapper()
         {
             CreateMap<EducationProgram, EducationProgramDto>()
+                .ForMember(dest => dest.EducationGroup, opt => opt.MapFrom(src => src.EducationGroup))
                 .ForMember(dest => dest.ClassTypes, opt => opt.MapFrom(src => src.EducationProgramClassTypes != null ? src.EducationProgramClassTypes.Select(epct => epct.ClassType).ToList() : new List<ClassType>()));
 
-            CreateMap<EducationProgramDto, EducationProgram>();
+            CreateMap<EducationProgramDto, EducationProgram>()
+                .ForMember(dest => dest.EducationGroup, opt => opt.Ignore());
 
             CreateMap<EducationProgramClassType, EducationProgramClassTypeDto>().ReverseMap();
         }

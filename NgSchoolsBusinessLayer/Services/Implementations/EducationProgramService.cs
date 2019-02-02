@@ -47,7 +47,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .FindBy(c => c.Id == id, includeProperties: "Subjects.Themes,EducationProgramClassTypes.ClassType");
+                    .FindBy(c => c.Id == id,
+                    includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType");
                 return await ActionResponse<EducationProgramDto>
                     .ReturnSuccess(mapper.Map<EducationProgram, EducationProgramDto>(entity));
             }
@@ -63,7 +64,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .GetAll(includeProperties: "Subjects.Themes,EducationProgramClassTypes.ClassType");
+                    .GetAll(includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType");
                 return await ActionResponse<List<EducationProgramDto>>
                     .ReturnSuccess(mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(entities));
             }
@@ -80,7 +81,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var allEntities = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .GetAll(includeProperties: "Subjects.Themes,EducationProgramClassTypes.ClassType");
+                    .GetAll(includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType");
                 return await ActionResponse<List<EducationProgramDto>>.ReturnSuccess(
                     mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(allEntities));
             }
@@ -154,7 +155,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 entityToAdd = unitOfWork.GetGenericRepository<EducationProgram>()
                     .FindBy(e => e.Id == entityToAdd.Id, 
-                    includeProperties: "Subjects.Themes,EducationProgramClassTypes.ClassType");
+                    includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType");
 
                 return await ActionResponse<EducationProgramDto>.ReturnSuccess(mapper.Map(entityToAdd, entityDto));
             }
@@ -191,7 +192,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 entityToUpdate = unitOfWork.GetGenericRepository<EducationProgram>()
                     .FindBy(e => e.Id == entityToUpdate.Id,
-                    includeProperties: "Subjects.Themes,EducationProgramClassTypes.ClassType");
+                    includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType");
 
                 return await ActionResponse<EducationProgramDto>.ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
             }

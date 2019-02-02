@@ -37,5 +37,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public List<SubjectDto> Subjects { get; set; }
         public PlanDto Plan { get; set; }
         public List<ClassTypeDto> ClassTypes { get; set; }
+        public int? EducationGroupId { get; set; }
+        public EducationGroupDto EducationGroup { get; set; }
     }
 }
