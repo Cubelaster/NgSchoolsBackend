@@ -92,7 +92,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<ContactPersonDto> contacts = new List<ContactPersonDto>(entityDto.BusinessPartnerContacts);
+                List<ContactPersonDto> contacts = entityDto.BusinessPartnerContacts != null ?
+                    new List<ContactPersonDto>(entityDto.BusinessPartnerContacts) : new List<ContactPersonDto>();
 
                 var entityToAdd = mapper.Map<BusinessPartnerDto, BusinessPartner>(entityDto);
                 unitOfWork.GetGenericRepository<BusinessPartner>().Add(entityToAdd);
@@ -124,7 +125,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<ContactPersonDto> contacts = new List<ContactPersonDto>(entityDto.BusinessPartnerContacts);
+                List<ContactPersonDto> contacts = entityDto.BusinessPartnerContacts != null ?
+                    new List<ContactPersonDto>(entityDto.BusinessPartnerContacts) : new List<ContactPersonDto>();
 
                 var entityToUpdate = mapper.Map<BusinessPartnerDto, BusinessPartner>(entityDto);
                 unitOfWork.GetGenericRepository<BusinessPartner>().Update(entityToUpdate);
