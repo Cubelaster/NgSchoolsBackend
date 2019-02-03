@@ -27,8 +27,7 @@ namespace NgSchoolsDataLayer.Repository.Provider
 
         public virtual T GetCustomRepository<T>(Func<NgSchoolsContext, object> factory = null) where T : class
         {
-            object repository;
-            Repositories.TryGetValue(typeof(T), out repository);
+            Repositories.TryGetValue(typeof(T), out object repository);
             if (repository != null)
             {
                 return (T)repository;

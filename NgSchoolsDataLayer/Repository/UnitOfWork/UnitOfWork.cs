@@ -1,6 +1,10 @@
-﻿using NgSchoolsDataLayer.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using NgSchoolsDataLayer.Context;
+using NgSchoolsDataLayer.Models.BaseTypes;
 using NgSchoolsDataLayer.Repository.Base;
 using NgSchoolsDataLayer.Repository.Provider;
+using System;
+using System.Linq;
 
 namespace NgSchoolsDataLayer.Repository.UnitOfWork
 {
@@ -24,6 +28,26 @@ namespace NgSchoolsDataLayer.Repository.UnitOfWork
 
         public int Save()
         {
+            var changeTracker = context.ChangeTracker;
+
+            var modifiedEntries = changeTracker.Entries()
+              .Where(x => x.Entity is DatabaseEntity && (x.State == EntityState.Deleted));
+
+            foreach (var entry in modifiedEntries)
+            {
+                DatabaseEntity entity = entry.Entity as DatabaseEntity;
+                if (entity != null)
+                {
+                    entity.DateModified = DateTime.Now;
+
+                    if (entry.State == EntityState.Deleted)
+                    {
+                        entry.State = EntityState.Modified;
+                        entity.Status = Enums.DatabaseEntityStatusEnum.Deleted;
+                    }
+                }
+            }
+
             return context.SaveChanges();
         }
 

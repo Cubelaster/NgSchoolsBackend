@@ -33,6 +33,7 @@
     <Compile Remove="Migrations\20190201163330_ClassLocations_Modify_Props.cs" />
     <Compile Remove="Migrations\20190202081918_Modify_EducationProgram_Add_Connection.cs" />
     <Compile Remove="Migrations\20190202150712_Modify_Class_Attendance.cs" />
+    <Compile Remove="Migrations\20190203150414_Various_Changes.cs" />
   </ItemGroup>
 
   <ItemGroup>

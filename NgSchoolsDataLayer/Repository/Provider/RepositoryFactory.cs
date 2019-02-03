@@ -29,15 +29,16 @@ namespace NgSchoolsDataLayer.Repository.Provider
 
         public Func<NgSchoolsContext, object> GetRepositoryFactoryFromCache<T>()
         {
-            Func<NgSchoolsContext, object> factory;
-            _factoryCache.TryGetValue(typeof(T), out factory);
+            _factoryCache.TryGetValue(typeof(T), out Func<NgSchoolsContext, object> factory);
             return factory;
         }
 
         private IDictionary<Type, Func<NgSchoolsContext, object>> GetFactories()
         {
-            Dictionary<Type, Func<NgSchoolsContext, object>> dic = new Dictionary<Type, Func<NgSchoolsContext, object>>();
-            dic.Add(typeof(IUserRepository), context => new UserRepository(context));
+            Dictionary<Type, Func<NgSchoolsContext, object>> dic = new Dictionary<Type, Func<NgSchoolsContext, object>>
+            {
+                { typeof(IUserRepository), context => new UserRepository(context) }
+            };
             //Add Extended and Custom Repositories here
             return dic;
         }

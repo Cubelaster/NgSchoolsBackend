@@ -37,6 +37,8 @@ namespace NgSchoolsDataLayer.Models
 
         public ICollection<Subject> Subjects { get; set; }
 
+        public virtual Plan Plan { get; set; }
+
         public virtual ICollection<EducationProgramClassType> EducationProgramClassTypes { get; set; }
     }
 }

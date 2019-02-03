@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NgSchoolsDataLayer.Context;
+using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,11 @@ namespace NgSchoolsDataLayer.Repository.Base
             string includeProperties = "")
         {
             IQueryable<T> query = context.Set<T>();
+
+            if (typeof(DatabaseEntity).IsAssignableFrom(typeof(T)))
+            {
+                query = query.Where(q => (q as DatabaseEntity).Status == Enums.DatabaseEntityStatusEnum.Active);
+            }
 
             if (filter != null)
             {
@@ -45,6 +51,13 @@ namespace NgSchoolsDataLayer.Repository.Base
             string includeProperties = "")
         {
             IQueryable<T> query = context.Set<T>();
+
+            Type typeParameterType = typeof(T);
+
+            if (typeof(DatabaseEntity).IsAssignableFrom(typeof(T)))
+            {
+                query = query.Where(q => (q as DatabaseEntity).Status == Enums.DatabaseEntityStatusEnum.Active);
+            }
 
             if (filter != null)
             {
