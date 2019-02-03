@@ -43,6 +43,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.UserDetails.Title));
 
             CreateMap<UserDto, TeacherViewModel>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.UserDetails.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.UserDetails.LastName))
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.Oib, opt => opt.MapFrom(src => src.UserDetails.Oib))
                 .ForMember(dest => dest.Notes, opt => opt.MapFrom(src => src.UserDetails.Notes))
@@ -56,7 +58,9 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Bank, opt => opt.MapFrom(src => src.UserDetails.Bank))
                 .ForMember(dest => dest.Certificates, opt => opt.MapFrom(src => src.UserDetails.Certificates))
                 .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.UserDetails.City))
-                .ForMember(dest => dest.EmploymentPlace, opt => opt.MapFrom(src => src.UserDetails.EmploymentPlace));
+                .ForMember(dest => dest.EmploymentPlace, opt => opt.MapFrom(src => src.UserDetails.EmploymentPlace))
+                .ForMember(dest => dest.RoleNames, opt => opt.MapFrom(src => string.Join(", ", src.UserRoles.Select(r => r.Name))))
+                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(r => r.Id)));
 
             CreateMap<TeacherViewModel, UserViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId));

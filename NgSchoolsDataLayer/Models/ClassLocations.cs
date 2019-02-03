@@ -18,5 +18,6 @@ namespace NgSchoolsDataLayer.Models
         public virtual City City { get; set; }
         public string Telephone { get; set; }
         public string Email { get; set; }
+        public string Mobile { get; set; }
     }
 }

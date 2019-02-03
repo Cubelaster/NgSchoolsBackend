@@ -643,18 +643,36 @@
 	"Telephone": "U3",
 	"Address": "Adresa3",
 	"CountryId": 518,
-	"RegionId": 47
+	"RegionId": 47,
+	"Mobile": "Mobile"
+}
+
+//ClassLocations/Update
+
+{
+	"Id": 3003,
+	"Name": "ClassLocation 2",
+	"Address": "Bla",
+	"CityId": 53,
+	"Email": "Bla23",
+	"Telephone": "U3",
+	"Address": "Adresa3",
+	"CountryId": 518,
+	"RegionId": 47,
+	"Mobile": "Bla"
 }
 
 //BusinessPartner/Insert
 
 {
 	"Name": "Name",
-	"City": "City",
 	"Phone": "Phone",
 	"Mobile": "Mobile",
 	"Email": "Email",
 	"Oib": "Oib",
+	"CityId": 51,
+	"CountryId": 517,
+	"RegionId": 46,
 	"Address": "Address",
 	"BusinessPartnerContacts": [
 		{
@@ -668,24 +686,26 @@
 //BusinessPartner/Update
 
 {
-	"Id": 1008,
-	"Name": "1008",
-	"City": "City",
+	"Id": 2008,
+	"Name": "Name",
 	"Phone": "Phone",
 	"Mobile": "Mobile",
 	"Email": "Email",
 	"Oib": "Oib",
 	"Address": "Address",
+	"CityId": 51,
+	"CountryId": 517,
+	"RegionId": 46,
 	"BusinessPartnerContacts": [
 		{
-			"Id": 2,
-			"FullName": "Name",
+			"Id": 1006,
+			"FullName": "Ba",
 			"Mobile": "Mobile",
 			"Email": "Email"
 		},
 		{
-			"FullName": "FullName2",
-			"Mobile": "Mobile",
+			"FullName": "Yo",
+			"Mobile": "Man",
 			"Email": "Email"
 		}
 	]
@@ -708,4 +728,31 @@
     "TeacherIds": [
     		"1a1bfa81-53ee-4cd3-c039-08d652b91ccb"
     	]
+}
+
+//EducationLevel/Insert
+
+{
+	"Name": "46",
+	"Level": "Level",
+	"KnowledgeBase": "KnowledgeBase",
+	"CognitiveSkills": "CognitiveSkills",
+	"PsychomotorSkills": "PsychomotorSkills",
+	"SocialSkills": "SocialSkills",
+	"Autonomy": "Autonomy",
+	"Responsibility": "0"
+}
+
+//EducationLevel/Update
+
+{
+	"Id": 2002,
+	"Name": "46",
+	"Level": "Level",
+	"KnowledgeBase": "KnowledgeBase",
+	"CognitiveSkills": "CognitiveSkills",
+	"PsychomotorSkills": "PsychomotorSkills",
+	"SocialSkills": "SocialSkills",
+	"Autonomy": "Autonomy",
+	"Responsibility": "0"
 }

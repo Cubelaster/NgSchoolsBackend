@@ -36,7 +36,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<BusinessPartner>()
-                    .FindBy(c => c.Id == id, includeProperties: "BusinessPartnerContacts");
+                    .FindBy(c => c.Id == id, includeProperties: "BusinessPartnerContacts,City,Region,Country");
                 return await ActionResponse<BusinessPartnerDto>
                     .ReturnSuccess(mapper.Map<BusinessPartner, BusinessPartnerDto>(entity));
             }
@@ -52,7 +52,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<BusinessPartner>()
-                    .GetAll(includeProperties: "BusinessPartnerContacts");
+                    .GetAll(includeProperties: "BusinessPartnerContacts,City,Region,Country");
                 return await ActionResponse<List<BusinessPartnerDto>>
                     .ReturnSuccess(mapper.Map<List<BusinessPartner>, List<BusinessPartnerDto>>(entities));
             }
@@ -68,7 +68,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<BusinessPartner>()
-                    .GetAllAsQueryable(includeProperties: "BusinessPartnerContacts").GetPaged(pagedRequest);
+                    .GetAllAsQueryable(includeProperties: "BusinessPartnerContacts,City,Region,Country").GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<BusinessPartnerDto>
                 {
@@ -100,10 +100,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 mapper.Map(entityToAdd, entityDto);
                 entityDto.BusinessPartnerContacts = contacts;
 
-                if((await ModifyBusinessPartnerContacts(entityDto))
+                if ((await ModifyBusinessPartnerContacts(entityDto))
                     .IsNotSuccess(out ActionResponse<BusinessPartnerDto> contactResponse, out entityDto))
                 {
                     return contactResponse;
+                }
+
+                if ((await GetById(entityToAdd.Id)).IsNotSuccess(out ActionResponse<BusinessPartnerDto> response, out entityDto))
+                {
+                    return response;
                 }
 
                 return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(entityDto);
@@ -132,6 +137,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .IsNotSuccess(out ActionResponse<BusinessPartnerDto> contactResponse, out entityDto))
                 {
                     return contactResponse;
+                }
+
+                if ((await GetById(entityToUpdate.Id)).IsNotSuccess(out ActionResponse<BusinessPartnerDto> response, out entityDto))
+                {
+                    return response;
                 }
 
                 return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(entityDto);
