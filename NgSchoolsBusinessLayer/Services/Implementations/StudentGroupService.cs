@@ -136,6 +136,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return response;
                     }
 
+                    mapper.Map(entityDto, entityToUpdate);
+                    unitOfWork.Save();
+
                     entityDto.SubjectTeachers = subjectTeachers;
                     if ((await ModifySubjectTeachers(entityDto)).IsNotSuccess(out response, out entityDto))
                     {
@@ -181,6 +184,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     List<int> studentIds = new List<int>(entityDto.StudentIds);
                     entityDto.StudentNames = null;
 
+                    ExamCommissionDto examCommission = entityDto.ExamCommission;
+
                     List<StudentGroupClassAttendanceDto> classAttendances = entityDto.StudentGroupClassAttendances != null ?
                         new List<StudentGroupClassAttendanceDto>(entityDto.StudentGroupClassAttendances) : new List<StudentGroupClassAttendanceDto>();
 
@@ -188,13 +193,18 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         new List<StudentGroupSubjectTeachersDto>(entityDto.SubjectTeachers) : new List<StudentGroupSubjectTeachersDto>();
                     entityDto.SubjectTeachers = null;
 
+                    var entityToUpdate = mapper.Map<StudentGroupDto, StudentGroup>(entityDto);
+                    unitOfWork.GetGenericRepository<StudentGroup>().Update(entityToUpdate);
+                    unitOfWork.Save();
+
+                    mapper.Map(entityToUpdate, entityDto);
+                    entityDto.ExamCommission = examCommission;
                     if ((await ModifyExamCommission(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> commissionResponse, out entityDto))
                     {
                         return commissionResponse;
                     }
 
-                    var entityToUpdate = mapper.Map<StudentGroupDto, StudentGroup>(entityDto);
-                    unitOfWork.GetGenericRepository<StudentGroup>().Update(entityToUpdate);
+                    mapper.Map(entityDto, entityToUpdate);
                     unitOfWork.Save();
 
                     mapper.Map(entityToUpdate, entityDto);
@@ -427,6 +437,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                             {
                                 return await ActionResponse<StudentGroupDto>.ReturnError(deleteResponse.Message);
                             }
+                        }
+                        else
+                        {
+                            if ((await examCommissionService.Insert(entityDto.ExamCommission))
+                                .IsNotSuccess(out ActionResponse<ExamCommissionDto> insertResponse, out ExamCommissionDto examCommission))
+                            {
+                                return await ActionResponse<StudentGroupDto>.ReturnError(insertResponse.Message);
+                            }
+                            entityDto.ExamCommission = examCommission;
+                            entityDto.ExamCommissionId = examCommission.Id;
                         }
                     }
                     else

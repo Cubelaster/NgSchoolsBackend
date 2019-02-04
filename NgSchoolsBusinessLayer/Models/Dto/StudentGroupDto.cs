@@ -6,6 +6,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
     public class StudentGroupDto
     {
         public int? Id { get; set; }
+        public string Name { get; set; }
+        public string SchoolYear { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
         public string CredentialDate { get; set; }
