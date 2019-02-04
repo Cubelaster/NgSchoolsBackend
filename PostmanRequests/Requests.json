@@ -390,12 +390,12 @@
 			"FileName": "wallpaper-2770084.jpg"
 		}
 	],
+	"CityOfBirthId": 52,
+	"RegionOfBirthId": 48,
+	"CountryOfBirthId": 518,
 	"Dob": "2109-01-01",
 	"Mentor": "Mentor",
-	"Cob": "Cob",
-	"Pob": "Pob",
 	"Mob": "Mob",
-	"Couob": "Couob",
 	"Citizenship": "Citizenship",
 	"Proffesion": "Proffesion",
 	"IdCard": true,
@@ -442,7 +442,7 @@
 // Student/Update
 
 {
-	"Id": 1015,
+	"Id": 2010,
 	"FirstName": "David Čubela",
 	"LastName": "Čubela",
 	"Oib": "38761800703",
@@ -460,12 +460,12 @@
 			"FileName": "wallpaper-2770084.jpg"
 		}
 	],
+	"CityOfBirthId": 55,
+	"RegionOfBirthId": 50,
+	"CountryOfBirthId": 530,
 	"Dob": "2109-01-01",
-	"Mentor": "Mentor 22",
-	"Cob": "Cob",
-	"Pob": "Pob",
+	"Mentor": "Mentor",
 	"Mob": "Mob",
-	"Couob": "Couob",
 	"Citizenship": "Citizenship",
 	"Proffesion": "Proffesion",
 	"IdCard": true,

@@ -41,7 +41,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 var entity = unitOfWork.GetGenericRepository<Student>()
                     .FindBy(c => c.Id == id, 
-                    includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
+                    includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion,CountryOfBirth,RegionOfBirth,CityOfBirth");
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entity));
             }
@@ -57,7 +57,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Student>()
-                    .FindBy(c => c.Oib == oib, includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
+                    .FindBy(c => c.Oib == oib,
+                    includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion,CountryOfBirth,RegionOfBirth,CityOfBirth");
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entity));
             }
@@ -74,7 +75,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var allEntities = unitOfWork.GetGenericRepository<Student>()
-                    .GetAll(includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
+                    .GetAll(includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion,CountryOfBirth,RegionOfBirth,CityOfBirth");
                 return await ActionResponse<List<StudentDto>>.ReturnSuccess(
                     mapper.Map<List<Student>, List<StudentDto>>(allEntities));
             }
@@ -90,7 +91,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var allEntities = unitOfWork.GetGenericRepository<Student>()
-                    .GetAll(includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
+                    .GetAll(includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion,CountryOfBirth,RegionOfBirth,CityOfBirth");
                 return await ActionResponse<List<StudentDto>>
                     .ReturnSuccess(mapper.Map<List<Student>, List<StudentDto>>(allEntities));
             }

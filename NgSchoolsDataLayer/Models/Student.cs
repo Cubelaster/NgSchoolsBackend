@@ -18,10 +18,13 @@ namespace NgSchoolsDataLayer.Models
         public DateTime? Dob { get; set; }
         public string Mentor { get; set; }
         public string Oib { get; set; }
-        public string Pob { get; set; }
-        public string Cob { get; set; }
+        public int? CityOfBirthId { get; set; }
+        public virtual City CityOfBirth { get; set; }
+        public int? CountryOfBirthId { get; set; }
+        public virtual Country CountryOfBirth { get; set; }
         public string Mob { get; set; }
-        public string Couob { get; set; }
+        public int? RegionOfBirthId { get; set; }
+        public virtual Region RegionOfBirth { get; set; }
         public string Citizenship { get; set; }
         public string Proffesion { get; set; }
         public bool IdCard { get; set; }
