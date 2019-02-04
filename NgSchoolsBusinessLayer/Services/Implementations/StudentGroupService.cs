@@ -47,7 +47,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 var entity = unitOfWork.GetGenericRepository<StudentGroup>()
                     .FindBy(c => c.Id == id,
-                    includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission,StudentGroupClassAttendances.StudentClassAttendances");
+                    includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances");
                 return await ActionResponse<StudentGroupDto>
                     .ReturnSuccess(mapper.Map<StudentGroup, StudentGroupDto>(entity));
             }
@@ -63,7 +63,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<StudentGroup>()
-                    .GetAll(includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission,StudentGroupClassAttendances.StudentClassAttendances");
+                    .GetAll(includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances");
                 return await ActionResponse<List<StudentGroupDto>>
                     .ReturnSuccess(mapper.Map<List<StudentGroup>, List<StudentGroupDto>>(entities));
             }
@@ -79,7 +79,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<StudentGroup>()
-                    .GetAllAsQueryable(includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission,StudentGroupClassAttendances.StudentClassAttendances")
+                    .GetAllAsQueryable(includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances")
                     .GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<StudentGroupDto>
