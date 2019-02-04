@@ -136,7 +136,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return response;
                     }
 
-                    mapper.Map(entityDto, entityToUpdate);
+                    mapper.Map(entityDto, entityToAdd);
                     unitOfWork.Save();
 
                     entityDto.SubjectTeachers = subjectTeachers;
