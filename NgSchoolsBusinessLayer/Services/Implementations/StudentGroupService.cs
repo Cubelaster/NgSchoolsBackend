@@ -215,6 +215,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return response;
                     }
 
+                    entityDto.SubjectTeachers = subjectTeachers;
                     if ((await ModifySubjectTeachers(entityDto)).IsNotSuccess(out response, out entityDto))
                     {
                         return response;
