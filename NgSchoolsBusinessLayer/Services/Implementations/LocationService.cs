@@ -355,6 +355,30 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<PagedResult<RegionDto>>> GetRegionsByCountryIdPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<RegionDto> regions = new List<RegionDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<RegionDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out regions))
+                {
+                    regions = (await GetAllRegions()).GetData();
+                }
+
+                var pagedResult = await regions
+                    .Where(r => r.CountryId == pagedRequest.AdditionalParams.Id)
+                    .AsQueryable()
+                    .GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<RegionDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<RegionDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za regije po državi.");
+            }
+        }
+
         public async Task<ActionResponse<PagedResult<RegionDto>>> GetRegionsBySearchQuery(BasePagedRequest pagedRequest)
         {
             try
@@ -593,6 +617,30 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<PagedResult<CityDto>>> GetCitiesByRegionIdPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<CityDto> cities = new List<CityDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<CityDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out cities))
+                {
+                    cities = (await GetAllCities()).GetData();
+                }
+
+                var pagedResult = await cities
+                    .Where(r => r.RegionId == pagedRequest.AdditionalParams.Id)
+                    .AsQueryable()
+                    .GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<CityDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<CityDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za gradove po regiji.");
+            }
+        }
+
         public async Task<ActionResponse<CityDto>> InsertCity(CityDto entityDto)
         {
             try
@@ -702,7 +750,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         }
 
         [CacheRefreshSource(typeof(CityDto))]
-        public async Task<ActionResponse<List<CityDto>>> GetAllCitiessForCache()
+        public async Task<ActionResponse<List<CityDto>>> GetAllCitiesForCache()
         {
             try
             {

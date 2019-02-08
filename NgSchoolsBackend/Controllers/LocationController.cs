@@ -113,6 +113,12 @@ namespace NgSchoolsWebApi.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResponse<PagedResult<RegionDto>>> GetRegionsByCountryIdPaged([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await locationService.GetRegionsByCountryIdPaged(pagedRequest);
+        }
+
+        [HttpPost]
         public async Task<ActionResponse<PagedResult<RegionDto>>> GetRegionsBySearchQuery([FromBody] BasePagedRequest pagedRequest)
         {
             return await locationService.GetRegionsBySearchQuery(pagedRequest);
@@ -142,6 +148,11 @@ namespace NgSchoolsWebApi.Controllers
             return await locationService.GetCitiesByRegionId(request.Id);
         }
 
+        [HttpPost]
+        public async Task<ActionResponse<PagedResult<CityDto>>> GetCitiesByRegionIdPaged([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await locationService.GetCitiesByRegionIdPaged(pagedRequest);
+        }
 
         // TODO: Authorize
         [HttpPost]

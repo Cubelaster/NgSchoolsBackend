@@ -10,5 +10,6 @@ namespace NgSchoolsBusinessLayer.Models.Requests.Base
         public object Where { get; set; }
         public string OrderBy { get; set; }
         public SortDirectionEnum SortDirection { get; set; }
+        public SimpleRequestBase AdditionalParams { get; set; }
     }
 }
