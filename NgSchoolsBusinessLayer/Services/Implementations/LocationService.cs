@@ -221,8 +221,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToUpdate = mapper.Map<CountryDto, Country>(entityDto);
                 unitOfWork.GetGenericRepository<Country>().Update(entityToUpdate);
                 unitOfWork.Save();
-                unitOfWork.GetContext().Entry(entityToUpdate).Reference(p => p.Cities).Load();
-                unitOfWork.GetContext().Entry(entityToUpdate).Reference(p => p.Regions).Load();
+                unitOfWork.GetContext().Entry(entityToUpdate).Collection(p => p.Cities).Load();
+                unitOfWork.GetContext().Entry(entityToUpdate).Collection(p => p.Regions).Load();
                 mapper.Map(entityToUpdate, entityDto);
 
                 return await ActionResponse<CountryDto>.ReturnSuccess(entityDto);
@@ -407,7 +407,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToUpdate = mapper.Map<RegionDto, Region>(entityDto);
                 unitOfWork.GetGenericRepository<Region>().Update(entityToUpdate);
                 unitOfWork.Save();
-                unitOfWork.GetContext().Entry(entityToUpdate).Reference(p => p.Cities).Load();
+                unitOfWork.GetContext().Entry(entityToUpdate).Collection(p => p.Cities).Load();
                 mapper.Map(entityToUpdate, entityDto);
 
                 return await ActionResponse<RegionDto>.ReturnSuccess(entityDto);
