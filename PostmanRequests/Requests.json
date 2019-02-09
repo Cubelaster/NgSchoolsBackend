@@ -747,3 +747,31 @@
 	"Autonomy": "Autonomy",
 	"Responsibility": "0"
 }
+
+//Location/GetRegionsByCountryIdPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0,
+	"AdditionalParams": {
+		"Id": 517
+	}
+}
+
+//Location/GetCitiesByRegionIdPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0,
+	"AdditionalParams": {
+		"Id": 55
+	}
+}
