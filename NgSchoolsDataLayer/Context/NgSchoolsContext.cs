@@ -39,6 +39,9 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<EducationProgramClassType> EducationProgramClassTypes { get; set; }
         public DbSet<StudentGroupClassAttendance> StudentGroupClassAttendances { get; set; }
         public DbSet<StudentClassAttendance> StudentClassAttendances { get; set; }
+        public DbSet<StudentRegister> StudentRegisters { get; set; }
+        public DbSet<StudentRegisterEntry> StudentRegisterEntries { get; set; }
+        public DbSet<StudentRegisterEntryPrint> StudentRegisterEntryPrints { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
