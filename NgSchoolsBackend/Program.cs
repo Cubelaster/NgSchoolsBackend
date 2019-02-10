@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NgSchoolsBusinessLayer.Utilities.DbUtils;
 using System;
+using System.IO;
 
 namespace NgSchoolsBackend
 {
@@ -11,7 +13,10 @@ namespace NgSchoolsBackend
     {
         public static void Main(string[] args)
         {
-            var host = CreateWebHostBuilder(args).Build();
+            var host = CreateWebHostBuilder(args)
+                .UseKestrel()
+                .UseIISIntegration()
+                .Build();
 
             using (var scope = host.Services.CreateScope())
             {

@@ -50,6 +50,8 @@ namespace NgSchoolsBusinessLayer.Utilities.DbUtils
 
             var Configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
+            //var dummy = Configuration.GetValue<string>("Dummy");
+
             var defaultUsers = Configuration.GetSection("DefaultUsers").GetChildren();
             foreach (var user in defaultUsers)
             {
