@@ -823,3 +823,9 @@
 	"StudentId": 1,
 	"Notes": "Notes"
 }
+
+//StudentRegister/UpdateEntry
+{
+	"EntryId": 9,
+	"Notes": "Notes 2"
+}
