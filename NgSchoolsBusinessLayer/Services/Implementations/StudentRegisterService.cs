@@ -49,8 +49,25 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 var entity = unitOfWork.GetGenericRepository<StudentRegister>()
                     .FindBy(c => c.Id == id, includeProperties: registerIncludes);
-                return await ActionResponse<StudentRegisterDto>
-                    .ReturnSuccess(mapper.Map<StudentRegister, StudentRegisterDto>(entity));
+
+                var entityDto = mapper.Map<StudentRegister, StudentRegisterDto>(entity);
+
+                var fullList = Enumerable.Range((entity.BookNumber * 200) - 199, 200).ToList();
+                if (!entity.StudentRegisterEntries.Any())
+                {
+                    entityDto.FreeStudentRegisterNumbers = fullList;
+                }
+                else
+                {
+                    var minStudentNumber = entity.StudentRegisterEntries.Min(r => r.StudentRegisterNumber);
+                    var maxStudentNumber = entity.StudentRegisterEntries.Max(r => r.StudentRegisterNumber);
+                    List<int> realList = entity.StudentRegisterEntries.Select(r => r.StudentRegisterNumber).ToList();
+
+                    var missingNums = fullList.Except(realList).ToList();
+                    entityDto.FreeStudentRegisterNumbers = missingNums;
+                }
+
+                return await ActionResponse<StudentRegisterDto>.ReturnSuccess(entityDto);
             }
             catch (Exception ex)
             {
@@ -221,17 +238,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     }
                 }
 
-                StudentRegisterDto selectedBook = null;
                 if (!request.BookNumber.HasValue)
                 {
-                    if ((await GetAllNotFull()).IsNotSuccess(out registerResponse, out registers))
+                    if ((await GetAllNotFull()).IsNotSuccess(out registerResponse, out List<StudentRegisterDto> notFullRegisters))
                     {
                         return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError(registerResponse.Message);
                     }
 
-                    if (registers.Any())
+                    if (notFullRegisters.Any())
                     {
-                        selectedBook = registers.OrderBy(b => b.BookNumber).FirstOrDefault();
+                        var selectedBook = registers.OrderBy(b => b.BookNumber).FirstOrDefault();
                         request.BookNumber = selectedBook.BookNumber;
                         request.BookId = selectedBook.Id;
                     }
@@ -258,8 +274,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 if (!request.StudentRegisterNumber.HasValue)
                 {
-                    request.StudentRegisterNumber = entries.Where(sre => sre.StudentRegisterId == selectedBook.Id)
-                        .Max(sre => sre.StudentRegisterNumber) + 1 ?? 1;
+                    var fullList = Enumerable.Range((request.BookNumber.Value * 200) - 199, 200).ToList();
+                    if (request.CreateNewBook)
+                    {
+                        request.StudentRegisterNumber = fullList.Min();
+                    }
+                    else
+                    {
+                        if ((await GetById(request.BookId.Value))
+                            .IsNotSuccess(out ActionResponse<StudentRegisterDto> bookResponse, out StudentRegisterDto registerDto))
+                        {
+                            return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError(bookResponse.Message);
+                        }
+                        request.StudentRegisterNumber = registerDto.FreeStudentRegisterNumbers.Min();
+                    }
                 }
                 return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnSuccess(request);
             }
