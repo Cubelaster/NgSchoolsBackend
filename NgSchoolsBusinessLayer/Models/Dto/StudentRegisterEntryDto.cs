@@ -18,7 +18,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public EducationProgramDto EducationProgram { get; set; }
 
         public int? StudentsInGroupsId { get; set; }
-        public StudentInGroupDto StudentInGroup { get; set; }
+        public StudentInGroupDto StudentsInGroups { get; set; }
 
         public StudentDto Student { get; set; }
         public StudentGroupDto StudentGroup { get; set; }

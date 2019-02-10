@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -79,10 +80,30 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<StudentRegister>()
-                    .GetAll(sr => !sr.Full)
+                    .GetAll(sr => !sr.Full, includeProperties: registerIncludes)
                     .ToList();
-                return await ActionResponse<List<StudentRegisterDto>>
-                    .ReturnSuccess(mapper.Map<List<StudentRegister>, List<StudentRegisterDto>>(entities));
+
+                var entityDtos = mapper.Map<List<StudentRegister>, List<StudentRegisterDto>>(entities);
+
+                entities.ForEach(sr =>
+                {
+                    var fullList = Enumerable.Range((sr.BookNumber * 200) - 199, 200).ToList();
+                    if (!sr.StudentRegisterEntries.Any())
+                    {
+                        entityDtos.FirstOrDefault(e => e.Id == sr.Id).FreeStudentRegisterNumbers = fullList;
+                    }
+                    else
+                    {
+                        var minStudentNumber = sr.StudentRegisterEntries.Min(r => r.StudentRegisterNumber);
+                        var maxStudentNumber = sr.StudentRegisterEntries.Max(r => r.StudentRegisterNumber);
+                        List<int> realList = sr.StudentRegisterEntries.Select(r => r.StudentRegisterNumber).ToList();
+
+                        var missingNums = fullList.Except(realList).ToList();
+                        entityDtos.FirstOrDefault(e => e.Id == sr.Id).FreeStudentRegisterNumbers = missingNums;
+                    }
+                });
+
+                return await ActionResponse<List<StudentRegisterDto>>.ReturnSuccess(entityDtos);
             }
             catch (Exception ex)
             {
@@ -132,27 +153,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<PagedResult<StudentRegisterDto>>> GetBySearchQuery(BasePagedRequest pagedRequest)
-        {
-            try
-            {
-                List<StudentRegisterDto> studentRegisters = new List<StudentRegisterDto>();
-                var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterDto>>();
-                if (!cachedResponse.IsSuccessAndHasData(out studentRegisters))
-                {
-                    studentRegisters = (await GetAll()).GetData();
-                }
-
-                var pagedResult = await studentRegisters.AsQueryable().GetBySearchQuery(pagedRequest);
-                return await ActionResponse<PagedResult<StudentRegisterDto>>.ReturnSuccess(pagedResult);
-            }
-            catch (Exception ex)
-            {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za matične knjige.");
-            }
-        }
-
         #endregion Readers
 
         #region Writers
@@ -166,6 +166,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
 
                 return await ActionResponse<StudentRegisterDto>.ReturnSuccess(mapper.Map(entityToAdd, entityDto));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom upisa matične knjige.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentRegisterDto>> Update(StudentRegisterDto entityDto)
+        {
+            try
+            {
+                var entityToUpdate = mapper.Map<StudentRegisterDto, StudentRegister>(entityDto);
+                unitOfWork.GetGenericRepository<StudentRegister>().Update(entityToUpdate);
+                unitOfWork.Save();
+
+                return await ActionResponse<StudentRegisterDto>.ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
             }
             catch (Exception ex)
             {
@@ -188,7 +205,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
 
                 var similarEntries = entries.Where(p => p.EducationProgramId == request.EducationProgramId);
-                var alreadyInserted = similarEntries.Any(sre => sre.StudentInGroup.StudentId == request.StudentId);
+                var alreadyInserted = similarEntries.Any(sre => sre.StudentsInGroups.StudentId == request.StudentId);
 
                 if (alreadyInserted)
                 {
@@ -226,7 +243,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         List<int> realList = registers.Select(r => r.BookNumber.Value).ToList();
 
                         var missingNums = fullList.Except(realList).ToList();
-                        var nextAvailableNumber = missingNums.Min();
+                        var nextAvailableNumber = missingNums.Min() + 1;
 
                         request.BookNumber = nextAvailableNumber;
                         request.CreateNewBook = true;
@@ -242,7 +259,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 if (!request.StudentRegisterNumber.HasValue)
                 {
                     request.StudentRegisterNumber = entries.Where(sre => sre.StudentRegisterId == selectedBook.Id)
-                        .Max(sre => sre.StudentRegisterNumber) + 1;
+                        .Max(sre => sre.StudentRegisterNumber) + 1 ?? 1;
                 }
                 return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnSuccess(request);
             }
@@ -334,7 +351,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<PagedResult<StudentRegisterEntryDto>>> GetEntriesBySearchQuery(BasePagedRequest pagedRequest)
+        public async Task<ActionResponse<PagedResult<StudentRegisterEntryDto>>> GetAllEntriesByBookIdPaged(BasePagedRequest pagedRequest)
         {
             try
             {
@@ -345,7 +362,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     entityDtos = (await GetAllEntries()).GetData();
                 }
 
-                var pagedResult = await entityDtos.AsQueryable().GetBySearchQuery(pagedRequest);
+                var pagedResult = await entityDtos
+                    .Where(e => e.StudentRegisterId == pagedRequest.AdditionalParams.Id)
+                    .AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnSuccess(pagedResult);
             }
             catch (Exception ex)
@@ -358,6 +377,100 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #endregion Readers
 
         #region Writers
+
+        public async Task<ActionResponse<StudentRegisterEntryDto>> InsertEntry(StudentRegisterEntryInsertRequest request)
+        {
+            try
+            {
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    if ((await PrepareForInsert(request))
+                    .IsNotSuccess(out ActionResponse<StudentRegisterEntryInsertRequest> prepareResponse, out request))
+                    {
+                        return await ActionResponse<StudentRegisterEntryDto>.ReturnError(prepareResponse.Message);
+                    }
+
+                    if (request.CreateNewBook)
+                    {
+                        var entityDto = new StudentRegisterDto
+                        {
+                            BookNumber = request.BookNumber
+                        };
+
+                        if ((await Insert(entityDto)).IsNotSuccess(out ActionResponse<StudentRegisterDto> bookInsertResponse, out entityDto))
+                        {
+                            return await ActionResponse<StudentRegisterEntryDto>.ReturnError(bookInsertResponse.Message);
+                        }
+                        request.BookId = entityDto.Id;
+                    }
+
+                    var studentInGroupId = unitOfWork.GetGenericRepository<StudentsInGroups>()
+                        .FindBy(sig => sig.StudentId == request.StudentId.Value
+                        && sig.StudentGroupId == request.StudentGroupId).Id;
+
+                    var entityToAdd = new StudentRegisterEntry
+                    {
+                        StudentRegisterId = request.BookId.Value,
+                        EducationProgramId = request.EducationProgramId.Value,
+                        StudentsInGroupsId = studentInGroupId,
+                        StudentRegisterNumber = request.StudentRegisterNumber.Value,
+                        Notes = request.Notes,
+                        EntryDate = DateTime.Now
+                    };
+
+                    unitOfWork.GetGenericRepository<StudentRegisterEntry>().Add(entityToAdd);
+                    unitOfWork.Save();
+
+                    if ((await GetById(request.BookId.Value))
+                        .IsNotSuccess(out ActionResponse<StudentRegisterDto> bookResponse, out StudentRegisterDto registerDto))
+                    {
+                        return await ActionResponse<StudentRegisterEntryDto>.ReturnError(bookResponse.Message);
+                    }
+
+                    if (registerDto.NumberOfEntries >= 200)
+                    {
+                        registerDto.Full = true;
+                        if ((await Update(registerDto)).IsNotSuccess(out bookResponse, out registerDto))
+                        {
+                            return await ActionResponse<StudentRegisterEntryDto>.ReturnError(bookResponse.Message);
+                        }
+                    }
+
+                    scope.Complete();
+                    return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntry, StudentRegisterEntryDto>(entityToAdd));
+                }
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom upisa u matičnu knjigu.");
+            }
+            finally
+            {
+                var registerTask = cacheService.RefreshCache<List<StudentRegisterDto>>();
+                var entryTask = cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
+
+                await Task.WhenAll(registerTask, entryTask);
+            }
+        }
+
+        public async Task<ActionResponse<StudentRegisterEntryDto>> UpdateEntry(StudentRegisterEntryInsertRequest request)
+        {
+            try
+            {
+                var entityToUpdate = unitOfWork.GetGenericRepository<StudentRegisterEntry>().FindSingle(request.EntryId.Value);
+                entityToUpdate.Notes = request.Notes;
+                unitOfWork.GetGenericRepository<StudentRegisterEntry>().Update(entityToUpdate);
+                unitOfWork.Save();
+
+                return await GetEntryById(request.EntryId.Value);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom ažuriranja zapisa matične knjige.");
+            }
+        }
 
         #endregion Writers
 

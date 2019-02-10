@@ -2,6 +2,7 @@
 {
     public class StudentRegisterEntryInsertRequest
     {
+        public int? EntryId { get; set; }
         public int? EducationProgramId { get; set; }
         public int? StudentGroupId { get; set; }
         public int? StudentId { get; set; }
@@ -10,5 +11,6 @@
         public int? StudentRegisterNumber { get; set; }
         public int? StudentInGroupId { get; set; }
         public bool CreateNewBook { get; set; }
+        public string Notes { get; set; }
     }
 }

@@ -775,3 +775,51 @@
 		"Id": 55
 	}
 }
+
+//StudentRegister/GetAllNotFull
+//StudentRegister/GetAll
+//StudentRegister/GetById
+//StudentRegister/GetAllPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0
+}
+
+//StudentRegister/GetEntryById
+//StudentRegister/GetAllEntries
+//StudentRegister/GetAllEntriesPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0
+}
+//StudentRegister/GetAllEntriesByBookIdPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0,
+	"AdditionalParams" {
+		"Id": 1
+	}
+}
+
+//StudentRegister/InsertEntry
+{
+	"EducationProgramId": 1,
+	"StudentGroupId": 1,
+	"StudentId": 1,
+	"Notes": "Notes"
+}

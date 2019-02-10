@@ -1,5 +1,6 @@
 ﻿using NgSchoolsBusinessLayer.Enums;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
+using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
@@ -12,5 +13,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int? NumberOfEntries { get; set; }
         public int? MinEntryNumber { get; set; }
         public int? MaxEntryNumber { get; set; }
+        public bool Full { get; set; }
+
+        public List<int> FreeStudentRegisterNumbers { get; set; }
     }
 }
