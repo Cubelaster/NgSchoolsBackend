@@ -25,8 +25,16 @@ namespace NgSchoolsDataLayer.Models
         public string Phone { get; set; }
         public string Oib { get; set; }
         public string Address { get; set; }
+
         public int? CityId { get; set; }
         public virtual City City { get; set; }
+
+        public int? CountryId { get; set; }
+        public virtual Country Country { get; set; }
+
+        public int? RegionId { get; set; }
+        public virtual Region Region { get; set; }
+
         public string Profession { get; set; }
         public string Qualifications { get; set; }
         public string EmploymentPlace { get; set; }

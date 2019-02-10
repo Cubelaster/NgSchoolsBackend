@@ -14,6 +14,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
             CreateMap<UserDetailsDto, UserDetails>()
                 .ForMember(dest => dest.Avatar, opt => opt.Ignore())
                 .ForMember(dest => dest.Signature, opt => opt.Ignore())
+                .ForMember(dest => dest.Country, opt => opt.Ignore())
+                .ForMember(dest => dest.Region, opt => opt.Ignore())
                 .ForMember(dest => dest.City, opt => opt.Ignore());
 
             CreateMap<UserViewModel, UserDetailsDto>()
@@ -21,7 +23,9 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id));
 
             CreateMap<TeacherViewModel, UserDetailsDto>()
-                .ForMember(dest => dest.City, opt => opt.Ignore());
+                .ForMember(dest => dest.City, opt => opt.Ignore())
+                .ForMember(dest => dest.Region, opt => opt.Ignore())
+                .ForMember(dest => dest.Country, opt => opt.Ignore());
         }
     }
 }
