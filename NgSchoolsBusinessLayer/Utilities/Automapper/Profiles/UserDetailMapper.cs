@@ -13,13 +13,15 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<UserDetailsDto, UserDetails>()
                 .ForMember(dest => dest.Avatar, opt => opt.Ignore())
-                .ForMember(dest => dest.Signature, opt => opt.Ignore());
+                .ForMember(dest => dest.Signature, opt => opt.Ignore())
+                .ForMember(dest => dest.City, opt => opt.Ignore());
 
             CreateMap<UserViewModel, UserDetailsDto>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.Id));
 
-            CreateMap<TeacherViewModel, UserDetailsDto>();
+            CreateMap<TeacherViewModel, UserDetailsDto>()
+                .ForMember(dest => dest.City, opt => opt.Ignore());
         }
     }
 }

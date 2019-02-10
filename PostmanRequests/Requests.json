@@ -334,6 +334,15 @@
 	"UserName": "Cubelaster"
 }
 
+// User/UpdateTeacher
+{
+	"UserId": "5863f206-5681-435d-6b10-08d652bdcec8",
+	"FirstName": "Mirzet",
+	"LastName": "Murtić",
+	"CityId": 136
+}
+
+
 // User/Create
 
 {

@@ -19,7 +19,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Phone { get; set; }
         public string Oib { get; set; }
         public string Address { get; set; }
-        public string City { get; set; }
+        public int? CityId { get; set; }
+        public virtual CityDto City { get; set; }
         public string Profession { get; set; }
         public string Qualifications { get; set; }
         public string EmploymentPlace { get; set; }
