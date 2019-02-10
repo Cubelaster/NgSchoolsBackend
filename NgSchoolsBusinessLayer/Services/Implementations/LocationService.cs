@@ -857,49 +857,49 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     }
                 }
 
-                if ((await GetCountryByCode("hr")).IsNotSuccess(out ActionResponse<CountryDto> croResponse, out CountryDto croatia))
-                {
-                    return await ActionResponse<List<CountryDto>>.ReturnError(croResponse.Message);
-                }
+                //if ((await GetCountryByCode("hr")).IsNotSuccess(out ActionResponse<CountryDto> croResponse, out CountryDto croatia))
+                //{
+                //    return await ActionResponse<List<CountryDto>>.ReturnError(croResponse.Message);
+                //}
 
-                if ((await GetAllRegions()).IsNotSuccess(out ActionResponse<List<RegionDto>> getRegionResponse, out List<RegionDto> regions))
-                {
-                    return await ActionResponse<List<CountryDto>>.ReturnError(getResponse.Message);
-                }
+                //if ((await GetAllRegions()).IsNotSuccess(out ActionResponse<List<RegionDto>> getRegionResponse, out List<RegionDto> regions))
+                //{
+                //    return await ActionResponse<List<CountryDto>>.ReturnError(getResponse.Message);
+                //}
 
-                if (regions.Count < 1)
-                {
-                    if ((await GetRegionsForCountryCodeBattuta(croatia.Code)).IsNotSuccess(out getRegionResponse, out regions))
-                    {
-                        return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
-                    }
+                //if (regions.Count < 1)
+                //{
+                //    if ((await GetRegionsForCountryCodeBattuta(croatia.Code)).IsNotSuccess(out getRegionResponse, out regions))
+                //    {
+                //        return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
+                //    }
 
-                    regions.ForEach(reg =>
-                    {
-                        reg.CountryId = croatia.Id;
-                    });
+                //    regions.ForEach(reg =>
+                //    {
+                //        reg.CountryId = croatia.Id;
+                //    });
 
-                    if ((await InsertRegions(regions)).IsNotSuccess(out getRegionResponse, out regions))
-                    {
-                        return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
-                    }
-                }
+                //    if ((await InsertRegions(regions)).IsNotSuccess(out getRegionResponse, out regions))
+                //    {
+                //        return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
+                //    }
+                //}
 
-                if ((await GetAllCities()).IsNotSuccess(out ActionResponse<List<CityDto>> citiesResponse, out List<CityDto> cities))
-                {
-                    return await ActionResponse<List<CountryDto>>.ReturnError(citiesResponse.Message);
-                }
+                //if ((await GetAllCities()).IsNotSuccess(out ActionResponse<List<CityDto>> citiesResponse, out List<CityDto> cities))
+                //{
+                //    return await ActionResponse<List<CountryDto>>.ReturnError(citiesResponse.Message);
+                //}
 
-                if (cities.Count < 1)
-                {
-                    foreach(var region in regions)
-                    {
-                        if((await InsertCitiesForRegion(region)).IsNotSuccess(out citiesResponse, out cities))
-                        {
-                            return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
-                        }
-                    }
-                }
+                //if (cities.Count < 1)
+                //{
+                //    foreach(var region in regions)
+                //    {
+                //        if((await InsertCitiesForRegion(region)).IsNotSuccess(out citiesResponse, out cities))
+                //        {
+                //            return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
+                //        }
+                //    }
+                //}
 
                 return getResponse;
             }

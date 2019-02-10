@@ -19,6 +19,7 @@ namespace NgSchoolsDataLayer.Models
         public int? InstConsultations { get; set; }
         public int? PracticalClasses { get; set; }
         public int? TheoreticalClasses { get; set; }
+        public bool SubjectObligatory { get; set; }
 
         public int EducationProgramId { get; set; }
         public EducationProgram EducationProgram { get; set; }
