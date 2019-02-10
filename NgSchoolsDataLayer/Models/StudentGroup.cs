@@ -22,8 +22,7 @@ namespace NgSchoolsDataLayer.Models
         [Required]
         public int ProgramId { get; set; }
         public virtual EducationProgram Program { get; set; }
-        [Required]
-        public int ClassLocationId { get; set; }
+        public int? ClassLocationId { get; set; }
         public virtual ClassLocations ClassLocation { get; set; }
 
         public ICollection<StudentsInGroups> StudentsInGroups { get; set; }
