@@ -16,10 +16,10 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Notes { get; set; }
         public string EnrolmentDate { get; set; }
 
-        public int ProgramId { get; set; }
+        public int? ProgramId { get; set; }
         public EducationProgramDto EducationProgram { get; set; }
 
-        public int ClassLocationId { get; set; }
+        public int? ClassLocationId { get; set; }
         public ClassLocationsDto ClassLocation { get; set; }
 
         public List<int> StudentIds { get; set; }
