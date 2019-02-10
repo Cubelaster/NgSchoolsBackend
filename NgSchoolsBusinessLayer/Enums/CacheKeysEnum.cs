@@ -9,6 +9,8 @@
         ClassType,
         ClassLocation,
         Student,
-        EducationProgram
+        EducationProgram,
+        StudentRegister,
+        StudentRegisterEntry
     }
 }

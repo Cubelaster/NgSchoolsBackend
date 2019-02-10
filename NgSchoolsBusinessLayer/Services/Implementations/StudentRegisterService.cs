@@ -1,0 +1,366 @@
+﻿using AutoMapper;
+using NgSchoolsBusinessLayer.Extensions;
+using NgSchoolsBusinessLayer.Models.Common;
+using NgSchoolsBusinessLayer.Models.Common.Paging;
+using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.Requests;
+using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Services.Contracts;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
+using NgSchoolsDataLayer.Models;
+using NgSchoolsDataLayer.Repository.UnitOfWork;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace NgSchoolsBusinessLayer.Services.Implementations
+{
+    public class StudentRegisterService : IStudentRegisterService
+    {
+        #region Ctors and Members
+
+        private const string registerIncludes = "StudentRegisterEntries";
+        private const string entryIncludes = "EducationProgram.EducationGroup,StudentsInGroups.Student,StudentsInGroups.StudentGroup";
+        private readonly IMapper mapper;
+        private readonly ILoggerService loggerService;
+        private readonly IUnitOfWork unitOfWork;
+        private readonly ICacheService cacheService;
+
+        public StudentRegisterService(IMapper mapper, ILoggerService loggerService,
+            IUnitOfWork unitOfWork, ICacheService cacheService)
+        {
+            this.mapper = mapper;
+            this.loggerService = loggerService;
+            this.unitOfWork = unitOfWork;
+            this.cacheService = cacheService;
+        }
+
+        #endregion Ctors and Members
+
+        #region Student Register
+
+        #region Readers
+
+        public async Task<ActionResponse<StudentRegisterDto>> GetById(int id)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<StudentRegister>()
+                    .FindBy(c => c.Id == id, includeProperties: registerIncludes);
+                return await ActionResponse<StudentRegisterDto>
+                    .ReturnSuccess(mapper.Map<StudentRegister, StudentRegisterDto>(entity));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom dohvata matične knjige.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentRegisterDto>>> GetAll()
+        {
+            try
+            {
+                var entities = unitOfWork.GetGenericRepository<StudentRegister>()
+                    .GetAll();
+                return await ActionResponse<List<StudentRegisterDto>>
+                    .ReturnSuccess(mapper.Map<List<StudentRegister>, List<StudentRegisterDto>>(entities));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata svih matičnih knjiga.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentRegisterDto>>> GetAllNotFull()
+        {
+            try
+            {
+                var entities = unitOfWork.GetGenericRepository<StudentRegister>()
+                    .GetAll(sr => !sr.Full)
+                    .ToList();
+                return await ActionResponse<List<StudentRegisterDto>>
+                    .ReturnSuccess(mapper.Map<List<StudentRegister>, List<StudentRegisterDto>>(entities));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata svih matičnih knjiga.");
+            }
+        }
+
+        [CacheRefreshSource(typeof(StudentRegisterDto))]
+        public async Task<ActionResponse<List<StudentRegisterDto>>> GetAllForCache()
+        {
+            try
+            {
+                if ((await GetAll())
+                    .IsNotSuccess(out ActionResponse<List<StudentRegisterDto>> response, out List<StudentRegisterDto> entityDtos))
+                {
+                    return response;
+                }
+
+                return await ActionResponse<List<StudentRegisterDto>>.ReturnSuccess(entityDtos);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata svih matičnih knjiga.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<StudentRegisterDto>>> GetAllPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<StudentRegisterDto> studentRegisters = new List<StudentRegisterDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out studentRegisters))
+                {
+                    studentRegisters = (await GetAll()).GetData();
+                }
+
+                var pagedResult = await studentRegisters.AsQueryable().GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<StudentRegisterDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata straničnih podataka matične knjige.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<StudentRegisterDto>>> GetBySearchQuery(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<StudentRegisterDto> studentRegisters = new List<StudentRegisterDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out studentRegisters))
+                {
+                    studentRegisters = (await GetAll()).GetData();
+                }
+
+                var pagedResult = await studentRegisters.AsQueryable().GetBySearchQuery(pagedRequest);
+                return await ActionResponse<PagedResult<StudentRegisterDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za matične knjige.");
+            }
+        }
+
+        #endregion Readers
+
+        #region Writers
+
+        public async Task<ActionResponse<StudentRegisterDto>> Insert(StudentRegisterDto entityDto)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<StudentRegisterDto, StudentRegister>(entityDto);
+                unitOfWork.GetGenericRepository<StudentRegister>().Add(entityToAdd);
+                unitOfWork.Save();
+
+                return await ActionResponse<StudentRegisterDto>.ReturnSuccess(mapper.Map(entityToAdd, entityDto));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, entityDto);
+                return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom upisa matične knjige.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentRegisterEntryInsertRequest>> PrepareForInsert(StudentRegisterEntryInsertRequest request)
+        {
+            try
+            {
+                if ((await cacheService.GetFromCache<List<StudentRegisterEntryDto>>())
+                    .IsNotSuccess(out ActionResponse<List<StudentRegisterEntryDto>> registerEntryResponse, out List<StudentRegisterEntryDto> entries))
+                {
+                    if ((await GetAllEntries()).IsNotSuccess(out registerEntryResponse, out entries))
+                    {
+                        return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError("Greška prilikom dohvata postojećih zapisa matičnih knjiga.");
+                    }
+                }
+
+                var similarEntries = entries.Where(p => p.EducationProgramId == request.EducationProgramId);
+                var alreadyInserted = similarEntries.Any(sre => sre.StudentInGroup.StudentId == request.StudentId);
+
+                if (alreadyInserted)
+                {
+                    return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnWarning("Ovaj student već je unuesen u matičnu knjigu za izabrani program. Molimo provjerite podatke.");
+                }
+
+                if ((await cacheService.GetFromCache<List<StudentRegisterDto>>())
+                    .IsNotSuccess(out ActionResponse<List<StudentRegisterDto>> registerResponse, out List<StudentRegisterDto> registers))
+                {
+                    if ((await GetAll()).IsNotSuccess(out registerResponse, out registers))
+                    {
+                        return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError("Greška prilikom dohvata postojećih matičnih knjiga.");
+                    }
+                }
+
+                StudentRegisterDto selectedBook = null;
+                if (!request.BookNumber.HasValue)
+                {
+                    if ((await GetAllNotFull()).IsNotSuccess(out registerResponse, out registers))
+                    {
+                        return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError(registerResponse.Message);
+                    }
+
+                    if (registers.Any())
+                    {
+                        selectedBook = registers.OrderBy(b => b.BookNumber).FirstOrDefault();
+                        request.BookNumber = selectedBook.BookNumber;
+                        request.BookId = selectedBook.Id;
+                    }
+                    else
+                    {
+                        var minBookNumber = registers.Min(r => r.BookNumber) ?? 0;
+                        var maxBookNumber = registers.Max(r => r.BookNumber) ?? 0;
+                        List<int> fullList = Enumerable.Range(minBookNumber, maxBookNumber - minBookNumber + 1).ToList();
+                        List<int> realList = registers.Select(r => r.BookNumber.Value).ToList();
+
+                        var missingNums = fullList.Except(realList).ToList();
+                        var nextAvailableNumber = missingNums.Min();
+
+                        request.BookNumber = nextAvailableNumber;
+                        request.CreateNewBook = true;
+                    }
+                }
+                else
+                {
+                    var chosenBook = unitOfWork.GetGenericRepository<StudentRegister>()
+                        .FindBy(b => b.BookNumber == request.BookNumber);
+                    request.BookId = chosenBook.Id;
+                }
+
+                if (!request.StudentRegisterNumber.HasValue)
+                {
+                    request.StudentRegisterNumber = entries.Where(sre => sre.StudentRegisterId == selectedBook.Id)
+                        .Max(sre => sre.StudentRegisterNumber) + 1;
+                }
+                return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnSuccess(request);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, request);
+                return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError("Greška prilikom pripreme za unos matične knjige.");
+            }
+        }
+
+        #endregion Writers
+
+        #endregion Student Register
+
+        #region StudentRegisterEntry
+
+        #region Readers
+
+        public async Task<ActionResponse<StudentRegisterEntryDto>> GetEntryById(int id)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
+                    .FindBy(c => c.Id == id, includeProperties: entryIncludes);
+                return await ActionResponse<StudentRegisterEntryDto>
+                    .ReturnSuccess(mapper.Map<StudentRegisterEntry, StudentRegisterEntryDto>(entity));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom dohvata zapisa matične knjige.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentRegisterEntryDto>>> GetAllEntries()
+        {
+            try
+            {
+                var entities = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
+                    .GetAll(includeProperties: entryIncludes);
+                return await ActionResponse<List<StudentRegisterEntryDto>>
+                    .ReturnSuccess(mapper.Map<List<StudentRegisterEntry>, List<StudentRegisterEntryDto>>(entities));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata svih zapisa matičnih knjiga.");
+            }
+        }
+
+        [CacheRefreshSource(typeof(StudentRegisterEntryDto))]
+        public async Task<ActionResponse<List<StudentRegisterEntryDto>>> GetAllEntriesForCache()
+        {
+            try
+            {
+                if ((await GetAllEntries())
+                    .IsNotSuccess(out ActionResponse<List<StudentRegisterEntryDto>> response, out List<StudentRegisterEntryDto> entityDtos))
+                {
+                    return response;
+                }
+
+                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(entityDtos);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata svih zapisa matičnih knjiga.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<StudentRegisterEntryDto>>> GetAllEntriesPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<StudentRegisterEntryDto> entityDtos = new List<StudentRegisterEntryDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterEntryDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out entityDtos))
+                {
+                    entityDtos = (await GetAllEntries()).GetData();
+                }
+
+                var pagedResult = await entityDtos.AsQueryable().GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata straničnih podataka zapisa matične knjige.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<StudentRegisterEntryDto>>> GetEntriesBySearchQuery(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<StudentRegisterEntryDto> entityDtos = new List<StudentRegisterEntryDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterEntryDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out entityDtos))
+                {
+                    entityDtos = (await GetAllEntries()).GetData();
+                }
+
+                var pagedResult = await entityDtos.AsQueryable().GetBySearchQuery(pagedRequest);
+                return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata straničnih podataka zapisa matične knjige.");
+            }
+        }
+
+        #endregion Readers
+
+        #region Writers
+
+        #endregion Writers
+
+        #endregion StudentRegisterEntry
+    }
+}

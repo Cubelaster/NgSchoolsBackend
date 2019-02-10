@@ -163,6 +163,11 @@ namespace NgSchoolsDataLayer.Context
                 .HasOne(s => s.EmployerRegion)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<StudentRegisterEntry>()
+                .HasOne(s => s.EducationProgram)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

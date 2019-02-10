@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190209191143_Modify_Student_Entry_Add_EduProgramId")]
+    partial class Modify_Student_Entry_Add_EduProgramId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1064,8 +1066,6 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<DateTime?>("DateModified");
 
-                    b.Property<bool>("Full");
-
                     b.Property<int>("Status");
 
                     b.HasKey("Id");
@@ -1092,7 +1092,7 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<int>("Status");
 
-                    b.Property<int>("StudentRegisterId");
+                    b.Property<int?>("StudentRegisterId");
 
                     b.Property<int>("StudentRegisterNumber");
 
@@ -1762,10 +1762,9 @@ namespace NgSchoolsDataLayer.Migrations
                         .HasForeignKey("EducationProgramId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("NgSchoolsDataLayer.Models.StudentRegister", "StudentRegister")
+                    b.HasOne("NgSchoolsDataLayer.Models.StudentRegister")
                         .WithMany("StudentRegisterEntries")
-                        .HasForeignKey("StudentRegisterId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("StudentRegisterId");
 
                     b.HasOne("NgSchoolsDataLayer.Models.StudentsInGroups", "StudentsInGroups")
                         .WithMany()
