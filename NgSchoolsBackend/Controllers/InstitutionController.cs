@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
@@ -18,27 +19,28 @@ namespace NgSchoolsWebApi.Controllers
             this.institutionService = institutionService;
         }
 
-        // TODO: Authorize
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<InstitutionDto>> Get()
         {
             return await institutionService.GetInstitution();
         }
 
-        // TODO: Authorize
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<InstitutionDto>> Insert([FromBody] InstitutionDto institution)
         {
             return await institutionService.Insert(institution);
         }
 
-        // TODO: Authorize
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<InstitutionDto>> Update([FromBody] InstitutionDto institution)
         {
             return await institutionService.Update(institution);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<InstitutionDto>> Delete([FromBody] SimpleRequestBase request)
         {

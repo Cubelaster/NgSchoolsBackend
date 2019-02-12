@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests;
@@ -18,6 +19,7 @@ namespace NgSchoolsWebApi.Controllers
             this.fileUploadService = fileUploadService;
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<FileDto>> Upload([FromBody] FileUploadRequest fileUploadRequest)
         {

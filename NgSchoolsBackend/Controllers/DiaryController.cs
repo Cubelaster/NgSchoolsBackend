@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
@@ -21,38 +22,42 @@ namespace NgSchoolsWebApi.Controllers
             this.diaryService = diaryService;
         }
 
-        // TODO: Authorize
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<List<DiaryDto>>> GetAll()
         {
             return await diaryService.GetAll();
         }
 
-        // TODO: Authorize
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<DiaryDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await diaryService.GetAllPaged(pagedRequest);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<DiaryDto>> GetById(SimpleRequestBase request)
         {
             return await diaryService.GetById(request.Id);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<DiaryDto>> Insert([FromBody]DiaryDto request)
         {
             return await diaryService.Insert(request);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<DiaryDto>> Update([FromBody]DiaryDto request)
         {
             return await diaryService.Update(request);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<DiaryDto>> Delete([FromBody] SimpleRequestBase request)
         {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
@@ -20,38 +21,42 @@ namespace NgSchoolsWebApi.Controllers
             this.classLocationsService = classLocationsService;
         }
 
-        // TODO: Authorize
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<List<ClassLocationsDto>>> GetAll()
         {
             return await classLocationsService.GetAll();
         }
 
-        // TODO: Authorize
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<ClassLocationsDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await classLocationsService.GetAllPaged(pagedRequest);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<ClassLocationsDto>> GetById(SimpleRequestBase request)
         {
             return await classLocationsService.GetById(request.Id);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<ClassLocationsDto>> Insert([FromBody]ClassLocationsDto request)
         {
             return await classLocationsService.Insert(request);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<ClassLocationsDto>> Update([FromBody]ClassLocationsDto request)
         {
             return await classLocationsService.Update(request);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<ClassLocationsDto>> Delete([FromBody] SimpleRequestBase request)
         {

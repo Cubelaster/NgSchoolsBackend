@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
@@ -19,38 +20,42 @@ namespace NgSchoolsWebApi.Controllers
             this.studentGroupService = studentGroupService;
         }
 
-        // TODO: Authorize
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<List<StudentGroupDto>>> GetAll()
         {
             return await studentGroupService.GetAll();
         }
 
-        // TODO: Authorize
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<StudentGroupDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await studentGroupService.GetAllPaged(pagedRequest);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<StudentGroupDto>> GetById(SimpleRequestBase request)
         {
             return await studentGroupService.GetById(request.Id);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<StudentGroupDto>> Insert([FromBody]StudentGroupDto request)
         {
             return await studentGroupService.Insert(request);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<StudentGroupDto>> Update([FromBody]StudentGroupDto request)
         {
             return await studentGroupService.Update(request);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<StudentGroupDto>> Delete([FromBody] SimpleRequestBase request)
         {
