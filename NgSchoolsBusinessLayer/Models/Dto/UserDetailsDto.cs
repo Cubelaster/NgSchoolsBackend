@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
@@ -34,5 +35,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Authorization { get; set; }
         public string Certificates { get; set; }
         public string Notes { get; set; }
+        public List<FileDto> TeacherFiles { get; set; }
     }
 }

@@ -19,21 +19,21 @@ namespace NgSchoolsWebApi.Controllers
             this.institutionService = institutionService;
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<InstitutionDto>> Get()
         {
             return await institutionService.GetInstitution();
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<InstitutionDto>> Insert([FromBody] InstitutionDto institution)
         {
             return await institutionService.Insert(institution);
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<InstitutionDto>> Update([FromBody] InstitutionDto institution)
         {

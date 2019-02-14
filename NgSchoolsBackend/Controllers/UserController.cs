@@ -30,7 +30,7 @@ namespace NgSchoolsBackend.Controllers
             return await userService.GetAllUsersFE();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<UserViewModel>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {

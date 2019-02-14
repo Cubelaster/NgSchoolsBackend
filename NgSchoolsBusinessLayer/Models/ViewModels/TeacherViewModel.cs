@@ -34,5 +34,6 @@ namespace NgSchoolsBusinessLayer.Models.ViewModels
         public string RoleNames { get; set; }
         public List<string> RolesNamed { get; set; }
         public List<Guid> Roles { get; set; }
+        public List<FileDto> Files { get; set; }
     }
 }

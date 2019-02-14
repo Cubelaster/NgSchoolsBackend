@@ -36,6 +36,7 @@
     <Compile Remove="Migrations\20190203150414_Various_Changes.cs" />
     <Compile Remove="Migrations\20190209190721_Modify_Student_Entry_Add_EduProgramId.cs" />
     <Compile Remove="Migrations\20190214170050_Changing_DbEntity.cs" />
+    <Compile Remove="Migrations\20190214181034_Modify_TeacherFile_Wrong_FK.cs" />
   </ItemGroup>
 
   <ItemGroup>

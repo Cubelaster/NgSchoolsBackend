@@ -184,6 +184,11 @@ namespace NgSchoolsDataLayer.Context
                 .HasOne(s => s.EducationProgram)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<EducationProgramSubject>()
+                .HasOne(s => s.EducationProgram)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         private void SetUpGlobalFilters(ModelBuilder builder)

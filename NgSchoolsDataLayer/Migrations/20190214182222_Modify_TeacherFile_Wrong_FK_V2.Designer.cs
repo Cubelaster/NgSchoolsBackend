@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190214182222_Modify_TeacherFile_Wrong_FK_V2")]
+    partial class Modify_TeacherFile_Wrong_FK_V2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1239,7 +1241,9 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<int>("Status");
 
-                    b.Property<int>("UserDetailsId");
+                    b.Property<int>("UserDetailId");
+
+                    b.Property<int?>("UserDetailsId");
 
                     b.HasKey("Id");
 
@@ -1889,8 +1893,7 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.HasOne("NgSchoolsDataLayer.Models.UserDetails", "UserDetails")
                         .WithMany("TeacherFiles")
-                        .HasForeignKey("UserDetailsId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserDetailsId");
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Theme", b =>

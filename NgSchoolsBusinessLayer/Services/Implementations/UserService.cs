@@ -434,9 +434,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     return (await response).AppendErrorMessage(actionResponse.Message);
                 }
 
-                unitOfWork.Save();
-
-                return (await response).AppendMessage("Nastavnik uspješno ažuriran.");
+                return await ActionResponse<TeacherViewModel>.ReturnSuccess(mapper.Map(userDetails, request), "Nastavnik uspješno ažuriran.");
             }
             catch (Exception ex)
             {
