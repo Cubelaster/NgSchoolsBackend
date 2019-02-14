@@ -1,5 +1,6 @@
 ﻿using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
@@ -47,5 +48,7 @@ namespace NgSchoolsDataLayer.Models
 
         public Guid? UserId { get; set; }
         public User User { get; set; }
+
+        public ICollection<TeacherFile> TeacherFiles { get; set; }
     }
 }

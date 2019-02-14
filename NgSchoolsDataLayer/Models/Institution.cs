@@ -1,5 +1,6 @@
 ﻿using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
@@ -31,5 +32,6 @@ namespace NgSchoolsDataLayer.Models
         public virtual Country Country { get; set; }
         public int RegionId { get; set; }
         public virtual Region Region { get; set; }
+        public ICollection<InstitutionFile> InstitutionFiles { get; set; }
     }
 }

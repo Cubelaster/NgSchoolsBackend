@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NgSchoolsBusinessLayer.Utilities.DbUtils;
 using System;
-using System.IO;
 
 namespace NgSchoolsBackend
 {

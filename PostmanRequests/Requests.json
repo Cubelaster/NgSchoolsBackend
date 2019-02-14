@@ -288,24 +288,39 @@
 	"LogoId": 1,
 	"PrincipalId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
 	"CountryId": 517,
-	"RegionId": 46
+	"RegionId": 46,
+	"Files": [
+		{
+			"Id": 1,
+			"FileName": "Bla"
+		},
+		{
+			"Id": 2,
+			"FileName": "Bla"
+		}
+	]
 }
 
 // Institution/Update
 
 {
-	"Id": 1015,
-	"Name": "Institucija 2",
+	"Id": 1039,
+	"Name": "Institucija",
 	"InstitutionCode": "Bla",
-	"CityId": 52,
-	"InstitutionClassFirstPart": "Bla23",
-	"InstitutionClassSecondPart": "Bla33",
-	"InstitutionUrNumber": "U3",
-	"Address": "Adresa3",
+	"CityId": 51,
+	"InstitutionClassFirstPart": "Bla2",
+	"InstitutionClassSecondPart": "Bla3",
+	"InstitutionUrNumber": "Ur",
+	"Address": "Adresa",
 	"LogoId": 1,
 	"PrincipalId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
-	"CountryId": 518,
-	"RegionId": 47
+	"CountryId": 517,
+	"RegionId": 46,
+	"Files": [{
+		"Id": 1,
+		"FileName": "Bla"
+	}
+	]
 }
 
 // User/Update

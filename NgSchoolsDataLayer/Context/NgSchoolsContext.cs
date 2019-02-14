@@ -2,7 +2,10 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NgSchoolsDataLayer.Models;
+using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
+using System.Linq;
+using System.Reflection;
 
 namespace NgSchoolsDataLayer.Context
 {
@@ -10,6 +13,8 @@ namespace NgSchoolsDataLayer.Context
         IdentityUserLogin<Guid>, IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
     {
         public NgSchoolsContext(DbContextOptions<NgSchoolsContext> options) : base(options) { }
+
+        #region Db Sets
 
         public DbSet<BusinessPartner> BusinessPartners { get; set; }
         public DbSet<ClassLocations> ClassLocations { get; set; }
@@ -42,11 +47,22 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<StudentRegister> StudentRegisters { get; set; }
         public DbSet<StudentRegisterEntry> StudentRegisterEntries { get; set; }
         public DbSet<StudentRegisterEntryPrint> StudentRegisterEntryPrints { get; set; }
+        public DbSet<InstitutionFile> InstitutionFiles { get; set; }
+        public DbSet<TeacherFile> TeacherFiles { get; set; }
+
+        #endregion Db Sets
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
+            SetUpKeys(builder);
+
+            SetUpGlobalFilters(builder);
+        }
+
+        private void SetUpKeys(ModelBuilder builder)
+        {
             builder.Entity<UserRoles>(userRole =>
             {
                 builder.Entity<User>()
@@ -168,6 +184,28 @@ namespace NgSchoolsDataLayer.Context
                 .HasOne(s => s.EducationProgram)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        private void SetUpGlobalFilters(ModelBuilder builder)
+        {
+            var dbTypes = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t != typeof(DatabaseEntity) && typeof(DatabaseEntity).IsAssignableFrom(t))
+                .ToList();
+
+            foreach(var type in dbTypes)
+            {
+                var method = SetGlobalQueryMethod.MakeGenericMethod(type);
+                method.Invoke(this, new object[] { builder });
+            }
+        }
+
+        private static readonly MethodInfo SetGlobalQueryMethod = typeof(NgSchoolsContext)
+            .GetMethods(BindingFlags.Public | BindingFlags.Instance)
+            .Single(t => t.IsGenericMethod && t.Name == "SetGlobalQuery");
+
+        public void SetGlobalQuery<T>(ModelBuilder builder) where T : DatabaseEntity
+        {
+            builder.Entity<T>().HasQueryFilter(e => e.Status == Enums.DatabaseEntityStatusEnum.Active);
         }
     }
 }

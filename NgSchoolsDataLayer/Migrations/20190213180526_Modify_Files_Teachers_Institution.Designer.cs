@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190213180526_Modify_Files_Teachers_Institution")]
+    partial class Modify_Files_Teachers_Institution
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1248,15 +1250,11 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<Guid>("TeacherId");
 
-                    b.Property<int?>("UserDetailsId");
-
                     b.HasKey("Id");
 
                     b.HasIndex("FileId");
 
                     b.HasIndex("TeacherId");
-
-                    b.HasIndex("UserDetailsId");
 
                     b.ToTable("TeacherFiles");
                 });
@@ -1670,7 +1668,7 @@ namespace NgSchoolsDataLayer.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("NgSchoolsDataLayer.Models.Institution", "Student")
-                        .WithMany("InstitutionFiles")
+                        .WithMany()
                         .HasForeignKey("InstitutionId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -1893,10 +1891,6 @@ namespace NgSchoolsDataLayer.Migrations
                         .WithMany()
                         .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("NgSchoolsDataLayer.Models.UserDetails")
-                        .WithMany("TeacherFiles")
-                        .HasForeignKey("UserDetailsId");
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Theme", b =>

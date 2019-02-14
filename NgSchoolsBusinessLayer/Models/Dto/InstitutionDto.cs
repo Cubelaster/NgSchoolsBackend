@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
@@ -20,5 +21,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public CountryDto Country { get; set; }
         public int? RegionId { get; set; }
         public RegionDto Region { get; set; }
+        public List<FileDto> Files { get; set; }
     }
 }

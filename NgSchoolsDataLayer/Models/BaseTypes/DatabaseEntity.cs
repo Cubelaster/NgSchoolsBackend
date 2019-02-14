@@ -1,6 +1,5 @@
 ﻿using NgSchoolsDataLayer.Enums;
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NgSchoolsDataLayer.Models.BaseTypes
 {
@@ -8,10 +7,9 @@ namespace NgSchoolsDataLayer.Models.BaseTypes
     {
         public DatabaseEntity()
         {
-            this.DateCreated = DateTime.Now;
+            DateCreated = DateTime.Now;
         }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime DateCreated { get; set; }
         public DateTime? DateModified { get; set; }
         public DatabaseEntityStatusEnum Status { get; set; }
