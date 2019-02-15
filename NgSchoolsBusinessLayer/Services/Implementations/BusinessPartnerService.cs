@@ -52,7 +52,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<BusinessPartner>()
-                    .GetAll(includeProperties: "BusinessPartnerContacts,City,Region,Country");
+                    .GetAll(bp => bp.IsBusinessPartner,
+                    includeProperties: "BusinessPartnerContacts,City,Region,Country");
                 return await ActionResponse<List<BusinessPartnerDto>>
                     .ReturnSuccess(mapper.Map<List<BusinessPartner>, List<BusinessPartnerDto>>(entities));
             }
@@ -68,7 +69,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<BusinessPartner>()
-                    .GetAllAsQueryable(includeProperties: "BusinessPartnerContacts,City,Region,Country").GetPaged(pagedRequest);
+                    .GetAllAsQueryable(bp => bp.IsBusinessPartner,
+                    includeProperties: "BusinessPartnerContacts,City,Region,Country").GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<BusinessPartnerDto>
                 {

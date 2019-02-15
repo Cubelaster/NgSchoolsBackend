@@ -41,19 +41,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Mobile { get; set; }
         public string Email { get; set; }
         public bool Employed { get; set; }
-        public string EmployerName { get; set; }
-        public int? EmployerCountryId { get; set; }
-        public CountryDto EmployerCountry { get; set; }
-        public int? EmployerCityId { get; set; }
-        public CityDto EmployerCity { get; set; }
-        public int? EmployerRegionId { get; set; }
-        public RegionDto EmployerRegion { get; set; }
-        public string EmployerAddress { get; set; }
-        public string EmployerPhone { get; set; }
-        public string EmployerMobile { get; set; }
-        public string EmployerEmail { get; set; }
-        public bool EmployerApplicationAttendant { get; set; }
-        public string EmployerOib { get; set; }
         public bool EducationContract { get; set; }
         public bool FinalExam { get; set; }
         public bool CompletedSchoolCertificate { get; set; }
@@ -71,6 +58,9 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Vocation { get; set; }
         public bool Gdpr { get; set; }
         public string Notes { get; set; }
+
+        public int? EmployerId { get; set; }
+        public BusinessPartnerDto Employer { get; set; }
 
         public List<FileDto> Files { get; set; }
     }

@@ -16,12 +16,17 @@ namespace NgSchoolsDataLayer.Models
         public string Oib { get; set; }
         public string Address { get; set; }
 
+        public bool ApplicationAttendant { get; set; }
+
         public int? CountryId { get; set; }
         public virtual Country Country { get; set; }
         public int? CityId { get; set; }
         public virtual City City { get; set; }
         public int? RegionId { get; set; }
         public virtual Region Region { get; set; }
+
+        public bool IsBusinessPartner { get; set; }
+        public bool IsEmployer { get; set; }
 
         public virtual ICollection<ContactPerson> BusinessPartnerContacts { get; set; }
     }

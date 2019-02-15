@@ -12,12 +12,17 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Oib { get; set; }
         public string Address { get; set; }
 
+        public bool ApplicationAttendant { get; set; }
+
         public int? CountryId { get; set; }
         public virtual CountryDto Country { get; set; }
         public int? CityId { get; set; }
         public virtual CityDto City { get; set; }
         public int? RegionId { get; set; }
         public virtual RegionDto Region { get; set; }
+
+        public bool IsBusinessPartner { get; set; }
+        public bool IsEmployer { get; set; }
 
         public List<ContactPersonDto> BusinessPartnerContacts { get; set; }
     }

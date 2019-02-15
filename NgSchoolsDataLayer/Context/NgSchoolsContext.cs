@@ -156,27 +156,12 @@ namespace NgSchoolsDataLayer.Context
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Student>()
-                .HasOne(s => s.EmployerCity)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Student>()
                 .HasOne(s => s.AddressCountry)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<Student>()
-                .HasOne(s => s.EmployerCountry)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Student>()
                 .HasOne(s => s.AddressRegion)
-                .WithMany()
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Student>()
-                .HasOne(s => s.EmployerRegion)
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
 

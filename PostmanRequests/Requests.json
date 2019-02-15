@@ -425,16 +425,7 @@
 	"Mobile": "Mobile",
 	"Email": "Email",
 	"Employed": true,
-	"EmployerName": "EmployerName",
-	"EmployerCountryId": 518,
-	"EmployerCityId": 53,
-	"EmployerRegionId": 46,
-	"EmployerAddress": "EmployerAddress",
-	"EmployerPhone": "EmployerPhone",
-	"EmployerMobile": "EmployerMobile",
-	"EmployerEmail": "EmployerEmail",
-	"EmployerApplicationAttendant": true,
-	"EmployerOib": "EmployerOib",
+	"EmployerId": 5,
 	"EducationContract": true,
 	"CompletedSchoolCertificate": true,
 	"PractiacalTrainingContract": true,
@@ -495,16 +486,6 @@
 	"Mobile": "Mobile",
 	"Email": "Email",
 	"Employed": true,
-	"EmployerName": "EmployerName",
-	"EmployerCountryId": 518,
-	"EmployerCityId": 53,
-	"EmployerRegionId": 46,
-	"EmployerAddress": "EmployerAddress",
-	"EmployerPhone": "EmployerPhone",
-	"EmployerMobile": "EmployerMobile",
-	"EmployerEmail": "EmployerEmail",
-	"EmployerApplicationAttendant": true,
-	"EmployerOib": "EmployerOib",
 	"EducationContract": true,
 	"CompletedSchoolCertificate": true,
 	"PractiacalTrainingContract": true,
@@ -520,7 +501,8 @@
 	"SchoolLevel": "SchoolLevel",
 	"Vocation": "Vocation",
 	"Gdpr": true,
-	"Notes": "Notes"
+	"Notes": "Notes",
+	"EmployerId": 5
 }
 
 // StudentGroup/Insert
@@ -695,7 +677,9 @@
 			"Mobile": "Mobile",
 			"Email": "Email"
 		}	
-	]
+	],
+	"IsBusinessPartner": true,
+	"IsEmployer": true
 }
 
 //BusinessPartner/Update

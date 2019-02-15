@@ -65,16 +65,8 @@ namespace NgSchoolsDataLayer.Models
         public bool Gdpr { get; set; }
         public string Notes { get; set; }
 
-        public int? EmployerCountryId { get; set; }
-        public virtual Country EmployerCountry { get; set; }
-        public int? EmployerCityId { get; set; }
-        public virtual City EmployerCity { get; set; }
-        public int? EmployerRegionId { get; set; }
-        public virtual Region EmployerRegion { get; set; }
-        public string EmployerAddress { get; set; }
-        public string EmployerPhone { get; set; }
-        public string EmployerMobile { get; set; }
-        public string EmployerEmail { get; set; }
+        public int? EmployerId { get; set; }
+        public virtual BusinessPartner Employer { get; set; }
 
         public ICollection<StudentsInGroups> StudentsInGroups { get; set; }
         public ICollection<StudentFiles> Files { get; set; }
