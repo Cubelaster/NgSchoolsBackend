@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -23,91 +24,91 @@ namespace NgSchoolsBackend.Controllers
             this.userService = userService;
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<UserViewModel>>> GetAll()
         {
             return await userService.GetAllUsersFE();
         }
 
-        [Authorize]
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResponse<PagedResult<UserViewModel>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await userService.GetAllUsersPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<TeacherViewModel>>> GetAllTeachersPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await userService.GetAllTeachersPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<UserDto>> GetById([FromBody] UserGetRequest request)
         {
             return await userService.GetById(request.Id.Value);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<UserViewModel>> GetUserById([FromBody] UserGetRequest request)
         {
             return await userService.GetUserViewModelById(request.Id.Value);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<TeacherViewModel>> GetTeacherById([FromBody] UserGetRequest request)
         {
             return await userService.GetTeacherViewModelById(request.Id.Value);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<UserViewModel>> Create([FromBody] UserViewModel request)
         {
             return await userService.Create(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<TeacherViewModel>> CreateTeacher([FromBody] TeacherViewModel request)
         {
             return await userService.CreateTeacher(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<UserViewModel>> Update([FromBody] UserViewModel request)
         {
             return await userService.Update(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<TeacherViewModel>> UpdateTeacher([FromBody] TeacherViewModel request)
         {
             return await userService.UpdateTeacher(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<object>> Delete([FromBody] UserGetRequest request)
         {
             return await userService.Delete(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<object>> DeleteTeacher([FromBody] UserGetRequest request)
         {
             return await userService.DeleteTeacher(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<RoleDto>>> GetAllRoles()
         {

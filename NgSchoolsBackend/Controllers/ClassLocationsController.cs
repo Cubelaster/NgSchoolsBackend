@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -21,42 +22,42 @@ namespace NgSchoolsWebApi.Controllers
             this.classLocationsService = classLocationsService;
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<ClassLocationsDto>>> GetAll()
         {
             return await classLocationsService.GetAll();
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<ClassLocationsDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await classLocationsService.GetAllPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<ClassLocationsDto>> GetById(SimpleRequestBase request)
         {
             return await classLocationsService.GetById(request.Id);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<ClassLocationsDto>> Insert([FromBody]ClassLocationsDto request)
         {
             return await classLocationsService.Insert(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<ClassLocationsDto>> Update([FromBody]ClassLocationsDto request)
         {
             return await classLocationsService.Update(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<ClassLocationsDto>> Delete([FromBody] SimpleRequestBase request)
         {

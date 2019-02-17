@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -21,42 +22,42 @@ namespace NgSchoolsWebApi.Controllers
             this.educationLevelService = educationLevelService;
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<EducationLevelDto>>> GetAll()
         {
             return await educationLevelService.GetAll();
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<EducationLevelDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await educationLevelService.GetAllPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<EducationLevelDto>> GetById(SimpleRequestBase request)
         {
             return await educationLevelService.GetById(request.Id);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<EducationLevelDto>> Insert([FromBody]EducationLevelDto request)
         {
             return await educationLevelService.Insert(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<EducationLevelDto>> Update([FromBody]EducationLevelDto request)
         {
             return await educationLevelService.Update(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<EducationLevelDto>> Delete([FromBody] SimpleRequestBase request)
         {

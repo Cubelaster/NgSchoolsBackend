@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -21,42 +22,42 @@ namespace NgSchoolsWebApi.Controllers
             this.classTypeService = classTypeService;
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<ClassTypeDto>> GetById(SimpleRequestBase request)
         {
             return await classTypeService.GetById(request.Id);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<ClassTypeDto>> Insert([FromBody] ClassTypeDto classType)
         {
             return await classTypeService.Insert(classType);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<ClassTypeDto>> Update([FromBody] ClassTypeDto classType)
         {
             return await classTypeService.Update(classType);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<ClassTypeDto>>> GetAll()
         {
             return await classTypeService.GetAll();
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<ClassTypeDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await classTypeService.GetAllClassTypesPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<ClassTypeDto>> Delete([FromBody] SimpleRequestBase request)
         {

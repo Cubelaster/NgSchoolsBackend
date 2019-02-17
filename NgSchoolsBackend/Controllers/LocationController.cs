@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -23,49 +24,49 @@ namespace NgSchoolsWebApi.Controllers
 
         #region Country
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<CountryDto>> GetCountryById(SimpleRequestBase request)
         {
             return await locationService.GetCountryById(request.Id);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<CountryDto>> InsertCountry([FromBody] CountryDto entityDto)
         {
             return await locationService.InsertCountry(entityDto);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<CountryDto>> UpdateCountry([FromBody] CountryDto entityDto)
         {
             return await locationService.UpdateCountry(entityDto);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<CountryDto>>> GetAllCountries()
         {
             return await locationService.GetAllCountries();
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<CountryDto>>> GetAllCountriesPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await locationService.GetAllCountriesPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<CountryDto>>> GetCountriesBySearchQuery([FromBody] BasePagedRequest pagedRequest)
         {
             return await locationService.GetCountriesBySearchQuery(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<CountryDto>> DeleteCountry([FromBody] SimpleRequestBase request)
         {
@@ -76,63 +77,63 @@ namespace NgSchoolsWebApi.Controllers
 
         #region Region
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<RegionDto>> GetRegionById(SimpleRequestBase request)
         {
             return await locationService.GetRegionById(request.Id);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<RegionDto>>> GetRegionsByCountryId(SimpleRequestBase request)
         {
             return await locationService.GetRegionsByCountryId(request.Id);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<RegionDto>> InsertRegion([FromBody] RegionDto entityDto)
         {
             return await locationService.InsertRegion(entityDto);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<RegionDto>> UpdateRegion([FromBody] RegionDto entityDto)
         {
             return await locationService.UpdateRegion(entityDto);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<RegionDto>>> GetAllRegions()
         {
             return await locationService.GetAllRegions();
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<RegionDto>>> GetAllRegionsPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await locationService.GetAllRegionsPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<RegionDto>>> GetRegionsByCountryIdPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await locationService.GetRegionsByCountryIdPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<RegionDto>>> GetRegionsBySearchQuery([FromBody] BasePagedRequest pagedRequest)
         {
             return await locationService.GetRegionsBySearchQuery(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<RegionDto>> DeleteRegion([FromBody] SimpleRequestBase request)
         {
@@ -143,63 +144,63 @@ namespace NgSchoolsWebApi.Controllers
 
         #region City
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<CityDto>> GetCityById(SimpleRequestBase request)
         {
             return await locationService.GetCityById(request.Id);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<CityDto>>> GetCitiesByRegionId(SimpleRequestBase request)
         {
             return await locationService.GetCitiesByRegionId(request.Id);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<CityDto>>> GetCitiesByRegionIdPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await locationService.GetCitiesByRegionIdPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<CityDto>> InsertCity([FromBody] CityDto entityDto)
         {
             return await locationService.InsertCity(entityDto);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<CityDto>> UpdateCity([FromBody] CityDto entityDto)
         {
             return await locationService.UpdateCity(entityDto);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<CityDto>>> GetAllCities()
         {
             return await locationService.GetAllCities();
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<CityDto>>> GetAllCitiesPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await locationService.GetAllCitiesPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<CityDto>>> GetCitiesBySearchQuery([FromBody] BasePagedRequest pagedRequest)
         {
             return await locationService.GetCitiesBySearchQuery(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<CityDto>> DeleteCity([FromBody] SimpleRequestBase request)
         {

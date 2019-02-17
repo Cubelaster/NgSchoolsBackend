@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -20,49 +21,49 @@ namespace NgSchoolsWebApi.Controllers
             this.educationProgramService = educationProgramService;
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<List<EducationProgramDto>>> GetAll()
         {
             return await educationProgramService.GetAll();
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<EducationProgramDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await educationProgramService.GetAllPaged(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<PagedResult<EducationProgramDto>>> GetBySearchQuery([FromBody] BasePagedRequest pagedRequest)
         {
             return await educationProgramService.GetBySearchQuery(pagedRequest);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<EducationProgramDto>> GetById(SimpleRequestBase request)
         {
             return await educationProgramService.GetById(request.Id);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<EducationProgramDto>> Insert([FromBody]EducationProgramDto request)
         {
             return await educationProgramService.Insert(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<EducationProgramDto>> Update([FromBody]EducationProgramDto request)
         {
             return await educationProgramService.Update(request);
         }
 
-        [Authorize]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
         public async Task<ActionResponse<EducationProgramDto>> Delete([FromBody] SimpleRequestBase request)
         {
