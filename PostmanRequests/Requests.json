@@ -354,7 +354,12 @@
 	"UserId": "5863f206-5681-435d-6b10-08d652bdcec8",
 	"FirstName": "Mirzet",
 	"LastName": "Murtić",
-	"CityId": 136
+	"CityId": 136,
+	"Files": [
+		{
+			"Id": 1
+		}
+	]
 }
 
 
@@ -685,29 +690,25 @@
 //BusinessPartner/Update
 
 {
-	"Id": 2008,
+	"Id": 4006,
 	"Name": "Name",
 	"Phone": "Phone",
 	"Mobile": "Mobile",
 	"Email": "Email",
 	"Oib": "Oib",
-	"Address": "Address",
 	"CityId": 51,
 	"CountryId": 517,
 	"RegionId": 46,
+	"Address": "Address",
 	"BusinessPartnerContacts": [
 		{
-			"Id": 1006,
-			"FullName": "Ba",
+			"FullName": "FullName",
 			"Mobile": "Mobile",
 			"Email": "Email"
-		},
-		{
-			"FullName": "Yo",
-			"Mobile": "Man",
-			"Email": "Email"
-		}
-	]
+		}	
+	],
+	"IsBusinessPartner": false,
+	"IsEmployer": true
 }
 
 //ExamCommission/Insert
