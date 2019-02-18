@@ -90,6 +90,32 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<PagedResult<BusinessPartnerDto>>> GetAllEmployersPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                var pagedEntityResult = await unitOfWork.GetGenericRepository<BusinessPartner>()
+                    .GetAllAsQueryable(bp => bp.IsEmployer,
+                    includeProperties: "BusinessPartnerContacts,City,Region,Country").GetPaged(pagedRequest);
+
+                var pagedResult = new PagedResult<BusinessPartnerDto>
+                {
+                    CurrentPage = pagedEntityResult.CurrentPage,
+                    PageSize = pagedEntityResult.PageSize,
+                    PageCount = pagedEntityResult.PageCount,
+                    RowCount = pagedEntityResult.RowCount,
+                    Results = mapper.Map<List<BusinessPartner>, List<BusinessPartnerDto>>(pagedEntityResult.Results)
+                };
+
+                return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex, pagedRequest);
+                return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnError("Some sort of fuckup. Try again.");
+            }
+        }
+
         public async Task<ActionResponse<BusinessPartnerDto>> Insert(BusinessPartnerDto entityDto)
         {
             try
