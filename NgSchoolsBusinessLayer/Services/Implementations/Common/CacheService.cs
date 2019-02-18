@@ -60,7 +60,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, cachedObject);
-                return await ActionResponse<T>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<T>.ReturnError("Greška prilikom postavljanja podataka u cache.");
             }
         }
 
@@ -102,7 +102,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
                 var result = await RefreshCache<T>();
                 if (result.ActionResponseType != ActionResponseTypeEnum.Success)
                 {
-                    return await ActionResponse<T>.ReturnError("Unable to refresh cache!");
+                    return await ActionResponse<T>.ReturnError("Greška prilikom osvježavanja podataka u cacheu.");
                 }
 
                 return await GetFromCache<T>();
@@ -110,7 +110,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<T>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<T>.ReturnError("Greška prilikom dohvata podataka iz cachea.");
             }
         }
     }
