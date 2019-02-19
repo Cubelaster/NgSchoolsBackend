@@ -64,6 +64,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<List<BusinessPartnerDto>>> GetAllEmployers()
+        {
+            try
+            {
+                var entities = unitOfWork.GetGenericRepository<BusinessPartner>()
+                    .GetAll(bp => bp.IsEmployer,
+                    includeProperties: "BusinessPartnerContacts,City,Region,Country");
+                return await ActionResponse<List<BusinessPartnerDto>>
+                    .ReturnSuccess(mapper.Map<List<BusinessPartner>, List<BusinessPartnerDto>>(entities));
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<BusinessPartnerDto>>.ReturnError("Some sort of fuckup!");
+            }
+        }
+
         public async Task<ActionResponse<PagedResult<BusinessPartnerDto>>> GetAllPaged(BasePagedRequest pagedRequest)
         {
             try
@@ -89,6 +106,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnError("Some sort of fuckup. Try again.");
             }
         }
+
 
         public async Task<ActionResponse<PagedResult<BusinessPartnerDto>>> GetAllEmployersPaged(BasePagedRequest pagedRequest)
         {

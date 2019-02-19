@@ -52,6 +52,13 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
+        public async Task<ActionResponse<List<BusinessPartnerDto>>> GetAllEmployers()
+        {
+            return await businessPartnerService.GetAllEmployers();
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
         public async Task<ActionResponse<PagedResult<BusinessPartnerDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await businessPartnerService.GetAllPaged(pagedRequest);
