@@ -114,7 +114,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     students = (await GetAll()).GetData();
                 }
                 
-                return await ActionResponse<List<StudentDto>>.ReturnSuccess(students.OrderBy(s => s.DateCreated).Take(10).ToList());
+                return await ActionResponse<List<StudentDto>>.ReturnSuccess(students.OrderByDescending(s => s.DateCreated).Take(10).ToList());
             }
             catch (Exception ex)
             {
