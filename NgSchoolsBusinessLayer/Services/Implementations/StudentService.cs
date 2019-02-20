@@ -224,7 +224,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var entityToUpdate = unitOfWork.GetGenericRepository<Student>()
                     .FindBy(c => c.Id == entityDto.Id, 
-                    includeProperties: "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,EmployerCountry,EmployerCity,EmployerRegion");
+                    includeProperties: includeProperties);
 
                 mapper.Map(entityDto, entityToUpdate);
                 unitOfWork.GetGenericRepository<Student>().Update(entityToUpdate);
