@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿
+using AutoMapper;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -100,6 +101,25 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<StudentDto>>.ReturnError("Greška prilikom dohvata svih studenata.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentDto>>> GetTenNewest()
+        {
+            try
+            {
+                var cachedResponse = await cacheService.GetFromCache<List<StudentDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out List<StudentDto> students))
+                {
+                    students = (await GetAll()).GetData();
+                }
+                
+                return await ActionResponse<List<StudentDto>>.ReturnSuccess(students.OrderBy(s => s.DateCreated).Take(10).ToList());
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<List<StudentDto>>.ReturnError("Greška prilikom dohvata deset najnovijih studenata.");
             }
         }
 

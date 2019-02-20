@@ -84,5 +84,12 @@ namespace NgSchoolsWebApi.Controllers
         {
             return await studentService.GetTotalNumber();
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<StudentDto>>> GetTenNewest()
+        {
+            return await studentService.GetTenNewest();
+        }
     }
 }

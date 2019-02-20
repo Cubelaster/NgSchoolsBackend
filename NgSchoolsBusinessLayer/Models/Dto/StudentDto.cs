@@ -1,5 +1,6 @@
 ﻿using NgSchoolsBusinessLayer.Enums;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
+using System;
 using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
@@ -58,6 +59,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Vocation { get; set; }
         public bool Gdpr { get; set; }
         public string Notes { get; set; }
+        public DateTime? DateCreated { get; set; }
 
         public int? EmployerId { get; set; }
         public BusinessPartnerDto Employer { get; set; }
