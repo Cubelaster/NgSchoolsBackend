@@ -46,7 +46,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ClassTypeDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ClassTypeDto>.ReturnError("Greška prilikom dohvata vrste nastave.");
             }
         }
 
@@ -62,7 +62,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<ClassTypeDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<List<ClassTypeDto>>.ReturnError("Greška prilikom dohvata vrsta nastave za brzu memoriju.");
             }
         }
 
@@ -77,7 +77,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<ClassTypeDto>>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<List<ClassTypeDto>>.ReturnError("Greška prilikom dohvata svih vrsta nastave.");
+            }
+        }
+
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            try
+            {
+                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<ClassType>().GetAllAsQueryable().Count());
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja vrsta nastave.");
             }
         }
 
@@ -98,7 +111,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<ClassTypeDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<PagedResult<ClassTypeDto>>.ReturnError("Greška prilikom dohvata straničnih podataka vrsta nastave.");
             }
         }
 
@@ -116,7 +129,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ClassTypeDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ClassTypeDto>.ReturnError("Greška prilikom upisa vrste nastave.");
             }
         }
 
@@ -134,7 +147,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ClassTypeDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ClassTypeDto>.ReturnError("Greška prilikom ažuriranja vrste nastave.");
             }
         }
 
@@ -145,12 +158,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.GetGenericRepository<ClassType>().Delete(id);
                 unitOfWork.Save();
                 await cacheService.RefreshCache<List<ClassTypeDto>>();
-                return await ActionResponse<ClassTypeDto>.ReturnSuccess(null, "Delete successful.");
+                return await ActionResponse<ClassTypeDto>.ReturnSuccess(null, "Brisanje vrste nastave uspješno.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ClassTypeDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ClassTypeDto>.ReturnError("Greška prilikom brisanja vrste nastave.");
             }
         }
     }

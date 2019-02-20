@@ -92,6 +92,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            try
+            {
+                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<StudentRegister>().GetAllAsQueryable().Count());
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja matičnih knjiga.");
+            }
+        }
+
         public async Task<ActionResponse<List<StudentRegisterDto>>> GetAllNotFull()
         {
             try

@@ -44,7 +44,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ExamCommissionDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ExamCommissionDto>.ReturnError("Greška prilikom dohvata ispitne komisije.");
             }
         }
 
@@ -60,7 +60,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<ExamCommissionDto>>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<List<ExamCommissionDto>>.ReturnError("Greška prilikom dohvata svih ispitnih komisija.");
+            }
+        }
+
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            try
+            {
+                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<Subject>().GetAllAsQueryable().Count());
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja ispitnih komisija.");
             }
         }
 
@@ -85,7 +98,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<ExamCommissionDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<PagedResult<ExamCommissionDto>>.ReturnError("Greška prilikom dohvata straničnih podataka ispitnih komisija.");
             }
         }
 
@@ -114,7 +127,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, entityDto);
-                return await ActionResponse<ExamCommissionDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ExamCommissionDto>.ReturnError("Greška prilikom unosa ispitne komisije.");
             }
         }
 
@@ -150,7 +163,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<ExamCommission>().Delete(id);
                 unitOfWork.Save();
-                return await ActionResponse<ExamCommissionDto>.ReturnSuccess(null, "Bisanje uspješno.");
+                return await ActionResponse<ExamCommissionDto>.ReturnSuccess(null, "Brisanje ispitne komisije uspješno.");
             }
             catch (Exception ex)
             {
@@ -179,20 +192,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 if ((await RemoveExamTeachers(teachersToRemove))
                     .IsNotSuccess(out ActionResponse<List<UserExamCommissionDto>> actionResponse))
                 {
-                    return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena učitelja u ispitnoj komisiji.");
+                    return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena nastavnika u ispitnoj komisiji.");
                 }
 
                 if ((await AddExamTeachers(teachersToAdd))
                     .IsNotSuccess(out actionResponse))
                 {
-                    return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena učitelja u ispitnoj komisiji.");
+                    return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena nastavnika u ispitnoj komisiji.");
                 }
                 return await ActionResponse<ExamCommissionDto>.ReturnSuccess(examCommission, "Uspješno izmijenjeni članovi ispitne komisije.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, examCommission);
-                return await ActionResponse<ExamCommissionDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ExamCommissionDto>.ReturnError("Greška prilikom ažuriranja članova ispitne komisije.");
             }
         }
 
@@ -200,7 +213,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var response = await ActionResponse<List<UserExamCommissionDto>>.ReturnSuccess(null, "Učitelji uspješno maknuti iz ispitne komisije.");
+                var response = await ActionResponse<List<UserExamCommissionDto>>.ReturnSuccess(null, "Nastavnici uspješno maknuti iz ispitne komisije.");
                 examCommissionTeachers.ForEach(async ect =>
                 {
                     if ((await RemoveExamTeacher(ect))
@@ -215,7 +228,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, examCommissionTeachers);
-                return await ActionResponse<List<UserExamCommissionDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<List<UserExamCommissionDto>>.ReturnError("Greška prilikom micanja članova ispitne komisije.");
             }
         }
 
@@ -225,12 +238,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<UserExamCommission>().Delete(teacher.Id.Value);
                 unitOfWork.Save();
-                return await ActionResponse<UserExamCommissionDto>.ReturnSuccess(null, "Učitelj upsješno izbrisan iz komisije.");
+                return await ActionResponse<UserExamCommissionDto>.ReturnSuccess(null, "Nastavnik upsješno izbrisan iz komisije.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, teacher);
-                return await ActionResponse<UserExamCommissionDto>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<UserExamCommissionDto>.ReturnError("Greška prilikom micanja člana ispitne komisije.");
             }
         }
 
@@ -238,7 +251,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var response = await ActionResponse<List<UserExamCommissionDto>>.ReturnSuccess(null, "Učitelji uspješno dodani u ispitnu komisiju.");
+                var response = await ActionResponse<List<UserExamCommissionDto>>.ReturnSuccess(null, "Nastavnici uspješno dodani u ispitnu komisiju.");
                 examCommissionTeachers.ForEach(async ect =>
                 {
                     if ((await AddExamTeacher(ect))
@@ -266,12 +279,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<UserExamCommissionDto>
                     .ReturnSuccess(mapper.Map<UserExamCommission, UserExamCommissionDto>(entityToAdd),
-                    "Učitelj upsješno dodan u komisiju.");
+                    "Nastavnik uspješno dodan u komisiju.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, teacher);
-                return await ActionResponse<UserExamCommissionDto>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<UserExamCommissionDto>.ReturnError("Greška prilikom dodavanja nastavnika u ispitnu komisiju.");
             }
         }
     }

@@ -9,6 +9,7 @@ using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
@@ -61,6 +62,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<ThemeDto>>.ReturnError("Greška prilikom dohvata svih tema.");
+            }
+        }
+
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            try
+            {
+                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<Subject>().GetAllAsQueryable().Count());
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja tema.");
             }
         }
 

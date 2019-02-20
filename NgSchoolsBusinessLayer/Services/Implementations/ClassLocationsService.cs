@@ -47,7 +47,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ClassLocationsDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom dohvata mjesta izvođenja.");
             }
         }
 
@@ -63,7 +63,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<ClassLocationsDto>>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<List<ClassLocationsDto>>.ReturnError("Greška prilikom dohvata svih mjesta izvođenja.");
+            }
+        }
+
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            try
+            {
+                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<ClassLocations>().GetAllAsQueryable().Count());
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja mjesta izvođenja.");
             }
         }
 
@@ -80,7 +93,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<ClassLocationsDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<List<ClassLocationsDto>>.ReturnError("Greška prilikom dohvata mjesta izvođenja za brzu memoriju.");
             }
         }
 
@@ -101,7 +114,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<ClassLocationsDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<PagedResult<ClassLocationsDto>>.ReturnError("Greška prilikom dohvata straničnih podataka mjesta izvođenja.");
             }
         }
 
@@ -119,7 +132,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ClassLocationsDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom upisa mjesta izvođenja.");
             }
         }
 
@@ -137,7 +150,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ClassLocationsDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom ažuriranja mjesta izvođenja.");
             }
         }
 
@@ -148,12 +161,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.GetGenericRepository<ClassLocations>().Delete(id);
                 unitOfWork.Save();
                 await cacheService.RefreshCache<List<ClassLocationsDto>>();
-                return await ActionResponse<ClassLocationsDto>.ReturnSuccess(null, "Delete successful.");
+                return await ActionResponse<ClassLocationsDto>.ReturnSuccess(null, "Brisanje mjesta izvođenja uspješno.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<ClassLocationsDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom brisanja mjesta izvođenja!");
             }
         }
     }

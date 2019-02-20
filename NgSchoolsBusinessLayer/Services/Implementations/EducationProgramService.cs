@@ -75,6 +75,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            try
+            {
+                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<EducationProgram>().GetAllAsQueryable().Count());
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja programa.");
+            }
+        }
+
         [CacheRefreshSource(typeof(EducationProgramDto))]
         public async Task<ActionResponse<List<EducationProgramDto>>> GetAllForCache()
         {
@@ -219,7 +232,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<EducationProgramDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom brisanja programa.");
             }
             finally
             {

@@ -12,6 +12,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<StudentGroupDto>> GetById(int id);
 
         Task<ActionResponse<List<StudentGroupDto>>> GetAll();
+        Task<ActionResponse<int>> GetTotalNumber();
         Task<ActionResponse<PagedResult<StudentGroupDto>>> GetAllPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<StudentGroupDto>> Delete(int id);
         Task<ActionResponse<StudentGroupDto>> Insert(StudentGroupDto entityDto);

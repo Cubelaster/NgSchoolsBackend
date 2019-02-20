@@ -25,5 +25,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<List<SubjectDto>>> UpdateSubjects(List<SubjectDto> subjects);
         Task<ActionResponse<SubjectDto>> Delete(int id);
         Task<ActionResponse<List<SubjectDto>>> DeleteSubjects(List<SubjectDto> subjects);
+        Task<ActionResponse<int>> GetTotalNumber();
     }
 }

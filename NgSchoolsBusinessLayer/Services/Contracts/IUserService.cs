@@ -35,5 +35,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<UserViewModel>> AddToDefaultRole(UserViewModel user);
         Task<ActionResponse<UserViewModel>> RemoveRoles(UserViewModel user);
         Task<ActionResponse<UserViewModel>> ModifyUserRoles(UserViewModel user);
+        Task<ActionResponse<int>> GetTotalNumberOfTeachers();
     }
 }

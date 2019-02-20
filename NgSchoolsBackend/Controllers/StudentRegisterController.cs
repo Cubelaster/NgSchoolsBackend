@@ -92,5 +92,12 @@ namespace NgSchoolsWebApi.Controllers
         {
             return await studentRegisterService.UpdateEntry(request);
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            return await studentRegisterService.GetTotalNumber();
+        }
     }
 }

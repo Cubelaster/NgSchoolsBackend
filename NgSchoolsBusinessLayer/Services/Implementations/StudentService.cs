@@ -103,6 +103,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            try
+            {
+                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<Student>().GetAllAsQueryable().Count());
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja studenata.");
+            }
+        }
+
         public async Task<ActionResponse<PagedResult<StudentDto>>> GetBySearchQuery(BasePagedRequest pagedRequest)
         {
             try
@@ -292,7 +305,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, entities);
-                return await ActionResponse<List<StudentFileDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<List<StudentFileDto>>.ReturnError("Greška prilikom micanja dokumenata sa studenta.");
             }
         }
 

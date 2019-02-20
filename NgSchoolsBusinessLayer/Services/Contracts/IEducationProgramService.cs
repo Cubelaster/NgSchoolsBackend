@@ -17,5 +17,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<EducationProgramDto>> Insert(EducationProgramDto entityDto);
         Task<ActionResponse<EducationProgramDto>> Update(EducationProgramDto entityDto);
         Task<ActionResponse<PagedResult<EducationProgramDto>>> GetBySearchQuery(BasePagedRequest pagedRequest);
+        Task<ActionResponse<int>> GetTotalNumber();
     }
 }

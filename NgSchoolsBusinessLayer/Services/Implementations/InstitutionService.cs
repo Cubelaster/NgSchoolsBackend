@@ -112,12 +112,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<Institution>().Delete(id);
                 unitOfWork.Save();
-                return await ActionResponse<InstitutionDto>.ReturnSuccess(null, "Delete successful.");
+                return await ActionResponse<InstitutionDto>.ReturnSuccess(null, "Brisanje institucije uspješno.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<InstitutionDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<InstitutionDto>.ReturnError("Greška prilikom brisanja institucije.");
             }
         }
 

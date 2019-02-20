@@ -31,6 +31,13 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            return await classLocationsService.GetTotalNumber();
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
         public async Task<ActionResponse<PagedResult<ClassLocationsDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await classLocationsService.GetAllPaged(pagedRequest);

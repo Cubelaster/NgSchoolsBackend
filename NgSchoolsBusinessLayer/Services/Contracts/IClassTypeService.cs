@@ -15,5 +15,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<ClassTypeDto>> Insert(ClassTypeDto classType);
         Task<ActionResponse<ClassTypeDto>> Update(ClassTypeDto classType);
         Task<ActionResponse<ClassTypeDto>> Delete(int id);
+        Task<ActionResponse<int>> GetTotalNumber();
     }
 }

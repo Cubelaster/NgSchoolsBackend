@@ -224,6 +224,30 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<int>> GetTotalNumberOfTeachers()
+        {
+            try
+            {
+                List<UserDto> users = new List<UserDto>();
+                var cachedUsersResponse = await cacheService.GetFromCache<List<UserDto>>();
+                if (!cachedUsersResponse.IsSuccessAndHasData(out users))
+                {
+                    users = (await GetAllUsers()).GetData();
+                }
+
+                var numberOfTeachers = users
+                    .Where(u => u.UserRoles.Any(ur => ur.Name == "Nastavnik"))
+                    .Count();
+
+                return await ActionResponse<int>.ReturnSuccess(numberOfTeachers);
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja predmeta.");
+            }
+        }
+
         #endregion Readers
 
         #region Writers

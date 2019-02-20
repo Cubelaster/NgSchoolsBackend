@@ -47,7 +47,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var userToLogin = await userManager.FindByEmailAsync(loginRequest.Email);
                 if (userToLogin == null)
                 {
-                    return await ActionResponse<LoginResponse>.ReturnError("No one with that email exists in our database!");
+                    return await ActionResponse<LoginResponse>.ReturnError("Ne postoji korisnik registriran s tom email adresom.");
                 }
 
                 var result = await signInManager.PasswordSignInAsync(userToLogin, loginRequest.Password, true, true);
@@ -64,12 +64,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         ValidUntil = jwtToken.ValidUntil
                     }, "Successfully logged in!");
                 }
-                return await ActionResponse<LoginResponse>.ReturnError("Wrong username or password");
+                return await ActionResponse<LoginResponse>.ReturnError("Pogrešno korisničko ime ili lozinka.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, loginRequest);
-                return await ActionResponse<LoginResponse>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<LoginResponse>.ReturnError("Dogodila se kritična greška. Molimo kontaktirajte administratore.");
             }
         }
     }

@@ -76,7 +76,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, userDetails);
-                return await ActionResponse<UserViewModel>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<UserViewModel>.ReturnError("Greška prilikom upisa korisničkih detalja.");
             }
         }
 

@@ -69,5 +69,12 @@ namespace NgSchoolsWebApi.Controllers
         {
             return await subjectService.Delete(request.Id);
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            return await subjectService.GetTotalNumber();
+        }
     }
 }

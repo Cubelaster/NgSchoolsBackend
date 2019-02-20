@@ -19,5 +19,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<List<DiaryStudentGroupDto>>> RemoveStudentGroups(List<DiaryStudentGroupDto> studentGroupDtos);
         Task<ActionResponse<DiaryDto>> Update(DiaryDto entityDto);
         Task<ActionResponse<DiaryDto>> Delete(int id);
+        Task<ActionResponse<int>> GetTotalNumber();
     }
 }

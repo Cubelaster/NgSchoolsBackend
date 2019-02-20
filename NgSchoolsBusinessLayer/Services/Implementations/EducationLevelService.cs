@@ -9,6 +9,7 @@ using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
@@ -42,7 +43,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<EducationLevelDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<EducationLevelDto>.ReturnError("Greška prilikom dohvata razine obrazovanja.");
             }
         }
 
@@ -57,7 +58,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<EducationLevelDto>>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<List<EducationLevelDto>>.ReturnError("Greška prilikom dohvata svih razina obrazovanja.");
+            }
+        }
+
+        public async Task<ActionResponse<int>> GetTotalNumber()
+        {
+            try
+            {
+                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<EducationLevel>().GetAllAsQueryable().Count());
+            }
+            catch (Exception ex)
+            {
+                loggerService.LogErrorToEventLog(ex);
+                return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja razina obrazovanja.");
             }
         }
 
@@ -82,7 +96,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<EducationLevelDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<PagedResult<EducationLevelDto>>.ReturnError("Greška prilikom dohvata straničnih podataka razina obrazovanja.");
             }
         }
 
@@ -99,7 +113,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<EducationLevelDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<EducationLevelDto>.ReturnError("Greška prilikom unosa razine obrazovanja.");
             }
         }
 
@@ -116,7 +130,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<EducationLevelDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<EducationLevelDto>.ReturnError("Greška prilikom ažuriranja razine obrazovanja.");
             }
         }
 
@@ -126,12 +140,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<EducationLevel>().Delete(id);
                 unitOfWork.Save();
-                return await ActionResponse<EducationLevelDto>.ReturnSuccess(null, "Delete successful.");
+                return await ActionResponse<EducationLevelDto>.ReturnSuccess(null, "Brisanje razine obrazovanja uspješno.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<EducationLevelDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<EducationLevelDto>.ReturnError("Greška prilikom brisanja razine obrazovanja.");
             }
         }
     }

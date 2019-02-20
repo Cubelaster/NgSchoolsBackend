@@ -43,7 +43,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<BusinessPartnerDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<BusinessPartnerDto>.ReturnError("Greška prilikom dohvata poslovnog partnera.");
             }
         }
 
@@ -60,7 +60,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<BusinessPartnerDto>>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<List<BusinessPartnerDto>>.ReturnError("Greška prilikom dohvata svih poslovnih partnera.");
             }
         }
 
@@ -77,7 +77,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<List<BusinessPartnerDto>>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<List<BusinessPartnerDto>>.ReturnError("Greška prilikom dohvata svih poslodavaca.");
             }
         }
 
@@ -103,7 +103,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za poslovne partnere.");
             }
         }
 
@@ -130,7 +130,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex, pagedRequest);
-                return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnError("Some sort of fuckup. Try again.");
+                return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnError("Greška prilikom dohvata straničnih podataka poslodavaca.");
             }
         }
 
@@ -163,7 +163,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<BusinessPartnerDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<BusinessPartnerDto>.ReturnError("Greška prilikom unosa poslovnog partnera.");
             }
         }
 
@@ -197,7 +197,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<BusinessPartnerDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<BusinessPartnerDto>.ReturnError("Greška prilikom ažuriranja poslovnog partnera.");
             }
         }
 
@@ -207,12 +207,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<BusinessPartner>().Delete(id);
                 unitOfWork.Save();
-                return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(null, "Delete successful.");
+                return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(null, "Brisanje poslovnog partnera uspješno.");
             }
             catch (Exception ex)
             {
                 loggerService.LogErrorToEventLog(ex);
-                return await ActionResponse<BusinessPartnerDto>.ReturnError("Some sort of fuckup!");
+                return await ActionResponse<BusinessPartnerDto>.ReturnError("Greška prilikom brisanja poslovnog partnera.");
             }
         }
 

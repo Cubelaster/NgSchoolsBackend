@@ -114,5 +114,12 @@ namespace NgSchoolsBackend.Controllers
         {
             return await userService.GetAllRoles();
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<int>> GetTotalNumberOfTeachers()
+        {
+            return await userService.GetTotalNumberOfTeachers();
+        }
     }
 }
