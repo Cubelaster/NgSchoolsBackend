@@ -13,5 +13,8 @@ namespace NgSchoolsDataLayer.Models
         [Required]
         public int StudentGroupId { get; set; }
         public virtual StudentGroup StudentGroup { get; set; }
+        public bool CompletedPractice { get; set; }
+        public int? EmployerId { get; set; }
+        public BusinessPartner Employer { get; set; }
     }
 }

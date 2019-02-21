@@ -8,9 +8,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public EducationLevelMapper()
         {
-            CreateMap<EducationLevel, EducationLevelDto>();
-
-            CreateMap<EducationLevelDto, EducationLevel>();
+            CreateMap<EducationLevel, EducationLevelDto>().ReverseMap();
         }
     }
 }

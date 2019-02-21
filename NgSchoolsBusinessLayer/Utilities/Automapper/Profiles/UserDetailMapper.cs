@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.ViewModels;
+using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using System.Linq;
 
@@ -11,7 +12,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         public UserDetailMapper()
         {
             CreateMap<UserDetails, UserDetailsDto>()
-                .ForMember(dest => dest.TeacherFiles, opt => opt.MapFrom(src => src.TeacherFiles.Select(tf => tf.File)));
+                .ForMember(dest => dest.TeacherFiles, opt => opt.MapFrom(src => src.TeacherFiles.Where(a => a.Status == DatabaseEntityStatusEnum.Active).Select(tf => tf.File)));
 
             CreateMap<UserDetailsDto, UserDetails>()
                 .ForMember(dest => dest.Avatar, opt => opt.Ignore())

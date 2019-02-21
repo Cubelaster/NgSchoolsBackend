@@ -8,9 +8,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public ClassTypeMapper()
         {
-            CreateMap<ClassType, ClassTypeDto>();
-
-            CreateMap<ClassTypeDto, ClassType>();
+            CreateMap<ClassType, ClassTypeDto>().ReverseMap();
         }
     }
 }

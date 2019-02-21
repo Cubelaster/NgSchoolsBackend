@@ -8,9 +8,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public EducationGroupMapper()
         {
-            CreateMap<EducationGroups, EducationGroupDto>();
-
-            CreateMap<EducationGroupDto, EducationGroups>();
+            CreateMap<EducationGroups, EducationGroupDto>().ReverseMap();
         }
     }
 }

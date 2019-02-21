@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using System.Linq;
 
@@ -10,7 +11,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         public StudentMapper()
         {
             CreateMap<Student, StudentDto>()
-                .ForMember(dest => dest.Files, opt => opt.MapFrom(src => src.Files.Select(sf => new FileDto { Id = sf.File.Id, FileName = sf.File.FileName })));
+                .ForMember(dest => dest.Files, opt => opt.MapFrom(src => src.Files.Where(a => a.Status == DatabaseEntityStatusEnum.Active).Select(sf => new FileDto { Id = sf.File.Id, FileName = sf.File.FileName })));
 
             CreateMap<StudentDto, Student>()
                 .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(src => src.Photo != null ? src.Photo.Id : null))

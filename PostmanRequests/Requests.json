@@ -12,7 +12,14 @@
     "EducationLeaderId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
     "StudentIds": [
     	1006, 1007, 1008
-    	],
+		],
+		"StudentsInGroup": [
+			{
+				"StudentId": 4012,
+				"EmployerId": 6006,
+				"CompletedPractice": true
+			}
+		],
     "ExamCommission": {
     	"Name": "Komisija",
     	"TeacherIds": [
@@ -39,35 +46,39 @@
 // StudentGroup/Update
 
 {
-	"Id": 2027,
-	"Name": "Ime",
-	"SchoolYear": "SchoolYear",
-	"StartDate": "22.01.2019",
-	"EndDate": "23.01.2019",
-	"CredentialDate": "23.01.2019",
-	"FirstExamDate": "23.01.2019",
-	"SecondExamDate": "23.01.2019",
-	"Notes": "<p>ffdgdgf</p>",
-	"ProgramId": 3005,
-	"ClassLocationId": 2004,
-	"StudentIds": [2013],
-	"EducationLeaderId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
+	"Id": 4032,
+    "StartDate": "2019-02-13",
+    "EndDate": "2019-12-01",
+    "CredentialDate": "2019-12-01",
+    "FirstExamDate": "2019-12-01",
+    "SecondExamDate": "2019-12-01",
+    "Notes": "Exam Commission",
+    "EnrolmentDate": "2019-12-01",
+    "ProgramId": 3006,
+    "ClassLocationId": 2004,
+    "EducationLeaderId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
+    "StudentsInGroup": [
+    	{
+    		"StudentId": 4012,
+    		"EmployerId": 6006,
+    		"CompletedPractice": true
+    	}
+	],
+    "StudentIds": [
+    	4012
+	],
     "ExamCommission": {
     	"Name": "Komisija",
     	"TeacherIds": [
     		"1a1bfa81-53ee-4cd3-c039-08d652b91ccb"
 		]
     },
-	"SubjectTeachers": [
-		{
-			"SubjectName": "fsdfs", "SubjectId": 4029, "TeacherId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb"}
-		],
     "StudentGroupClassAttendances": [
     	{
 	    	"Date": "2019-01-01",
 	    	"StudentClassAttendances": [
 	    		{
-	    			"StudentId": 2013,
+	    			"StudentId": 4012,
 	    			"Attendance": true
 	    		}
 			]

@@ -191,7 +191,7 @@ namespace NgSchoolsDataLayer.Context
 
         private static readonly MethodInfo SetGlobalQueryMethod = typeof(NgSchoolsContext)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance)
-            .Single(t => t.IsGenericMethod && t.Name == "SetGlobalQuery");
+            .Single(t => t.IsGenericMethod && t.Name == nameof(SetGlobalQuery));
 
         public void SetGlobalQuery<T>(ModelBuilder builder) where T : DatabaseEntity
         {

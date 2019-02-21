@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -24,6 +25,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IUnitOfWork unitOfWork;
         private readonly IExamCommissionService examCommissionService;
         private readonly IStudentService studentService;
+        private readonly string includeProperties = "ClassLocation,StudentsInGroups.Student,StudentsInGroups.Employer,SubjectTeachers,EducationLeader,ExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances";
 
         public StudentGroupService(IMapper mapper, ILoggerService loggerService,
             IUnitOfWork unitOfWork, IExamCommissionService examCommissionService,
@@ -46,10 +48,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<StudentGroup>()
-                    .FindBy(c => c.Id == id,
-                    includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances");
+                    .FindBy(c => c.Id == id, includeProperties: includeProperties);
+
                 return await ActionResponse<StudentGroupDto>
-                    .ReturnSuccess(mapper.Map<StudentGroup, StudentGroupDto>(entity));
+                    .ReturnSuccess(mapper.Map<StudentGroupDto>(entity));
             }
             catch (Exception ex)
             {
@@ -63,7 +65,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<StudentGroup>()
-                    .GetAll(includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances");
+                    .GetAll(includeProperties: includeProperties);
                 return await ActionResponse<List<StudentGroupDto>>
                     .ReturnSuccess(mapper.Map<List<StudentGroup>, List<StudentGroupDto>>(entities));
             }
@@ -92,7 +94,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<StudentGroup>()
-                    .GetAllAsQueryable(includeProperties: "ClassLocation,StudentsInGroups.Student,SubjectTeachers,EducationLeader,ExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances")
+                    .GetAllAsQueryable(includeProperties: includeProperties)
                     .GetPaged(pagedRequest);
 
                 var pagedResult = new PagedResult<StudentGroupDto>
@@ -126,6 +128,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     List<int> studentIds = new List<int>(entityDto.StudentIds);
                     entityDto.StudentNames = null;
 
+                    List<StudentInGroupDto> studentsInGroup = entityDto.StudentsInGroup != null ?
+                        new List<StudentInGroupDto>(entityDto.StudentsInGroup) : new List<StudentInGroupDto>();
+                    entityDto.StudentsInGroup = null;
+
                     List<StudentGroupSubjectTeachersDto> subjectTeachers = entityDto.SubjectTeachers != null ?
                         new List<StudentGroupSubjectTeachersDto>(entityDto.SubjectTeachers) : new List<StudentGroupSubjectTeachersDto>();
                     entityDto.SubjectTeachers = null;
@@ -142,7 +148,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     unitOfWork.GetGenericRepository<StudentGroup>().Add(entityToAdd);
                     unitOfWork.Save();
                     mapper.Map(entityToAdd, entityDto);
+
                     entityDto.StudentIds = new List<int>(studentIds);
+                    entityDto.StudentsInGroup = new List<StudentInGroupDto>(studentsInGroup);
 
                     if ((await ModifyStudentsInGroup(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> response, out entityDto))
                     {
@@ -177,6 +185,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return response;
                     }
 
+                    if ((await GetById(entityDto.Id.Value)).IsNotSuccess(out response, out entityDto))
+                    {
+                        return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom čitanja novounesenih podataka.");
+                    }
+
                     scope.Complete();
                     return await ActionResponse<StudentGroupDto>.ReturnSuccess(entityDto, "Grupa studenata uspješno upisana.");
                 }
@@ -196,6 +209,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 {
                     List<int> studentIds = new List<int>(entityDto.StudentIds);
                     entityDto.StudentNames = null;
+
+                    List<StudentInGroupDto> studentsInGroup = entityDto.StudentsInGroup != null ?
+                        new List<StudentInGroupDto>(entityDto.StudentsInGroup) : new List<StudentInGroupDto>();
+                    entityDto.StudentsInGroup = null;
 
                     ExamCommissionDto examCommission = entityDto.ExamCommission;
 
@@ -222,6 +239,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                     mapper.Map(entityToUpdate, entityDto);
                     entityDto.StudentIds = new List<int>(studentIds);
+                    entityDto.StudentsInGroup = new List<StudentInGroupDto>(studentsInGroup);
 
                     if ((await ModifyStudentsInGroup(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> response, out entityDto))
                     {
@@ -253,7 +271,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return response;
                     }
 
+                    if ((await GetById(entityDto.Id.Value)).IsNotSuccess(out response, out entityDto))
+                    {
+                        return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom čitanja novounesenih podataka.");
+                    }
+
                     scope.Complete();
+
                     return await ActionResponse<StudentGroupDto>.ReturnSuccess(entityDto, "Grupa studenata uspješno izmijenjena.");
                 }
             }
@@ -311,17 +335,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<StudentGroup>()
-                    .FindBy(e => e.Id == studentGroup.Id.Value, includeProperties: "StudentsInGroups.Student");
+                    .FindBy(e => e.Id == studentGroup.Id.Value, includeProperties: "StudentsInGroups");
                 var currentStudents = mapper.Map<List<StudentsInGroups>, List<StudentInGroupDto>>(entity.StudentsInGroups.ToList());
 
-                var newStudents = studentGroup.StudentIds;
+                var newStudents = studentGroup.StudentsInGroup;
 
-                var studentsToRemove = currentStudents.Where(cet => !newStudents.Contains(cet.StudentId.Value)).ToList();
+                var studentsToRemove = currentStudents.Where(cet => !newStudents.Select(ns => ns.Id).Contains(cet.Id)).ToList();
 
                 var studentsToAdd = newStudents
-                    .Where(nt => !currentStudents.Select(uec => uec.StudentId).Contains(nt))
-                    .Select(nt => new StudentInGroupDto { StudentId = nt, GroupId = studentGroup.Id })
-                    .ToList();
+                    .Where(nt => !currentStudents.Select(uec => uec.Id).Contains(nt.Id))
+                    .Select(nt =>
+                    {
+                        nt.GroupId = studentGroup.Id;
+                        return nt;
+                    }).ToList();
 
                 if ((await RemoveStudentsFromGroup(studentsToRemove))
                     .IsNotSuccess(out ActionResponse<List<StudentInGroupDto>> actionResponse))
@@ -385,7 +412,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var response = await ActionResponse<List<StudentInGroupDto>>.ReturnSuccess(null, "Studenti uspješno dodani u grupu.");
+                var response = await ActionResponse<List<StudentInGroupDto>>.ReturnSuccess(students, "Studenti uspješno dodani u grupu.");
                 students.ForEach(async s =>
                 {
                     if ((await AddStudentInGroup(s))
@@ -634,7 +661,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var daysToAdd = newDays
                     .Where(nt => !currentDays.Select(cd => cd.Id).Contains(nt.Id))
-                    .Select(nt => {
+                    .Select(nt =>
+                    {
                         nt.StudentGroupId = entityDto.Id;
                         return nt;
                     })
