@@ -36,6 +36,8 @@ namespace NgSchoolsBackend
         public static IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
             return WebHost.CreateDefaultBuilder(args)
+                .UseKestrel()
+                .UseIISIntegration()
                 .UseStartup<Startup>();
         }
     }
