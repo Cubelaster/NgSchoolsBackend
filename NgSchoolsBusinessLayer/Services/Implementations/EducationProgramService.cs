@@ -20,19 +20,17 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
         private readonly IPlanService planService;
         private readonly ISubjectService subjectService;
         private readonly IThemeService themeService;
         private readonly ICacheService cacheService;
 
-        public EducationProgramService(IMapper mapper, ILoggerService loggerService,
+        public EducationProgramService(IMapper mapper,
             IUnitOfWork unitOfWork, IPlanService planService, ISubjectService subjectService,
             IThemeService themeService, ICacheService cacheService)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
             this.planService = planService;
             this.subjectService = subjectService;
@@ -52,9 +50,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<EducationProgramDto>
                     .ReturnSuccess(mapper.Map<EducationProgram, EducationProgramDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom dohvaćanja programa.");
             }
         }
@@ -68,9 +65,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<EducationProgramDto>>
                     .ReturnSuccess(mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<EducationProgramDto>>.ReturnError("Greška prilikom dohvaćanja svih programa.");
             }
         }
@@ -81,9 +77,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<EducationProgram>().GetAllAsQueryable().Count());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja programa.");
             }
         }
@@ -98,9 +93,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<EducationProgramDto>>.ReturnSuccess(
                     mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(allEntities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<EducationProgramDto>>.ReturnError("Greška prilikom dohvata svih edukacijskih programa.");
             }
         }
@@ -119,9 +113,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await eduPrograms.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<EducationProgramDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<EducationProgramDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za programe.");
             }
         }
@@ -140,9 +133,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await eduPrograms.AsQueryable().GetBySearchQuery(pagedRequest);
                 return await ActionResponse<PagedResult<EducationProgramDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<EducationProgramDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za programe.");
             }
         }
@@ -167,14 +159,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
 
                 entityToAdd = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .FindBy(e => e.Id == entityToAdd.Id, 
+                    .FindBy(e => e.Id == entityToAdd.Id,
                     includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType");
 
                 return await ActionResponse<EducationProgramDto>.ReturnSuccess(mapper.Map(entityToAdd, entityDto));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom upisa programa.");
             }
             finally
@@ -209,9 +200,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<EducationProgramDto>.ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom ažuriranja programa.");
             }
             finally
@@ -229,9 +219,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<EducationProgramDto>.ReturnSuccess(null, "Brisanje programa i povezanog plana uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom brisanja programa.");
             }
             finally
@@ -276,9 +265,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<EducationProgramDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni tipovi nastave edukacijskog programa.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom izmjene tipova nastave edukacijskog programa.");
             }
         }
@@ -299,9 +287,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entities);
                 return await ActionResponse<List<EducationProgramClassTypeDto>>.ReturnError("Greška prilikom micanja vrsta nastave s edukacijskog programa.");
             }
         }
@@ -314,9 +301,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<EducationProgramClassTypeDto>.ReturnSuccess(null, "Vrsta nastave uspješno izbrisana iz edukacijskog programa.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entity);
                 return await ActionResponse<EducationProgramClassTypeDto>.ReturnError("Greška prilikom brisanja vrste nastave iz edukacijskog programa.");
             }
         }
@@ -337,9 +323,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entities);
                 return await ActionResponse<List<EducationProgramClassTypeDto>>.ReturnError("Greška prilikom dodavanja vrsta nastave edukacijskom programu.");
             }
         }
@@ -355,9 +340,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .ReturnSuccess(mapper.Map<EducationProgramClassType, EducationProgramClassTypeDto>(entityToAdd),
                     "Vrsta nastave uspješno dodana edukacijskom programu.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, eduCt);
                 return await ActionResponse<EducationProgramClassTypeDto>.ReturnError("Greška prilikom dodavanja vrste nastave edukacijskom programu.");
             }
         }

@@ -19,14 +19,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
         private const int expirationMinutes = 60;
 
         private readonly IMemoryCache memoryCache;
-        private readonly ILoggerService loggerService;
         private readonly IServiceProvider serviceProvider;
 
-        public CacheService(IMemoryCache memoryCache, ILoggerService loggerService, 
-            IServiceProvider serviceProvider)
+        public CacheService(IMemoryCache memoryCache, IServiceProvider serviceProvider)
         {
             this.memoryCache = memoryCache;
-            this.loggerService = loggerService;
             this.serviceProvider = serviceProvider;
         }
 
@@ -57,9 +54,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
                 memoryCache.Set(attribute.Key, cachedObject);
                 return await ActionResponse<T>.ReturnSuccess();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, cachedObject);
                 return await ActionResponse<T>.ReturnError("Greška prilikom postavljanja podataka u cache.");
             }
         }
@@ -107,9 +103,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
 
                 return await GetFromCache<T>();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<T>.ReturnError("Greška prilikom dohvata podataka iz cachea.");
             }
         }

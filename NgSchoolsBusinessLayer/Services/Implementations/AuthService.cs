@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
+using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
+using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests;
+using NgSchoolsBusinessLayer.Models.Responses;
+using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsDataLayer.Models;
-using System.Threading.Tasks;
-using AutoMapper;
-using NgSchoolsBusinessLayer.Models.Dto;
-using NgSchoolsBusinessLayer.Extensions;
-using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
-using NgSchoolsBusinessLayer.Models.Responses;
 using System;
+using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -23,11 +23,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IMapper mapper;
         private readonly IJwtFactory jwtFactory;
         private readonly ICacheService cacheService;
-        private readonly ILoggerService loggerService;
 
         public AuthService(UserManager<User> userManager, SignInManager<User> signInManager,
             IUserService userService, IJwtFactory jwtFactory, IMapper mapper,
-            ICacheService cacheService, ILoggerService loggerService)
+            ICacheService cacheService)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
@@ -35,7 +34,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             this.mapper = mapper;
             this.jwtFactory = jwtFactory;
             this.cacheService = cacheService;
-            this.loggerService = loggerService;
         }
 
         #endregion Ctors and Members
@@ -66,9 +64,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<LoginResponse>.ReturnError("Pogrešno korisničko ime ili lozinka.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, loginRequest);
                 return await ActionResponse<LoginResponse>.ReturnError("Dogodila se kritična greška. Molimo kontaktirajte administratore.");
             }
         }

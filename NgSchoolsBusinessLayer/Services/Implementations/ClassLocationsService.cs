@@ -20,15 +20,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
 
-        public ClassLocationsService(IMapper mapper, ILoggerService loggerService, 
-            IUnitOfWork unitOfWork, ICacheService cacheService)
+        public ClassLocationsService(IMapper mapper, IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
         }
@@ -44,9 +41,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<ClassLocationsDto>
                     .ReturnSuccess(mapper.Map<ClassLocations, ClassLocationsDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom dohvata mjesta izvođenja.");
             }
         }
@@ -60,9 +56,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<ClassLocationsDto>>
                     .ReturnSuccess(mapper.Map<List<ClassLocations>, List<ClassLocationsDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<ClassLocationsDto>>.ReturnError("Greška prilikom dohvata svih mjesta izvođenja.");
             }
         }
@@ -73,9 +68,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<ClassLocations>().GetAllAsQueryable().Count());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja mjesta izvođenja.");
             }
         }
@@ -90,9 +84,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<ClassLocationsDto>>.ReturnSuccess(
                     mapper.Map<List<ClassLocations>, List<ClassLocationsDto>>(allClassLocations));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<ClassLocationsDto>>.ReturnError("Greška prilikom dohvata mjesta izvođenja za brzu memoriju.");
             }
         }
@@ -111,9 +104,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await classTypes.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<ClassLocationsDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<ClassLocationsDto>>.ReturnError("Greška prilikom dohvata straničnih podataka mjesta izvođenja.");
             }
         }
@@ -129,9 +121,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<ClassLocationsDto>
                     .ReturnSuccess(mapper.Map<ClassLocations, ClassLocationsDto>(entityToAdd));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom upisa mjesta izvođenja.");
             }
         }
@@ -147,9 +138,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<ClassLocationsDto>
                     .ReturnSuccess(mapper.Map<ClassLocations, ClassLocationsDto>(entityToUpdate));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom ažuriranja mjesta izvođenja.");
             }
         }
@@ -163,9 +153,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 await cacheService.RefreshCache<List<ClassLocationsDto>>();
                 return await ActionResponse<ClassLocationsDto>.ReturnSuccess(null, "Brisanje mjesta izvođenja uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom brisanja mjesta izvođenja!");
             }
         }

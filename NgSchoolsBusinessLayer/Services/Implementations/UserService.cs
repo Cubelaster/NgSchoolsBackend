@@ -33,14 +33,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IJwtFactory jwtFactory;
         private readonly IMapper mapper;
         private readonly ICacheService cacheService;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
         private readonly IConfiguration configuration;
         private readonly string includeProperties = "Roles.Role,UserDetails.Avatar,UserDetails.Signature,UserDetails.City,UserDetails.Region,UserDetails.Country,UserDetails.TeacherFiles.File";
 
         public UserService(UserManager<User> userManager, IUserDetailsService userDetailsService,
             IJwtFactory jwtFactory, RoleManager<Role> roleManager, IMapper mapper, IConfiguration configuration,
-            ICacheService cacheService, ILoggerService loggerService, IUnitOfWork unitOfWork)
+            ICacheService cacheService, IUnitOfWork unitOfWork)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
@@ -48,7 +47,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             this.jwtFactory = jwtFactory;
             this.mapper = mapper;
             this.cacheService = cacheService;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
             this.configuration = configuration;
         }
@@ -66,9 +64,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<UserDto>>
                     .ReturnSuccess(mapper.Map<List<User>, List<UserDto>>(allUsers));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<UserDto>>.ReturnError("Greška prilikom dohvata podataka za korisnike.");
             }
         }
@@ -86,9 +83,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var feUsers = mapper.Map<List<UserDto>, List<UserViewModel>>(users);
                 return await ActionResponse<List<UserViewModel>>.ReturnSuccess(feUsers);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<UserViewModel>>.ReturnError("Greška prilikom dohvata podataka za korisnike.");
             }
         }
@@ -103,9 +99,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<UserDto>>.ReturnSuccess(
                     mapper.Map<List<User>, List<UserDto>>(allUsers));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<UserDto>>.ReturnError("Greška prilikom dohvata podataka za korisnika.");
             }
         }
@@ -118,9 +113,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .FindBy(u => u.Email == email, includeProperties);
                 return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<UserDto>.ReturnError("Greška prilikom dohvata korisnika po email adresi.");
             }
         }
@@ -133,9 +127,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .FindBy(u => u.Id == userId, includeProperties: includeProperties);
                 return await ActionResponse<UserDto>.ReturnSuccess(mapper.Map<User, UserDto>(user));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, userId);
                 return await ActionResponse<UserDto>.ReturnError("Greška prilikom dohvata podataka korisnika.");
             }
         }
@@ -150,9 +143,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<UserViewModel>.ReturnSuccess(mapper.Map<UserDto, UserViewModel>(user));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, userId);
                 return await ActionResponse<UserViewModel>.ReturnError("Greška prilikom dohvata podataka o korisniku.");
             }
         }
@@ -167,9 +159,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<TeacherViewModel>.ReturnSuccess(mapper.Map<UserDto, TeacherViewModel>(user));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, userId);
                 return await ActionResponse<TeacherViewModel>.ReturnError("Greška prilikom dohvata podataka o nastavniku.");
             }
         }
@@ -190,9 +181,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<UserViewModel>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<UserViewModel>>.ReturnError("Greška prilikom dohvata podataka korisnika.");
             }
         }
@@ -217,9 +207,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<TeacherViewModel>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<TeacherViewModel>>.ReturnError("Greška prilikom dohvata straničnih podataka nastavnika.");
             }
         }
@@ -241,9 +230,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<int>.ReturnSuccess(numberOfTeachers);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja predmeta.");
             }
         }
@@ -287,9 +275,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<UserViewModel>.ReturnSuccess(request);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<UserViewModel>.ReturnError("Dogodila se greška, molimo kontaktirajte svog administratora.");
             }
             finally
@@ -331,9 +318,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<TeacherViewModel>.ReturnSuccess(request, "Korisnik uspješno dodan u rolu nastavnika i njegovi detelji ažurirani.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<TeacherViewModel>.ReturnError("Greška prilikom kreacije novog nastavnika.");
             }
             finally
@@ -355,9 +341,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<object>.ReturnSuccess(null, "Success!");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<object>.ReturnError("Greška prilikom brisanja.");
             }
             finally
@@ -388,9 +373,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<object>.ReturnSuccess(null, "Nastavnik uspješno izbrisan!");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<object>.ReturnError("Greška prilikom brisanja nastavnika.");
             }
             finally
@@ -423,9 +407,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<UserViewModel>.ReturnSuccess(request, "User updated successfully.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<UserViewModel>.ReturnError("Greška prilikom ažuriranja podataka korisnika.");
             }
             finally
@@ -460,9 +443,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<TeacherViewModel>.ReturnSuccess(mapper.Map(userDetails, request), "Nastavnik uspješno ažuriran.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<TeacherViewModel>
                     .ReturnError("Dogodila se greška prilikom ažuriranja podataka o nastavniku. Molimo pokušajte ponovno.");
             }
@@ -523,9 +505,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entities = unitOfWork.GetGenericRepository<Role>().GetAll();
                 return await ActionResponse<List<RoleDto>>.ReturnSuccess(mapper.Map<List<Role>, List<RoleDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<RoleDto>>.ReturnError("Greška prilikom dohvata prava korisnika.");
             }
         }
@@ -542,9 +523,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<UserViewModel>.ReturnSuccess(user);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, user);
                 return await ActionResponse<UserViewModel>.ReturnError("Greška prilikom dodavanja rola korisniku.");
             }
         }
@@ -558,9 +538,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 user.Roles.Add(defaultRole.Id);
                 return await ActionResponse<UserViewModel>.ReturnSuccess(user);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, user);
                 return await ActionResponse<UserViewModel>.ReturnError("Greška prilikom dodavanja korisnika u početnu rolu.");
             }
         }
@@ -577,9 +556,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<UserViewModel>.ReturnSuccess(user);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, user);
                 return await ActionResponse<UserViewModel>.ReturnError("Greška prilikom micanja rola s korisnika.");
             }
         }
@@ -617,9 +595,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return actionResponse;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, user);
                 return await ActionResponse<UserViewModel>.ReturnError("Greška prilikom ažuriranja rola korisnika.");
             }
         }

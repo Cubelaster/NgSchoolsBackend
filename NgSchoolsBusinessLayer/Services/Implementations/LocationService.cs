@@ -9,7 +9,6 @@ using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -22,7 +21,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
         private readonly IHttpClientFactory httpClientFactory;
@@ -30,11 +28,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly string battutaApiKey = "key=ee64538820e420c329c5f164c550336b";
         private readonly object myLock = new object();
 
-        public LocationService(IMapper mapper, ILoggerService loggerService, IUnitOfWork unitOfWork,
+        public LocationService(IMapper mapper, IUnitOfWork unitOfWork,
             ICacheService cacheService, IHttpClientFactory httpClientFactory)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
             this.httpClientFactory = httpClientFactory;
@@ -52,9 +49,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<CountryDto>.ReturnSuccess(null, "Brisanje države uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<CountryDto>.ReturnError("Greška prilikom brisanja države.");
             }
             finally
@@ -76,9 +72,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<CountryDto>>
                     .ReturnSuccess(mapper.Map<List<Country>, List<CountryDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<CountryDto>>.ReturnError("Greška prilikom dohvata svih država.");
             }
         }
@@ -97,9 +92,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await countries.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<CountryDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<CountryDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za države.");
             }
         }
@@ -118,9 +112,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await countries.AsQueryable().GetBySearchQuery(pagedRequest);
                 return await ActionResponse<PagedResult<CountryDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<CountryDto>>.ReturnError("Greška prilikom dohvata straničnih podataka država.");
             }
         }
@@ -134,9 +127,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<CountryDto>
                     .ReturnSuccess(mapper.Map<Country, CountryDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<CountryDto>.ReturnError("Greška prilikom dohvata države.");
             }
         }
@@ -150,9 +142,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<CountryDto>
                     .ReturnSuccess(mapper.Map<Country, CountryDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<CountryDto>.ReturnError("Greška prilikom dohvata države.");
             }
         }
@@ -173,9 +164,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<CountryDto>>.ReturnError($"Greška prilikom upisa države.");
             }
             finally
@@ -199,9 +189,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 mapper.Map(entityToAdd, entityDto);
                 return await ActionResponse<CountryDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<CountryDto>.ReturnError($"Greška prilikom upisa države.");
             }
             finally
@@ -227,9 +216,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<CountryDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<CountryDto>.ReturnError("Greška prilikom ažuriranja države.");
             }
             finally
@@ -251,9 +239,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<CountryDto>>.ReturnSuccess(
                     mapper.Map<List<Country>, List<CountryDto>>(allEntities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<CountryDto>>.ReturnError("Greška prilikom dohvata svih studenata.");
             }
         }
@@ -271,9 +258,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 await cacheService.RefreshCache<List<RegionDto>>();
                 return await ActionResponse<RegionDto>.ReturnSuccess(null, "Brisanje regije uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<RegionDto>.ReturnError("Greška prilikom brisanja regije.");
             }
             finally
@@ -295,9 +281,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<RegionDto>>
                     .ReturnSuccess(mapper.Map<List<Region>, List<RegionDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<RegionDto>>.ReturnError("Greška prilikom dohvata svih županija.");
             }
         }
@@ -316,9 +301,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await regions.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<RegionDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<RegionDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za gradove.");
             }
         }
@@ -332,9 +316,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<RegionDto>
                     .ReturnSuccess(mapper.Map<Region, RegionDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<RegionDto>.ReturnError("Greška prilikom dohvata države.");
             }
         }
@@ -348,9 +331,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<RegionDto>>
                     .ReturnSuccess(mapper.Map<List<Region>, List<RegionDto>>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<RegionDto>>.ReturnError("Greška prilikom dohvata regija za državu.");
             }
         }
@@ -372,9 +354,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<RegionDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<RegionDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za regije po državi.");
             }
         }
@@ -393,9 +374,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await regions.AsQueryable().GetBySearchQuery(pagedRequest);
                 return await ActionResponse<PagedResult<RegionDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<RegionDto>>.ReturnError("Greška prilikom dohvata straničnih podataka država.");
             }
         }
@@ -412,9 +392,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<RegionDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<RegionDto>.ReturnError($"Greška prilikom ažuriranja regije.");
             }
             finally
@@ -438,9 +417,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 mapper.Map(entityToAdd, entityDto);
                 return await ActionResponse<RegionDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<RegionDto>.ReturnError($"Greška prilikom upisa regije.");
             }
             finally
@@ -469,9 +447,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<RegionDto>>.ReturnError($"Greška prilikom upisa regija.");
             }
             finally
@@ -494,9 +471,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<RegionDto>>.ReturnSuccess(
                     mapper.Map<List<Region>, List<RegionDto>>(allEntities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<RegionDto>>.ReturnError("Greška prilikom dohvata svih gradova.");
             }
         }
@@ -514,9 +490,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 await cacheService.RefreshCache<List<CityDto>>();
                 return await ActionResponse<CityDto>.ReturnSuccess(null, "Brisanje grada uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<CityDto>.ReturnError("Greška prilikom brisanja grada.");
             }
             finally
@@ -537,9 +512,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<CityDto>>
                     .ReturnSuccess(mapper.Map<List<City>, List<CityDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<CityDto>>.ReturnError("Greška prilikom dohvata svih gradova.");
             }
         }
@@ -558,9 +532,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await cities.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<CityDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<CityDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za gradove.");
             }
         }
@@ -579,9 +552,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await countries.AsQueryable().GetBySearchQuery(pagedRequest);
                 return await ActionResponse<PagedResult<CityDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<CityDto>>.ReturnError("Greška prilikom dohvata straničnih podataka gradova.");
             }
         }
@@ -595,9 +567,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<CityDto>
                     .ReturnSuccess(mapper.Map<City, CityDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<CityDto>.ReturnError("Greška prilikom dohvata države.");
             }
         }
@@ -610,9 +581,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<CityDto>>
                     .ReturnSuccess(mapper.Map<List<City>, List<CityDto>>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<CityDto>>.ReturnError("Greška prilikom dohvata gradova za regiju.");
             }
         }
@@ -634,9 +604,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<CityDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<CityDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za gradove po regiji.");
             }
         }
@@ -652,9 +621,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 mapper.Map(entityToAdd, entityDto);
                 return await ActionResponse<CityDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<CityDto>.ReturnError($"Greška prilikom upisa grada.");
             }
             finally
@@ -685,9 +653,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await InsertCities(cities);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, region);
                 return await ActionResponse<List<CityDto>>.ReturnError($"Greška prilikom upisa gradova za regiju.");
             }
         }
@@ -708,9 +675,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<CityDto>>.ReturnError($"Greška prilikom upisa gradova.");
             }
             finally
@@ -734,9 +700,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<CityDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<CityDto>.ReturnError($"Greška prilikom ažuriranja regije.");
             }
             finally
@@ -758,9 +723,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<CityDto>>.ReturnSuccess(
                     mapper.Map<List<City>, List<CityDto>>(allEntities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<CityDto>>.ReturnError("Greška prilikom dohvata svih gradova.");
             }
         }
@@ -784,9 +748,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<List<CountryDto>>.ReturnError("Greška kod dohvata podataka svih država s online referenta." + response.ReasonPhrase);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<CountryDto>>.ReturnError("Greška prilikom dohvata svih država s battute.");
             }
         }
@@ -806,9 +769,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<List<RegionDto>>.ReturnError("Greška kod dohvata podataka regija sa online referenta." + response.ReasonPhrase);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<RegionDto>>.ReturnError("Greška prilikom dohvata svih država s battute.");
             }
         }
@@ -828,9 +790,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<List<CityDto>>.ReturnError("Greška kod dohvata podataka gradova sa online referenta." + response.ReasonPhrase);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<CityDto>>.ReturnError("Greška prilikom dohvata gradova s battute.");
             }
         }
@@ -857,55 +818,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     }
                 }
 
-                //if ((await GetCountryByCode("hr")).IsNotSuccess(out ActionResponse<CountryDto> croResponse, out CountryDto croatia))
-                //{
-                //    return await ActionResponse<List<CountryDto>>.ReturnError(croResponse.Message);
-                //}
-
-                //if ((await GetAllRegions()).IsNotSuccess(out ActionResponse<List<RegionDto>> getRegionResponse, out List<RegionDto> regions))
-                //{
-                //    return await ActionResponse<List<CountryDto>>.ReturnError(getResponse.Message);
-                //}
-
-                //if (regions.Count < 1)
-                //{
-                //    if ((await GetRegionsForCountryCodeBattuta(croatia.Code)).IsNotSuccess(out getRegionResponse, out regions))
-                //    {
-                //        return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
-                //    }
-
-                //    regions.ForEach(reg =>
-                //    {
-                //        reg.CountryId = croatia.Id;
-                //    });
-
-                //    if ((await InsertRegions(regions)).IsNotSuccess(out getRegionResponse, out regions))
-                //    {
-                //        return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
-                //    }
-                //}
-
-                //if ((await GetAllCities()).IsNotSuccess(out ActionResponse<List<CityDto>> citiesResponse, out List<CityDto> cities))
-                //{
-                //    return await ActionResponse<List<CountryDto>>.ReturnError(citiesResponse.Message);
-                //}
-
-                //if (cities.Count < 1)
-                //{
-                //    foreach(var region in regions)
-                //    {
-                //        if((await InsertCitiesForRegion(region)).IsNotSuccess(out citiesResponse, out cities))
-                //        {
-                //            return await ActionResponse<List<CountryDto>>.ReturnError(getRegionResponse.Message);
-                //        }
-                //    }
-                //}
-
                 return getResponse;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<CountryDto>>.ReturnError("Greška prilikom dohvata svih država s battute.");
             }
         }

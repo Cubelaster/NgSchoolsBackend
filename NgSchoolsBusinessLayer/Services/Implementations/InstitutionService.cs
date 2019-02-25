@@ -18,14 +18,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public InstitutionService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork)
+        public InstitutionService(IMapper mapper, IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
         }
 
@@ -40,9 +37,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<InstitutionDto>
                     .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institution));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<InstitutionDto>.ReturnError("Greška prilikom dohvata podataka o instituciji");
             }
         }
@@ -70,9 +66,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await GetInstitution();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<InstitutionDto>.ReturnError("Greška prilikom unosa podataka za instituciju.");
             }
         }
@@ -99,9 +94,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await GetInstitution();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<InstitutionDto>.ReturnError("Greška prilikom ažuriranja podataka institucije.");
             }
         }
@@ -114,9 +108,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<InstitutionDto>.ReturnSuccess(null, "Brisanje institucije uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<InstitutionDto>.ReturnError("Greška prilikom brisanja institucije.");
             }
         }
@@ -156,9 +149,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<InstitutionDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni dokumenti institucije.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<InstitutionDto>.ReturnError("Greška prilikom izmjene dokumenata institucije.");
             }
         }
@@ -179,9 +171,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entities);
                 return await ActionResponse<List<InstitutionFileDto>>.ReturnError("Greška prilikom micanja dokumenata sa institucije.");
             }
         }
@@ -194,9 +185,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<InstitutionFileDto>.ReturnSuccess(null, "Dokument uspješno maknut s institucije.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entity);
                 return await ActionResponse<InstitutionFileDto>.ReturnError("Greška prilikom micanja dokumenta s institucije.");
             }
         }
@@ -217,9 +207,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entities);
                 return await ActionResponse<List<InstitutionFileDto>>.ReturnError("Greška prilikom dodavanja dokumenata instituciji.");
             }
         }
@@ -234,9 +223,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<InstitutionFileDto>
                     .ReturnSuccess(mapper.Map<InstitutionFile, InstitutionFileDto>(entityToAdd), "Dokument uspješno dodan instituciji.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, file);
                 return await ActionResponse<InstitutionFileDto>.ReturnError("Greška prilikom dodavanja dokumenta instituciji.");
             }
         }

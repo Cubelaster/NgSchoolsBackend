@@ -14,15 +14,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 {
     public class FileUploadService : IFileUploadService
     {
-        private readonly ILoggerService loggerService;
         private readonly IConfiguration configuration;
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
 
-        public FileUploadService(ILoggerService loggerService, IConfiguration configuration,
+        public FileUploadService(IConfiguration configuration,
             IUnitOfWork unitOfWork, IMapper mapper)
         {
-            this.loggerService = loggerService;
             this.configuration = configuration;
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
@@ -55,9 +53,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<FileDto>.ReturnSuccess(mapper.Map<UploadedFile, FileDto>(uploadedFile), "Datoteka uspješno učitana i spremljena.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog<FileUploadRequest>(ex, fileUploadRequest);
                 return await ActionResponse<FileDto>.ReturnError("Greška kod učitavanja datoteke.");
             }
         }

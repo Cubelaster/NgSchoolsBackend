@@ -20,14 +20,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public DiaryService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork)
+        public DiaryService(IMapper mapper, IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
         }
 
@@ -42,9 +39,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<DiaryDto>
                     .ReturnSuccess(mapper.Map<Diary, DiaryDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<DiaryDto>.ReturnError("Greška prilikom dohvata dnevnika rada.");
             }
         }
@@ -55,9 +51,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<Diary>().GetAllAsQueryable().Count());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja dnevnika rada.");
             }
         }
@@ -71,9 +66,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<DiaryDto>>
                     .ReturnSuccess(mapper.Map<List<Diary>, List<DiaryDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<DiaryDto>>.ReturnError("Greška prilikom dohvata svih dnevnika rada.");
             }
         }
@@ -96,9 +90,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PagedResult<DiaryDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<DiaryDto>>.ReturnError("Greška prilikom dohvata straničnih podataka grupe studenata.");
             }
         }
@@ -124,9 +117,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         .ReturnSuccess(mapper.Map(entityToAdd, entityDto));
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<DiaryDto>.ReturnError("Greška prilikom upisa dnevnika rada.");
             }
         }
@@ -164,9 +156,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<DiaryDto>.ReturnSuccess(entityDto, "Dnevnik rada uspješno unesen.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<DiaryDto>.ReturnError("Greška prilikom ažuriranja grupa studenata u dnevniku rada.");
             }
         }
@@ -187,9 +178,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<DiaryStudentGroupDto>>.ReturnError("Greška prilikom pridruživanja grupa studenata.");
             }
         }
@@ -206,9 +196,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<DiaryStudentGroupDto>
                     .ReturnSuccess(mapper.Map(entityToAdd, entityDto));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<DiaryStudentGroupDto>.ReturnError("Greška prilikom unošenja grupe studenata za dnevnik rada.");
             }
         }
@@ -229,9 +218,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<DiaryStudentGroupDto>>.ReturnError("Greška prilikom upisa studenta.");
             }
         }
@@ -245,9 +233,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<DiaryStudentGroupDto>.ReturnSuccess(null, "Brisanje grupe studenata iz dnevnika rada uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<DiaryStudentGroupDto>.ReturnError("Greška prilikom unošenja grupe studenata za dnevnik rada.");
             }
         }
@@ -272,9 +259,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         .ReturnSuccess(mapper.Map(entityToUpdate, entityDto), "Dnevnik rada uspješno ažuriran.");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<DiaryDto>.ReturnError("Greška prilikom ažuriranja dnevnika rada.");
             }
         }
@@ -287,9 +273,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<DiaryDto>.ReturnSuccess(null, "Brisanje dnevnika rada uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<DiaryDto>.ReturnError("Greška prilikom brisanja dnevnika rada.");
             }
         }

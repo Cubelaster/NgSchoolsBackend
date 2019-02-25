@@ -109,6 +109,9 @@ namespace NgSchoolsBackend
                 options.WithOrigins(Configuration.GetValue<string>("CorsOrigin"));
             });
 
+            app.UseDeveloperExceptionPage();
+            app.UseDatabaseErrorPage();
+
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();

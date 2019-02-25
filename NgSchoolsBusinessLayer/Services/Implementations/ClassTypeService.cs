@@ -20,15 +20,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
 
-        public ClassTypeService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork, ICacheService cacheService)
+        public ClassTypeService(IMapper mapper, IUnitOfWork unitOfWork,
+            ICacheService cacheService)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
         }
@@ -43,9 +41,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<ClassTypeDto>
                     .ReturnSuccess(mapper.Map<ClassType, ClassTypeDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ClassTypeDto>.ReturnError("Greška prilikom dohvata vrste nastave.");
             }
         }
@@ -59,9 +56,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<ClassTypeDto>>.ReturnSuccess(
                     mapper.Map<List<ClassType>, List<ClassTypeDto>>(allClassTypes));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<ClassTypeDto>>.ReturnError("Greška prilikom dohvata vrsta nastave za brzu memoriju.");
             }
         }
@@ -74,9 +70,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<ClassTypeDto>>
                     .ReturnSuccess(mapper.Map<List<ClassType>, List<ClassTypeDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<ClassTypeDto>>.ReturnError("Greška prilikom dohvata svih vrsta nastave.");
             }
         }
@@ -87,9 +82,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<ClassType>().GetAllAsQueryable().Count());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja vrsta nastave.");
             }
         }
@@ -108,9 +102,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await classTypes.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<ClassTypeDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<ClassTypeDto>>.ReturnError("Greška prilikom dohvata straničnih podataka vrsta nastave.");
             }
         }
@@ -126,9 +119,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<ClassTypeDto>
                     .ReturnSuccess(mapper.Map<ClassType, ClassTypeDto>(entityToAdd));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ClassTypeDto>.ReturnError("Greška prilikom upisa vrste nastave.");
             }
         }
@@ -144,9 +136,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<ClassTypeDto>
                     .ReturnSuccess(mapper.Map<ClassType, ClassTypeDto>(entityToUpdate));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ClassTypeDto>.ReturnError("Greška prilikom ažuriranja vrste nastave.");
             }
         }
@@ -160,9 +151,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 await cacheService.RefreshCache<List<ClassTypeDto>>();
                 return await ActionResponse<ClassTypeDto>.ReturnSuccess(null, "Brisanje vrste nastave uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ClassTypeDto>.ReturnError("Greška prilikom brisanja vrste nastave.");
             }
         }

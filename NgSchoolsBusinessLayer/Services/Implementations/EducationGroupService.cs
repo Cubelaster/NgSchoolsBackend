@@ -19,14 +19,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public EducationGroupService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork)
+        public EducationGroupService(IMapper mapper, IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
         }
 
@@ -40,9 +37,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<EducationGroupDto>
                     .ReturnSuccess(mapper.Map<EducationGroups, EducationGroupDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationGroupDto>.ReturnError("Greška prilikom dohvata obrazovnog sektora.");
             }
         }
@@ -55,9 +51,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<EducationGroupDto>>
                     .ReturnSuccess(mapper.Map<List<EducationGroups>, List<EducationGroupDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<EducationGroupDto>>.ReturnError("Greška prilikom dohvata svih obrazovnih sektora.");
             }
         }
@@ -68,9 +63,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<EducationGroups>().GetAllAsQueryable().Count());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja obrazovnih sektora.");
             }
         }
@@ -93,9 +87,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PagedResult<EducationGroupDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<EducationGroupDto>>.ReturnError("Greška prilikom dohvata straničnih podataka obrazovnih sektora.");
             }
         }
@@ -110,9 +103,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<EducationGroupDto>
                     .ReturnSuccess(mapper.Map<EducationGroups, EducationGroupDto>(entityToAdd));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationGroupDto>.ReturnError("Greška prilikom upisa obrazovnog sektora.");
             }
         }
@@ -127,9 +119,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<EducationGroupDto>
                     .ReturnSuccess(mapper.Map<EducationGroups, EducationGroupDto>(entityToUpdate));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationGroupDto>.ReturnError("Greška prilikom ažuriranja obrazovnog sektora.");
             }
         }
@@ -142,9 +133,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<EducationGroupDto>.ReturnSuccess(null, "Brisanje obrazovnog sektora uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationGroupDto>.ReturnError("Greška prilikom brisanja obrazovnog sektora.");
             }
         }

@@ -24,15 +24,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private const string registerIncludes = "StudentRegisterEntries";
         private const string entryIncludes = "EducationProgram.EducationGroup,StudentsInGroups.Student,StudentsInGroups.StudentGroup";
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
 
-        public StudentRegisterService(IMapper mapper, ILoggerService loggerService,
+        public StudentRegisterService(IMapper mapper,
             IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
         }
@@ -69,9 +67,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<StudentRegisterDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom dohvata matične knjige.");
             }
         }
@@ -85,9 +82,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<StudentRegisterDto>>
                     .ReturnSuccess(mapper.Map<List<StudentRegister>, List<StudentRegisterDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata svih matičnih knjiga.");
             }
         }
@@ -98,9 +94,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<StudentRegister>().GetAllAsQueryable().Count());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja matičnih knjiga.");
             }
         }
@@ -135,9 +130,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<List<StudentRegisterDto>>.ReturnSuccess(entityDtos);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata svih matičnih knjiga.");
             }
         }
@@ -155,9 +149,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<List<StudentRegisterDto>>.ReturnSuccess(entityDtos);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata svih matičnih knjiga.");
             }
         }
@@ -176,9 +169,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await studentRegisters.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<StudentRegisterDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata straničnih podataka matične knjige.");
             }
         }
@@ -197,9 +189,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<StudentRegisterDto>.ReturnSuccess(mapper.Map(entityToAdd, entityDto));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom upisa matične knjige.");
             }
         }
@@ -214,9 +205,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<StudentRegisterDto>.ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom upisa matične knjige.");
             }
         }
@@ -304,9 +294,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnSuccess(request);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError("Greška prilikom pripreme za unos matične knjige.");
             }
         }
@@ -328,9 +317,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<StudentRegisterEntryDto>
                     .ReturnSuccess(mapper.Map<StudentRegisterEntry, StudentRegisterEntryDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom dohvata zapisa matične knjige.");
             }
         }
@@ -344,9 +332,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<StudentRegisterEntryDto>>
                     .ReturnSuccess(mapper.Map<List<StudentRegisterEntry>, List<StudentRegisterEntryDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata svih zapisa matičnih knjiga.");
             }
         }
@@ -364,9 +351,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(entityDtos);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata svih zapisa matičnih knjiga.");
             }
         }
@@ -385,9 +371,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await entityDtos.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata straničnih podataka zapisa matične knjige.");
             }
         }
@@ -408,9 +393,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata straničnih podataka zapisa matične knjige.");
             }
         }
@@ -481,9 +465,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntry, StudentRegisterEntryDto>(entityToAdd));
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom upisa u matičnu knjigu.");
             }
             finally
@@ -506,9 +489,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await GetEntryById(request.EntryId.Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, request);
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom ažuriranja zapisa matične knjige.");
             }
         }

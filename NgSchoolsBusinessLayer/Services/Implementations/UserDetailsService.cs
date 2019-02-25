@@ -19,15 +19,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         private readonly IMapper mapper;
         private readonly ICacheService cacheService;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public UserDetailsService(IMapper mapper, ICacheService cacheService,
-            ILoggerService loggerService, IUnitOfWork unitOfWork)
+        public UserDetailsService(IMapper mapper, ICacheService cacheService, IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
             this.cacheService = cacheService;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
         }
 
@@ -73,9 +70,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<UserViewModel>.ReturnSuccess(userDetails);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, userDetails);
                 return await ActionResponse<UserViewModel>.ReturnError("Greška prilikom upisa korisničkih detalja.");
             }
         }
@@ -85,14 +81,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var userDetails = unitOfWork.GetGenericRepository<UserDetails>()
-                    .FindBy(ud => ud.UserId == userId, 
+                    .FindBy(ud => ud.UserId == userId,
                     includeProperties: "Avatar,Signature,City,Country,Region,TeacherFiles.File");
                 return await ActionResponse<UserDetailsDto>
                     .ReturnSuccess(mapper.Map<UserDetailsDto>(userDetails));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, userId);
                 return await ActionResponse<UserDetailsDto>.ReturnError("Dogodila se greška prilikom dohvata detalja za korisnika.");
             }
         }
@@ -119,9 +114,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await GetUserDetails(userDetails.UserId.Value);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, userDetails);
                 return await ActionResponse<UserDetailsDto>
                     .ReturnError("Dogodila se greška prilikom ažuriranja podataka o korisniku. Molimo pokušajte ponovno.");
             }
@@ -163,9 +157,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<UserViewModel>.ReturnSuccess(userDetails);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, userDetails);
                 return await ActionResponse<UserViewModel>
                     .ReturnError("Dogodila se greška prilikom ažuriranja podataka o korisniku. Molimo pokušajte ponovno.");
             }
@@ -208,9 +201,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<UserDetailsDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni dokumenti nastavnika.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<UserDetailsDto>.ReturnError("Greška prilikom izmjene dokumenata nastavnika.");
             }
         }
@@ -231,9 +223,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entities);
                 return await ActionResponse<List<TeacherFileDto>>.ReturnError("Greška prilikom micanja dokumenata sa nastavnika.");
             }
         }
@@ -246,9 +237,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<TeacherFileDto>.ReturnSuccess(null, "Dokument uspješno maknut s nastavnika.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entity);
                 return await ActionResponse<TeacherFileDto>.ReturnError("Greška prilikom micanja dokumenta s nastavnika.");
             }
         }
@@ -269,9 +259,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entities);
                 return await ActionResponse<List<TeacherFileDto>>.ReturnError("Greška prilikom dodavanja dokumenata nastavniku.");
             }
         }
@@ -286,9 +275,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<TeacherFileDto>
                     .ReturnSuccess(mapper.Map<TeacherFile, TeacherFileDto>(entityToAdd), "Dokument uspješno dodan nastavniku.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, file);
                 return await ActionResponse<TeacherFileDto>.ReturnError("Greška prilikom dodavanja dokumenta nastavniku.");
             }
         }

@@ -19,14 +19,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public ThemeService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork)
+        public ThemeService(IMapper mapper, IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
         }
 
@@ -43,9 +40,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<ThemeDto>
                     .ReturnSuccess(mapper.Map<Theme, ThemeDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ThemeDto>.ReturnError("Greška prilikom dohvata teme.");
             }
         }
@@ -58,9 +54,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<ThemeDto>>
                     .ReturnSuccess(mapper.Map<List<Theme>, List<ThemeDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<ThemeDto>>.ReturnError("Greška prilikom dohvata svih tema.");
             }
         }
@@ -71,9 +66,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<Subject>().GetAllAsQueryable().Count());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja tema.");
             }
         }
@@ -87,9 +81,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<ThemeDto>>
                     .ReturnSuccess(mapper.Map<List<Theme>, List<ThemeDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<ThemeDto>>.ReturnError("Greška prilikom dohvata svih tema za predmet.");
             }
         }
@@ -112,9 +105,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PagedResult<ThemeDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<ThemeDto>>.ReturnError("Greška prilikom dohvata straničnih podataka tema.");
             }
         }
@@ -131,9 +123,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 mapper.Map(entityToAdd, entityDto);
                 return await ActionResponse<ThemeDto>.ReturnSuccess(entityDto, "Tema uspješno upisana.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<ThemeDto>.ReturnError("Greška prilikom upisivanja teme.");
             }
         }
@@ -148,9 +139,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<ThemeDto>
                     .ReturnSuccess(mapper.Map<Theme, ThemeDto>(entityToUpdate));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ThemeDto>.ReturnError($"Greška prilikom ažuriranja teme: {entityDto.Name}.");
             }
         }
@@ -163,9 +153,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<ThemeDto>.ReturnSuccess(null, "Brisanje uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<ThemeDto>.ReturnError("Greška prilikom brisanja teme.");
             }
         }

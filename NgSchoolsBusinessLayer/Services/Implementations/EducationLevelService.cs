@@ -19,14 +19,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public EducationLevelService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork)
+        public EducationLevelService(IMapper mapper, IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
         }
 
@@ -40,9 +37,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<EducationLevelDto>
                     .ReturnSuccess(mapper.Map<EducationLevel, EducationLevelDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationLevelDto>.ReturnError("Greška prilikom dohvata razine obrazovanja.");
             }
         }
@@ -55,9 +51,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<EducationLevelDto>>
                     .ReturnSuccess(mapper.Map<List<EducationLevel>, List<EducationLevelDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<EducationLevelDto>>.ReturnError("Greška prilikom dohvata svih razina obrazovanja.");
             }
         }
@@ -68,9 +63,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<EducationLevel>().GetAllAsQueryable().Count());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja razina obrazovanja.");
             }
         }
@@ -93,9 +87,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PagedResult<EducationLevelDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<EducationLevelDto>>.ReturnError("Greška prilikom dohvata straničnih podataka razina obrazovanja.");
             }
         }
@@ -110,9 +103,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<EducationLevelDto>
                     .ReturnSuccess(mapper.Map<EducationLevel, EducationLevelDto>(entityToAdd));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationLevelDto>.ReturnError("Greška prilikom unosa razine obrazovanja.");
             }
         }
@@ -127,9 +119,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<EducationLevelDto>
                     .ReturnSuccess(mapper.Map<EducationLevel, EducationLevelDto>(entityToUpdate));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationLevelDto>.ReturnError("Greška prilikom ažuriranja razine obrazovanja.");
             }
         }
@@ -142,9 +133,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<EducationLevelDto>.ReturnSuccess(null, "Brisanje razine obrazovanja uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<EducationLevelDto>.ReturnError("Greška prilikom brisanja razine obrazovanja.");
             }
         }

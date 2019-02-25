@@ -19,14 +19,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public PlanService(IMapper mapper, ILoggerService loggerService,
-            IUnitOfWork unitOfWork)
+        public PlanService(IMapper mapper, IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
         }
 
@@ -43,9 +40,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PlanDto>
                     .ReturnSuccess(mapper.Map<Plan, PlanDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<PlanDto>.ReturnError("Greška prilikom dohvaćanja plana.");
             }
         }
@@ -59,9 +55,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<PlanDto>>
                     .ReturnSuccess(mapper.Map<List<Plan>, List<PlanDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<PlanDto>>.ReturnError("Greška prilikom dohvaćanja planova.");
             }
         }
@@ -84,9 +79,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PagedResult<PlanDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<PlanDto>>.ReturnError("Greška prilikom dohvaćanja straničnih podataka plana.");
             }
         }
@@ -100,9 +94,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PlanDto>
                     .ReturnSuccess(mapper.Map<Plan, PlanDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<PlanDto>.ReturnError("Greška prilikom dohvaćanja plana.");
             }
         }
@@ -143,9 +136,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PlanDto>.ReturnSuccess(entityDto, "Plan uspješno unesen.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<PlanDto>.ReturnError("Greška prilikom upisivanja plana.");
             }
         }
@@ -176,9 +168,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PlanDto>.ReturnSuccess(entityDto, "Plan uspješno ažuriran.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<PlanDto>.ReturnError("Greška prilikom ažuriranja plana.");
             }
         }
@@ -191,9 +182,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<PlanDto>.ReturnSuccess(null, "Brisanje plana uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<PlanDto>.ReturnError("Greška prilikom brisanja plana.");
             }
         }
@@ -240,9 +230,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PlanDto>.ReturnSuccess(plan, "Uspješno izmijenjeni dani plana.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, plan);
                 return await ActionResponse<PlanDto>.ReturnError("Greška prilikom modifikacije dana za plan.");
             }
         }
@@ -265,9 +254,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, daysInPlan);
                 return await ActionResponse<List<PlanDayDto>>.ReturnError("Greška prilikom micanja dana iz plana.");
             }
         }
@@ -280,9 +268,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<PlanDayDto>.ReturnSuccess(null, "Dan uspješno izbrisan iz plana.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, planDay);
                 return await ActionResponse<PlanDayDto>.ReturnError("Greška prilikom micanja dana iz plana.");
             }
         }
@@ -307,9 +294,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, planDays);
                 return await ActionResponse<List<PlanDayDto>>.ReturnError("Greška prilikom dodavanja dana u plan.");
             }
         }
@@ -340,9 +326,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PlanDayDto>.ReturnSuccess(mapper.Map(entityToAdd, entityDto), "Dan plana uspješno unesen.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<PlanDayDto>.ReturnError("Greška prilikom dodavanja dana u plan.");
             }
         }
@@ -367,9 +352,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, planDays);
                 return await ActionResponse<List<PlanDayDto>>.ReturnError("Greška prilikom dodavanja dana u plan.");
             }
         }
@@ -401,9 +385,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PlanDayDto>
                     .ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<PlanDayDto>.ReturnError("Greška prilikom ažuriranja dana plana.");
             }
         }
@@ -477,9 +460,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<PlanDaySubjectDto>>.ReturnError("Greška prilikom micanja predmeta iz dana plana.");
             }
         }
@@ -492,9 +474,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<PlanDaySubjectDto>.ReturnSuccess(null, "Predmet uspješno izbrisan iz planskog dana.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<PlanDaySubjectDto>.ReturnError("Greška prilikom micanja predmeta iz planskog dana.");
             }
         }
@@ -519,9 +500,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<PlanDaySubjectDto>>.ReturnError("Greška prilikom dodavanja predmeta u dan plana.");
             }
         }
@@ -553,9 +533,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PlanDaySubjectDto>.ReturnSuccess(entityDto, "Predmet uspješno dodan u dan plana.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<PlanDaySubjectDto>.ReturnError("Greška prilikom dodavanja predmeta u dan plana.");
             }
         }
@@ -580,9 +559,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<PlanDaySubjectDto>>.ReturnError("Greška prilikom dodavanja predmeta u dan plana.");
             }
         }
@@ -610,9 +588,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PlanDaySubjectDto>
                     .ReturnSuccess(mapper.Map(entityToUpdate, entityDto), "Predmet u danu plana uspješno ažuriran.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<PlanDaySubjectDto>.ReturnError("Greška prilikom ažuriranja predmeta u danu plana.");
             }
         }
@@ -684,9 +661,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<PlanDaySubjectThemeDto>>.ReturnError("Greška prilikom micanja teme iz predmeta u planskom danu.");
             }
         }
@@ -699,9 +675,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<PlanDaySubjectThemeDto>.ReturnSuccess(null, "Tema uspješno izbrisana iz predmeta planskog dana.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<PlanDaySubjectThemeDto>.ReturnError("Greška prilikom micanja teme iz predmeta planskog dana.");
             }
         }
@@ -722,9 +697,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<PlanDaySubjectThemeDto>>.ReturnError("Greška prilikom dodavanja tema u predmet planskog dana.");
             }
         }
@@ -739,9 +713,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PlanDaySubjectThemeDto>
                     .ReturnSuccess(mapper.Map(entityToAdd, entityDto), "Tema uspješno dodana u predmet planskog dana.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<PlanDaySubjectThemeDto>.ReturnError("Greška prilikom dodavanja teme u predmet planskog dana.");
             }
         }
@@ -763,9 +736,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<PlanDaySubjectThemeDto>>.ReturnError("Greška prilikom ažuriranja tema u predmetu planskog dana.");
             }
         }
@@ -781,9 +753,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PlanDaySubjectThemeDto>
                     .ReturnSuccess(mapper.Map(entityToUpdate, entityDto), "Tema u danu plana uspješno ažuriran.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<PlanDaySubjectThemeDto>.ReturnError("Greška prilikom ažuriranja teme u danu plana.");
             }
         }

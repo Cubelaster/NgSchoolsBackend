@@ -19,13 +19,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
 
-        public BusinessPartnerService(IMapper mapper, ILoggerService loggerService, IUnitOfWork unitOfWork)
+        public BusinessPartnerService(IMapper mapper, IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
         }
 
@@ -40,9 +38,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<BusinessPartnerDto>
                     .ReturnSuccess(mapper.Map<BusinessPartner, BusinessPartnerDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<BusinessPartnerDto>.ReturnError("Greška prilikom dohvata poslovnog partnera.");
             }
         }
@@ -57,9 +54,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<BusinessPartnerDto>>
                     .ReturnSuccess(mapper.Map<List<BusinessPartner>, List<BusinessPartnerDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<BusinessPartnerDto>>.ReturnError("Greška prilikom dohvata svih poslovnih partnera.");
             }
         }
@@ -74,9 +70,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<BusinessPartnerDto>>
                     .ReturnSuccess(mapper.Map<List<BusinessPartner>, List<BusinessPartnerDto>>(entities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<BusinessPartnerDto>>.ReturnError("Greška prilikom dohvata svih poslodavaca.");
             }
         }
@@ -100,13 +95,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za poslovne partnere.");
             }
         }
-
 
         public async Task<ActionResponse<PagedResult<BusinessPartnerDto>>> GetAllEmployersPaged(BasePagedRequest pagedRequest)
         {
@@ -127,9 +120,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<BusinessPartnerDto>>.ReturnError("Greška prilikom dohvata straničnih podataka poslodavaca.");
             }
         }
@@ -160,9 +152,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<BusinessPartnerDto>.ReturnError("Greška prilikom unosa poslovnog partnera.");
             }
         }
@@ -194,9 +185,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<BusinessPartnerDto>.ReturnError("Greška prilikom ažuriranja poslovnog partnera.");
             }
         }
@@ -209,9 +199,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(null, "Brisanje poslovnog partnera uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<BusinessPartnerDto>.ReturnError("Greška prilikom brisanja poslovnog partnera.");
             }
         }
@@ -264,9 +253,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<BusinessPartnerDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni dokumenti studenta.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<BusinessPartnerDto>.ReturnError($"Greška prilikom ažuriranja kontakata za poslovnog partnera.");
             }
         }
@@ -287,9 +275,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<ContactPersonDto>>.ReturnError("Greška prilikom brisanja kontakata za poslovnog partnera.");
             }
         }
@@ -302,9 +289,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<ContactPersonDto>.ReturnSuccess(null, "Kontakt za poslovnog partnera uspješno izbrisan obrisan.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<ContactPersonDto>.ReturnError("Greška prilikom brisanja kontakta za poslovnog partnera.");
             }
         }
@@ -325,9 +311,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<ContactPersonDto>>.ReturnError("Greška prilikom brisanja kontakata za poslovnog partnera.");
             }
         }
@@ -342,9 +327,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 mapper.Map(entityToAdd, entityDto);
                 return await ActionResponse<ContactPersonDto>.ReturnSuccess(entityDto, "Kontakt za poslovnog partnera uspješno dodan.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<ContactPersonDto>.ReturnError("Greška prilikom dodavanja kontakta za poslovnog partnera.");
             }
         }
@@ -365,9 +349,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDtos);
                 return await ActionResponse<List<ContactPersonDto>>.ReturnError("Greška prilikom brisanja kontakata za poslovnog partnera.");
             }
         }
@@ -383,9 +366,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 mapper.Map(entityToUpdate, entityDto);
                 return await ActionResponse<ContactPersonDto>.ReturnSuccess(entityDto, "Kontakt za poslovnog partnera uspješno ažuriran.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<ContactPersonDto>.ReturnError("Greška prilikom ažuriranja kontakta za poslovnog partnera.");
             }
         }

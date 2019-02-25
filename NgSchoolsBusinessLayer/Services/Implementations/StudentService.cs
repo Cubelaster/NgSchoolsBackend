@@ -21,16 +21,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ILoggerService loggerService;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
         private readonly string includeProperties = "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,Employer,Employer.Country,Employer.Region,Employer.City,CountryOfBirth,RegionOfBirth,CityOfBirth";
 
-        public StudentService(IMapper mapper, ILoggerService loggerService,
+        public StudentService(IMapper mapper,
             IUnitOfWork unitOfWork, ICacheService cacheService)
         {
             this.mapper = mapper;
-            this.loggerService = loggerService;
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
         }
@@ -42,14 +40,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Student>()
-                    .FindBy(c => c.Id == id, 
+                    .FindBy(c => c.Id == id,
                     includeProperties: includeProperties);
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<StudentDto>.ReturnError("Greška prilikom dohvata studenta.");
             }
         }
@@ -64,9 +61,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<StudentDto>.ReturnError("Greška prilikom dohvata studenta.");
             }
         }
@@ -81,9 +77,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<StudentDto>>.ReturnSuccess(
                     mapper.Map<List<Student>, List<StudentDto>>(allEntities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<StudentDto>>.ReturnError("Greška prilikom dohvata svih studenata.");
             }
         }
@@ -97,9 +92,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<List<StudentDto>>
                     .ReturnSuccess(mapper.Map<List<Student>, List<StudentDto>>(allEntities));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<StudentDto>>.ReturnError("Greška prilikom dohvata svih studenata.");
             }
         }
@@ -113,12 +107,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 {
                     students = (await GetAll()).GetData();
                 }
-                
+
                 return await ActionResponse<List<StudentDto>>.ReturnSuccess(students.OrderByDescending(s => s.DateCreated).Take(10).ToList());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<List<StudentDto>>.ReturnError("Greška prilikom dohvata deset najnovijih studenata.");
             }
         }
@@ -129,9 +122,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<Student>().GetAllAsQueryable().Count());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja studenata.");
             }
         }
@@ -150,9 +142,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await students.AsQueryable().GetBySearchQuery(pagedRequest);
                 return await ActionResponse<PagedResult<StudentDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<StudentDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za studente.");
             }
         }
@@ -171,9 +162,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await students.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<StudentDto>>.ReturnSuccess(pagedResult);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, pagedRequest);
                 return await ActionResponse<PagedResult<StudentDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za studente.");
             }
         }
@@ -208,9 +198,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<StudentDto>.ReturnSuccess(students.FirstOrDefault(s => s.Id == entityDto.Id));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<StudentDto>.ReturnError("Greška prilikom upisa studenta.");
             }
         }
@@ -223,7 +212,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 entityDto.Files = null;
 
                 var entityToUpdate = unitOfWork.GetGenericRepository<Student>()
-                    .FindBy(c => c.Id == entityDto.Id, 
+                    .FindBy(c => c.Id == entityDto.Id,
                     includeProperties: includeProperties);
 
                 mapper.Map(entityDto, entityToUpdate);
@@ -242,9 +231,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entityToUpdate));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<StudentDto>.ReturnError("Greška prilikom ažuriranja podataka za studenta.");
             }
         }
@@ -258,9 +246,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 await cacheService.RefreshCache<List<StudentDto>>();
                 return await ActionResponse<StudentDto>.ReturnSuccess(null, "Brisanje studenta uspješno.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex);
                 return await ActionResponse<StudentDto>.ReturnError("Greška prilikom brisanja studenta.");
             }
         }
@@ -299,9 +286,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
                 return await ActionResponse<StudentDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni dokumenti studenta.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<StudentDto>.ReturnError("Greška prilikom izmjene dokumenata studenta.");
             }
         }
@@ -322,9 +308,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entities);
                 return await ActionResponse<List<StudentFileDto>>.ReturnError("Greška prilikom micanja dokumenata sa studenta.");
             }
         }
@@ -337,9 +322,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 unitOfWork.Save();
                 return await ActionResponse<StudentFileDto>.ReturnSuccess(null, "Student upsješno izbrisan iz grupe.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entity);
                 return await ActionResponse<StudentFileDto>.ReturnError("Greška prilikom micanja studenta iz grupe.");
             }
         }
@@ -360,9 +344,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 });
                 return response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entities);
                 return await ActionResponse<List<StudentFileDto>>.ReturnError("Greška prilikom dodavanja datoteka studentu.");
             }
         }
@@ -378,9 +361,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .ReturnSuccess(mapper.Map<StudentFiles, StudentFileDto>(entityToAdd),
                     "Datoteka uspješno dodana studentu.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, file);
                 return await ActionResponse<StudentFileDto>.ReturnError("Greška prilikom dodavanja datoteke studentu.");
             }
         }
@@ -401,9 +383,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await Update(student);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                loggerService.LogErrorToEventLog(ex, entityDto);
                 return await ActionResponse<StudentDto>.ReturnError($"Greška prilikom ažuriranja datuma upisa za studenta.");
             }
         }
