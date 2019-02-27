@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using NgSchoolsBusinessLayer.Utilities.DbUtils;
-using System;
 
 namespace NgSchoolsBackend
 {
@@ -12,22 +10,12 @@ namespace NgSchoolsBackend
         public static void Main(string[] args)
         {
             var host = CreateWebHostBuilder(args)
-                .UseKestrel()
-                .UseIISIntegration()
                 .Build();
 
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                try
-                {
-                    DbInitializer.Initialize(services);
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding the database.");
-                }
+                DbInitializer.Initialize(services);
             }
 
             host.Run();

@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.EventLog;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
 using NgSchoolsBusinessLayer.Security.Jwt;
@@ -19,13 +17,11 @@ using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Services.Implementations;
 using NgSchoolsBusinessLayer.Services.Implementations.Common;
 using NgSchoolsDataLayer.Context;
-using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NgSchoolsBackend
 {
@@ -48,6 +44,11 @@ namespace NgSchoolsBackend
 
             services.AddHttpClient();
 
+            //services.Configure<IISOptions>(options =>
+            //{
+            //    options.AutomaticAuthentication = false;
+            //});
+
             services.AddDbContext<NgSchoolsContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"),
                 opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
@@ -61,16 +62,16 @@ namespace NgSchoolsBackend
                 .AddRoles<IdentityRole<Guid>>()
                 .AddDefaultTokenProviders();
 
-            services.AddLogging(options =>
-            {
-                var eventLogSettings = new EventLogSettings
-                {
-                    LogName = "NgSchools",
-                    SourceName = "NgSchools",
+            //services.AddLogging(options =>
+            //{
+            //    var eventLogSettings = new EventLogSettings
+            //    {
+            //        LogName = "NgSchools",
+            //        SourceName = "NgSchools",
 
-                };
-                options.AddEventLog(eventLogSettings);
-            });
+            //    };
+            //    options.AddEventLog(eventLogSettings);
+            //});
 
             services.AddAutoMapper();
 
@@ -101,12 +102,14 @@ namespace NgSchoolsBackend
 
             ConfigureFileServer(app);
 
+            var availableCorsOrigins = Configuration.GetSection("CorsOrigin").Get<string[]>();
+
             app.UseCors(options =>
             {
                 options.AllowCredentials();
                 options.AllowAnyHeader();
                 options.WithMethods(new string[] { "POST", "GET", "OPTIONS" });
-                options.WithOrigins(Configuration.GetValue<string>("CorsOrigin"));
+                options.WithOrigins(availableCorsOrigins);
             });
 
             app.UseDeveloperExceptionPage();

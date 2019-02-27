@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
@@ -12,7 +13,12 @@ namespace NgSchoolsDataLayer.Context
     public class NgSchoolsContext : IdentityDbContext<User, Role, Guid, IdentityUserClaim<Guid>, UserRoles,
         IdentityUserLogin<Guid>, IdentityRoleClaim<Guid>, IdentityUserToken<Guid>>
     {
-        public NgSchoolsContext(DbContextOptions<NgSchoolsContext> options) : base(options) { }
+        private readonly IConfiguration configuration;
+
+        public NgSchoolsContext(DbContextOptions<NgSchoolsContext> options, IConfiguration configuration) : base(options)
+        {
+            this.configuration = configuration;
+        }
 
         #region Db Sets
 
@@ -54,6 +60,11 @@ namespace NgSchoolsDataLayer.Context
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            var defaultSchema = configuration.GetValue<string>("DefaultSchema");
+            if (!string.IsNullOrEmpty(defaultSchema))
+            {
+                builder.HasDefaultSchema(defaultSchema);
+            }
             base.OnModelCreating(builder);
 
             SetUpKeys(builder);
@@ -182,7 +193,7 @@ namespace NgSchoolsDataLayer.Context
                 .Where(t => t != typeof(DatabaseEntity) && typeof(DatabaseEntity).IsAssignableFrom(t))
                 .ToList();
 
-            foreach(var type in dbTypes)
+            foreach (var type in dbTypes)
             {
                 var method = SetGlobalQueryMethod.MakeGenericMethod(type);
                 method.Invoke(this, new object[] { builder });

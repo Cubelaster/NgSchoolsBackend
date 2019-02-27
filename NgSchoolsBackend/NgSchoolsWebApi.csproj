@@ -20,4 +20,8 @@
     <ProjectReference Include="..\NgSchoolsBusinessLayer\NgSchoolsBusinessLayer.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+  </PropertyGroup>
+
 </Project>

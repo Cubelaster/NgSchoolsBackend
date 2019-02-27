@@ -37,7 +37,6 @@ namespace NgSchoolsBusinessLayer.Utilities.DbUtils
                 var roleExist = await RoleManager.RoleExistsAsync(roleName);
                 if (!roleExist)
                 {
-                    //create the roles and seed them to the database: Question 1
                     roleResult = await RoleManager.CreateAsync(new Role { Name = roleName });
                 }
             }
@@ -49,8 +48,6 @@ namespace NgSchoolsBusinessLayer.Utilities.DbUtils
             var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 
             var Configuration = serviceProvider.GetRequiredService<IConfiguration>();
-
-            //var dummy = Configuration.GetValue<string>("Dummy");
 
             var defaultUsers = Configuration.GetSection("DefaultUsers").GetChildren();
             foreach (var user in defaultUsers)
