@@ -44,11 +44,6 @@ namespace NgSchoolsBackend
 
             services.AddHttpClient();
 
-            //services.Configure<IISOptions>(options =>
-            //{
-            //    options.AutomaticAuthentication = false;
-            //});
-
             services.AddDbContext<NgSchoolsContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"),
                 opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
@@ -102,14 +97,12 @@ namespace NgSchoolsBackend
 
             ConfigureFileServer(app);
 
-            var availableCorsOrigins = Configuration.GetSection("CorsOrigin").Get<string[]>();
-
             app.UseCors(options =>
             {
                 options.AllowCredentials();
                 options.AllowAnyHeader();
                 options.WithMethods(new string[] { "POST", "GET", "OPTIONS" });
-                options.WithOrigins(availableCorsOrigins);
+                options.WithOrigins(Configuration.GetSection("CorsOrigin").Get<string[]>());
             });
 
             app.UseDeveloperExceptionPage();
