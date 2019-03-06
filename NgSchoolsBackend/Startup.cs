@@ -108,7 +108,7 @@ namespace NgSchoolsBackend
             app.UseDeveloperExceptionPage();
             app.UseDatabaseErrorPage();
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();
         }
