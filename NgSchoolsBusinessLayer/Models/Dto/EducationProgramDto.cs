@@ -33,6 +33,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string CIClassesGroup { get; set; }
         public string CIClassesIndividual { get; set; }
         public string CIClassesPractical { get; set; }
+        public string ProgramType { get; set; }
 
         public List<SubjectDto> Subjects { get; set; }
         public PlanDto Plan { get; set; }
