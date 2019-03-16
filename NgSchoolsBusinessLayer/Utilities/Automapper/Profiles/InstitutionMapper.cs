@@ -18,6 +18,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Country, opt => opt.Ignore())
                 .ForMember(dest => dest.City, opt => opt.Ignore())
                 .ForMember(dest => dest.Region, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipality, opt => opt.Ignore())
                 .ForMember(dest => dest.Logo, opt => opt.Ignore())
                 .ForMember(dest => dest.Principal, opt => opt.Ignore())
                 .ForMember(dest => dest.InstitutionFiles, opt => opt.Ignore());

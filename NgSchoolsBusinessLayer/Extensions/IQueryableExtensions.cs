@@ -76,7 +76,6 @@ namespace NgSchoolsBusinessLayer.Extensions
                     .ToList()
                 );
 
-
                 return result;
             }
 

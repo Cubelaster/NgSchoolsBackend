@@ -19,11 +19,13 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Mentor { get; set; }
         public string Oib { get; set; }
         public int? CityOfBirthId { get; set; }
-        public virtual CityDto CityOfBirth { get; set; }
+        public CityDto CityOfBirth { get; set; }
         public int? CountryOfBirthId { get; set; }
-        public virtual CountryDto CountryOfBirth { get; set; }
+        public CountryDto CountryOfBirth { get; set; }
         public int? RegionOfBirthId { get; set; }
-        public virtual RegionDto RegionOfBirth { get; set; }
+        public RegionDto RegionOfBirth { get; set; }
+        public int? MunicipalityOfBirthId { get; set; }
+        public MunicipalityDto MunicipalityOfBirth { get; set; }
         public string Mob { get; set; }
         public string Citizenship { get; set; }
         public string Proffesion { get; set; }
@@ -38,7 +40,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public CityDto AddressCity { get; set; }
         public int? AddressRegionId { get; set; }
         public RegionDto AddressRegion { get; set; }
-        public string AddressMuncipality { get; set; }
+        public int? AddressMunicipalityId { get; set; }
+        public MunicipalityDto AddressMunicipality { get; set; }
         public string Mobile { get; set; }
         public string Email { get; set; }
         public bool Employed { get; set; }

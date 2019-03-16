@@ -25,6 +25,8 @@ namespace NgSchoolsDataLayer.Models
         public string Mob { get; set; }
         public int? RegionOfBirthId { get; set; }
         public virtual Region RegionOfBirth { get; set; }
+        public int? MunicipalityOfBirthId { get; set; }
+        public virtual Municipality MunicipalityOfBirth { get; set; }
         public string Citizenship { get; set; }
         public string Proffesion { get; set; }
         public bool IdCard { get; set; }
@@ -39,6 +41,8 @@ namespace NgSchoolsDataLayer.Models
         public virtual City AddressCity { get; set; }
         public int? AddressRegionId { get; set; }
         public virtual Region AddressRegion { get; set; }
+        public int? AddressMunicipalityId { get; set; }
+        public virtual Municipality AddressMunicipality { get; set; }
 
         public string AddressMuncipality { get; set; }
         public string Mobile { get; set; }

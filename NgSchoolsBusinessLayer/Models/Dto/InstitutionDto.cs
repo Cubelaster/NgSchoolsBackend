@@ -21,6 +21,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public CountryDto Country { get; set; }
         public int? RegionId { get; set; }
         public RegionDto Region { get; set; }
+        public int? MunicipalityId { get; set; }
+        public MunicipalityDto Municipality { get; set; }
         public List<FileDto> Files { get; set; }
     }
 }

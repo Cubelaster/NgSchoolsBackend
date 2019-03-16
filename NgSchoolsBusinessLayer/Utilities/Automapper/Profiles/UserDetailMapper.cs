@@ -18,6 +18,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Avatar, opt => opt.Ignore())
                 .ForMember(dest => dest.Signature, opt => opt.Ignore())
                 .ForMember(dest => dest.Country, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipality, opt => opt.Ignore())
                 .ForMember(dest => dest.Region, opt => opt.Ignore())
                 .ForMember(dest => dest.City, opt => opt.Ignore())
                 .ForMember(dest => dest.TeacherFiles, opt => opt.Ignore());
@@ -28,6 +29,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<TeacherViewModel, UserDetailsDto>()
                 .ForMember(dest => dest.City, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipality, opt => opt.Ignore())
                 .ForMember(dest => dest.Region, opt => opt.Ignore())
                 .ForMember(dest => dest.Country, opt => opt.Ignore())
                 .ForMember(dest => dest.TeacherFiles, opt => opt.MapFrom(src => src.Files));

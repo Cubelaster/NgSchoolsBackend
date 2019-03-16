@@ -36,6 +36,9 @@ namespace NgSchoolsDataLayer.Models
         public int? RegionId { get; set; }
         public virtual Region Region { get; set; }
 
+        public int? MunicipalityId { get; set; }
+        public virtual Municipality Municipality { get; set; }
+
         public string Profession { get; set; }
         public string Qualifications { get; set; }
         public string EmploymentPlace { get; set; }

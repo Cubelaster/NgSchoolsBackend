@@ -34,6 +34,9 @@ namespace NgSchoolsDataLayer.Models
         public int? ExamCommissionId { get; set; }
         public virtual ExamCommission ExamCommission { get; set; }
 
+        public Guid? DirectorId { get; set; }
+        public virtual User Director { get; set; }
+
         public virtual ICollection<StudentGroupClassAttendance> StudentGroupClassAttendances { get; set; }
     }
 }

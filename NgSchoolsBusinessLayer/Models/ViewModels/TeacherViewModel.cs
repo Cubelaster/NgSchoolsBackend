@@ -22,6 +22,8 @@ namespace NgSchoolsBusinessLayer.Models.ViewModels
         public CountryDto Country { get; set; }
         public int? RegionId { get; set; }
         public RegionDto Region { get; set; }
+        public int? MunicipalityId { get; set; }
+        public MunicipalityDto Municipality { get; set; }
         public string Profession { get; set; }
         public string Qualifications { get; set; }
         public string EmploymentPlace { get; set; }
