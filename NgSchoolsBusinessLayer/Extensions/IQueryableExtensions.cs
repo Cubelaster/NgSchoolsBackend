@@ -25,10 +25,12 @@ namespace NgSchoolsBusinessLayer.Extensions
                     PageSize = pagedRequest.PageSize
                 };
 
+                var totalCount = query.Count();
+
                 int skip = (currentPage - 1) * pagedRequest.PageSize;
 
                 PropertyInfo propertyForSort = null;
-                if (!string.IsNullOrEmpty(pagedRequest.OrderBy) && result.RowCount > 1)
+                if (!string.IsNullOrEmpty(pagedRequest.OrderBy) && totalCount > 1)
                 {
                     propertyForSort = objectType.GetProperty(pagedRequest.OrderBy);
                 }
@@ -59,7 +61,7 @@ namespace NgSchoolsBusinessLayer.Extensions
                     {
                         query = query
                         .Where(q => searchableProperties
-                            .Any(p => p.GetValue(q).ToString()
+                            .Any(p => (p.GetValue(q) != null ? p.GetValue(q).ToString() : "")
                             .Contains(pagedRequest.SearchQuery, StringComparison.OrdinalIgnoreCase)));
                     }
                 }

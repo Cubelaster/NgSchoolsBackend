@@ -94,14 +94,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<ClassLocationsDto> classTypes = new List<ClassLocationsDto>();
+                List<ClassLocationsDto> classLocations = new List<ClassLocationsDto>();
                 var cachedResponse = await cacheService.GetFromCache<List<ClassLocationsDto>>();
-                if (!cachedResponse.IsSuccessAndHasData(out classTypes))
+                if (!cachedResponse.IsSuccessAndHasData(out classLocations))
                 {
-                    classTypes = (await GetAll()).GetData();
+                    classLocations = (await GetAll()).GetData();
                 }
 
-                var pagedResult = await classTypes.AsQueryable().GetPaged(pagedRequest);
+                var pagedResult = await classLocations.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<ClassLocationsDto>>.ReturnSuccess(pagedResult);
             }
             catch (Exception)
