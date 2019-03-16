@@ -599,7 +599,7 @@
 	"SearchQuery": ""
 }
 
-//Location/DeleteCountry
+//Location/DeleteCountry || DeleteRegion || DeleteMunicipality || DeleteCity
 {
 	"Id": 1
 }
@@ -629,6 +629,7 @@
 	"City": "Ime",
 	"NameDomestic": "Ime",
 	"RegionId": 1,
+	"MunicipalityId": 1,
 	"CountryId": 1,
 	"Latitude": "",
 	"Longtitude": ""
@@ -639,6 +640,7 @@
 	"City": "Ime",
 	"NameDomestic": "Ime",
 	"RegionId": 1,
+	"MunicipalityId": 1,
 	"CountryId": 1,
 	"Latitude": "",
 	"Longtitude": ""
@@ -647,6 +649,143 @@
 //Location/GetAllCitiesPaged
 //Location/GetCitiesBySearchQuery
 //Location/DeleteCity
+//Location/GetCitiesByMunicipalityId
+{
+	"Id": 1
+}
+
+//Location/GetAllCitiesWithoutMunicipality
+//Location/GetAllCitiesWithoutRegion
+
+//Location/GetRegionsByCountryIdPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0,
+	"AdditionalParams": {
+		"Id": 517
+	}
+}
+
+//Location/GetCitiesByRegionIdPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0,
+	"AdditionalParams": {
+		"Id": 55
+	}
+}
+
+//Location/GetCitiesByCountryId
+{
+	"Id": 49
+}
+
+//Location/GetCitiesByCountryIdPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0,
+	"AdditionalParams": {
+		"Id": 49
+	}
+}
+
+//GetAllCitiesByMunicipalityIdPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"AdditionalParams": {
+		"Id": 1
+	}
+}
+
+//Location/GetAllMunicipalities
+//Location/GetAllMunicipalitiesWithoutRegion
+//Location/GetAllMunicipalitiesPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {}
+}
+
+//Location/GetMunicipalitiesByCountryIdPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"AdditionalParams": {
+		"Id": 49
+	}
+}
+
+//Location/GetMunicipalitiesByRegionIdPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"AdditionalParams": {
+		"Id": 1
+	}
+}
+
+//Location/InsertMunicipality
+{
+	"Name": "Ime",
+	"CountryId": 49,
+	"RegionId": 1,
+	"NameDomestic": ""
+}
+
+//Location/UpdateMunicipality
+{
+	"Id": 1,
+	"Name": "Mun",
+	"CountryId": 49,
+	"RegionId": 1,
+	"NameDomestic": ""
+}
+
+//Location/DeleteMunicipality
+{
+	"Id": 1
+}
+
+//Location/GetMunicipalityById
+{
+	"Id": 1
+}
+
+//Location/GetMunicipalitiesByRegionId || GetMunicipalitiesByCountryId
+{
+	"Id": 1
+}
 
 //ClassLocations/Insert
 {
@@ -767,34 +906,6 @@
 	"SocialSkills": "SocialSkills",
 	"Autonomy": "Autonomy",
 	"Responsibility": "0"
-}
-
-//Location/GetRegionsByCountryIdPaged
-{
-	"OrderBy": "",
-	"PageIndex": 0,
-	"PageSize": 10,
-	"SearchQuery": "",
-	"SortDirection": 0,
-	"Where": {},
-	"itemsTotal": 0,
-	"AdditionalParams": {
-		"Id": 517
-	}
-}
-
-//Location/GetCitiesByRegionIdPaged
-{
-	"OrderBy": "",
-	"PageIndex": 0,
-	"PageSize": 10,
-	"SearchQuery": "",
-	"SortDirection": 0,
-	"Where": {},
-	"itemsTotal": 0,
-	"AdditionalParams": {
-		"Id": 55
-	}
 }
 
 //StudentRegister/GetAllNotFull
