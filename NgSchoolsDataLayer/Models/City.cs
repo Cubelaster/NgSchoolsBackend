@@ -10,8 +10,11 @@ namespace NgSchoolsDataLayer.Models
         public string Latitude { get; set; }
         public string Longtitude { get; set; }
 
-        public int RegionId { get; set; }
+        public int? RegionId { get; set; }
         public virtual Region Region { get; set; }
+
+        public int? MunicipalityId { get; set; }
+        public virtual Municipality Municipality { get; set; }
 
         public int CountryId { get; set; }
         public Country Country { get; set; }

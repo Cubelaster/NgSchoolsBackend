@@ -45,6 +45,7 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<DiaryStudentGroup> DiaryStudentGroups { get; set; }
         public DbSet<Country> Countries { get; set; }
         public DbSet<Region> Regions { get; set; }
+        public DbSet<Municipality> Municipalities { get; set; }
         public DbSet<City> Cities { get; set; }
         public DbSet<ContactPerson> ContactPeople { get; set; }
         public DbSet<EducationProgramClassType> EducationProgramClassTypes { get; set; }
@@ -133,6 +134,11 @@ namespace NgSchoolsDataLayer.Context
 
             builder.Entity<City>()
                 .HasOne(c => c.Region)
+                .WithMany(r => r.Cities)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<City>()
+                .HasOne(c => c.Municipality)
                 .WithMany(r => r.Cities)
                 .OnDelete(DeleteBehavior.Restrict);
 

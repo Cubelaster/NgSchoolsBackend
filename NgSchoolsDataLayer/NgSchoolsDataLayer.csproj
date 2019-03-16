@@ -37,6 +37,10 @@
     <Compile Remove="Migrations\20190209190721_Modify_Student_Entry_Add_EduProgramId.cs" />
     <Compile Remove="Migrations\20190214170050_Changing_DbEntity.cs" />
     <Compile Remove="Migrations\20190214181034_Modify_TeacherFile_Wrong_FK.cs" />
+    <Compile Remove="Migrations\20190316082550_Added_Municipality.cs" />
+    <Compile Remove="Migrations\20190316082604_Added_Municipality_DbEntity.cs" />
+    <Compile Remove="Migrations\20190316082639_Added_Municipality_DbEntity.cs" />
+    <Compile Remove="Migrations\20190316084146_Modify_Municipality_Keys_and_Connections.cs" />
   </ItemGroup>
 
   <ItemGroup>

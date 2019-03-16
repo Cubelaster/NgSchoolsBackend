@@ -15,6 +15,7 @@ namespace NgSchoolsDataLayer.Models
         public int? InternationalDiallingPrefix { get; set; }
 
         public virtual ICollection<Region> Regions { get; set; }
+        public virtual ICollection<Municipality> Municipalities { get; set; }
         public virtual ICollection<City> Cities { get; set; }
     }
 }

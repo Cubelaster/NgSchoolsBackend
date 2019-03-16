@@ -57,17 +57,6 @@ namespace NgSchoolsBackend
                 .AddRoles<IdentityRole<Guid>>()
                 .AddDefaultTokenProviders();
 
-            //services.AddLogging(options =>
-            //{
-            //    var eventLogSettings = new EventLogSettings
-            //    {
-            //        LogName = "NgSchools",
-            //        SourceName = "NgSchools",
-
-            //    };
-            //    options.AddEventLog(eventLogSettings);
-            //});
-
             services.AddAutoMapper();
 
             services.AddMvc()
@@ -107,8 +96,6 @@ namespace NgSchoolsBackend
 
             app.UseDeveloperExceptionPage();
             app.UseDatabaseErrorPage();
-
-            //app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();
         }
