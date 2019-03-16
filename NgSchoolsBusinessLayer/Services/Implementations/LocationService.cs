@@ -27,6 +27,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly string battutaBaseUrl = "http://battuta.medunes.net/api/";
         private readonly string battutaApiKey = "key=ee64538820e420c329c5f164c550336b";
         private readonly object myLock = new object();
+        private const string countryInclude = "Regions.Cities,Regions.Municipalities,Municipalities,Cities";
+        private const string regionInclude = "Cities,Municipalities";
+        private const string municipalityInclude = "Cities";
 
         public LocationService(IMapper mapper, IUnitOfWork unitOfWork,
             ICacheService cacheService, IHttpClientFactory httpClientFactory)
@@ -35,6 +38,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
             this.httpClientFactory = httpClientFactory;
+        }
+
+        private async Task RefreshAllCache()
+        {
+            var countryTask = cacheService.RefreshCache<List<CountryDto>>();
+            var regionTask = cacheService.RefreshCache<List<RegionDto>>();
+            var municipalityTask = cacheService.RefreshCache<List<MunicipalityDto>>();
+            var cityTask = cacheService.RefreshCache<List<CityDto>>();
+
+            await Task.WhenAll(countryTask, regionTask, cityTask, municipalityTask);
         }
 
         #endregion Ctors and Members
@@ -68,7 +81,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<Country>()
-                    .GetAll(includeProperties: "Regions.Cities,Cities");
+                    .GetAll(includeProperties: countryInclude);
                 return await ActionResponse<List<CountryDto>>
                     .ReturnSuccess(mapper.Map<List<Country>, List<CountryDto>>(entities));
             }
@@ -123,7 +136,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Country>()
-                    .FindBy(c => c.Id == id, includeProperties: "Regions.Cities,Cities");
+                    .FindBy(c => c.Id == id, includeProperties: countryInclude);
                 return await ActionResponse<CountryDto>
                     .ReturnSuccess(mapper.Map<Country, CountryDto>(entity));
             }
@@ -138,7 +151,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Country>()
-                    .FindBy(c => c.Alpha2Code == alpha2Code, includeProperties: "Regions.Cities,Cities");
+                    .FindBy(c => c.Alpha2Code == alpha2Code, includeProperties: countryInclude);
                 return await ActionResponse<CountryDto>
                     .ReturnSuccess(mapper.Map<Country, CountryDto>(entity));
             }
@@ -235,7 +248,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var allEntities = unitOfWork.GetGenericRepository<Country>().GetAll(includeProperties: "Regions.Cities,Cities");
+                var allEntities = unitOfWork.GetGenericRepository<Country>().GetAll(includeProperties: countryInclude);
                 return await ActionResponse<List<CountryDto>>.ReturnSuccess(
                     mapper.Map<List<Country>, List<CountryDto>>(allEntities));
             }
@@ -264,11 +277,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             finally
             {
-                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
-                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
-                var cityTask = cacheService.RefreshCache<List<CityDto>>();
-
-                await Task.WhenAll(countryTask, regionTask, cityTask);
+                await RefreshAllCache();
             }
         }
 
@@ -277,7 +286,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<Region>()
-                    .GetAll(includeProperties: "Cities");
+                    .GetAll(includeProperties: regionInclude);
                 return await ActionResponse<List<RegionDto>>
                     .ReturnSuccess(mapper.Map<List<Region>, List<RegionDto>>(entities));
             }
@@ -303,7 +312,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             catch (Exception)
             {
-                return await ActionResponse<PagedResult<RegionDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za gradove.");
+                return await ActionResponse<PagedResult<RegionDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za županije.");
             }
         }
 
@@ -312,13 +321,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Region>()
-                    .FindBy(c => c.Id == id, includeProperties: "Cities");
+                    .FindBy(c => c.Id == id, includeProperties: regionInclude);
                 return await ActionResponse<RegionDto>
                     .ReturnSuccess(mapper.Map<Region, RegionDto>(entity));
             }
             catch (Exception)
             {
-                return await ActionResponse<RegionDto>.ReturnError("Greška prilikom dohvata države.");
+                return await ActionResponse<RegionDto>.ReturnError("Greška prilikom dohvata županije.");
             }
         }
 
@@ -327,7 +336,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<Region>()
-                    .GetAll(c => c.CountryId == id, includeProperties: "Cities");
+                    .GetAll(c => c.CountryId == id, includeProperties: regionInclude);
                 return await ActionResponse<List<RegionDto>>
                     .ReturnSuccess(mapper.Map<List<Region>, List<RegionDto>>(entity));
             }
@@ -398,11 +407,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             finally
             {
-                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
-                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
-                var cityTask = cacheService.RefreshCache<List<CityDto>>();
-
-                await Task.WhenAll(countryTask, regionTask, cityTask);
+                await RefreshAllCache();
             }
         }
 
@@ -423,11 +428,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             finally
             {
-                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
-                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
-                var cityTask = cacheService.RefreshCache<List<CityDto>>();
-
-                await Task.WhenAll(countryTask, regionTask, cityTask);
+                await RefreshAllCache();
             }
         }
 
@@ -453,11 +454,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             finally
             {
-                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
-                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
-                var cityTask = cacheService.RefreshCache<List<CityDto>>();
-
-                await Task.WhenAll(countryTask, regionTask, cityTask);
+                await RefreshAllCache();
             }
         }
 
@@ -467,13 +464,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var allEntities = unitOfWork.GetGenericRepository<Region>()
-                    .GetAll(includeProperties: "Cities");
+                    .GetAll(includeProperties: regionInclude);
                 return await ActionResponse<List<RegionDto>>.ReturnSuccess(
                     mapper.Map<List<Region>, List<RegionDto>>(allEntities));
             }
             catch (Exception)
             {
-                return await ActionResponse<List<RegionDto>>.ReturnError("Greška prilikom dohvata svih gradova.");
+                return await ActionResponse<List<RegionDto>>.ReturnError("Greška prilikom dohvata svih županija za brzu memoriju.");
             }
         }
 
@@ -496,11 +493,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             finally
             {
-                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
-                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
-                var cityTask = cacheService.RefreshCache<List<CityDto>>();
-
-                await Task.WhenAll(countryTask, regionTask, cityTask);
+                await RefreshAllCache();
             }
         }
 
@@ -569,7 +562,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             catch (Exception)
             {
-                return await ActionResponse<CityDto>.ReturnError("Greška prilikom dohvata države.");
+                return await ActionResponse<CityDto>.ReturnError("Greška prilikom dohvata grada.");
             }
         }
 
@@ -627,11 +620,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             finally
             {
-                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
-                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
-                var cityTask = cacheService.RefreshCache<List<CityDto>>();
-
-                await Task.WhenAll(countryTask, regionTask, cityTask);
+                await RefreshAllCache();
             }
         }
 
@@ -681,11 +670,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             finally
             {
-                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
-                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
-                var cityTask = cacheService.RefreshCache<List<CityDto>>();
-
-                await Task.WhenAll(countryTask, regionTask, cityTask);
+                await RefreshAllCache();
             }
         }
 
@@ -706,11 +691,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             finally
             {
-                var countryTask = cacheService.RefreshCache<List<CountryDto>>();
-                var regionTask = cacheService.RefreshCache<List<RegionDto>>();
-                var cityTask = cacheService.RefreshCache<List<CityDto>>();
-
-                await Task.WhenAll(countryTask, regionTask, cityTask);
+                await RefreshAllCache();
             }
         }
 
@@ -729,7 +710,386 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<List<CityDto>>> GetCitiesByCountryId(int id)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<City>().GetAll(c => c.CountryId == id);
+                return await ActionResponse<List<CityDto>>
+                    .ReturnSuccess(mapper.Map<List<City>, List<CityDto>>(entity));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<CityDto>>.ReturnError("Greška prilikom dohvata gradova za državu.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<CityDto>>> GetCitiesByCountryIdPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<CityDto> cities = new List<CityDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<CityDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out cities))
+                {
+                    cities = (await GetAllCities()).GetData();
+                }
+
+                var pagedResult = await cities
+                    .Where(r => r.CountryId == pagedRequest.AdditionalParams.Id)
+                    .AsQueryable()
+                    .GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<CityDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<PagedResult<CityDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za gradove po državi.");
+            }
+        }
+
+        public async Task<ActionResponse<List<CityDto>>> GetCitiesByMunicipalityId(int id)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<City>().GetAll(c => c.MunicipalityId == id);
+                return await ActionResponse<List<CityDto>>
+                    .ReturnSuccess(mapper.Map<List<City>, List<CityDto>>(entity));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<CityDto>>.ReturnError("Greška prilikom dohvata gradova za općinu.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<CityDto>>> GetCitiesByMunicipalityIdPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<CityDto> cities = new List<CityDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<CityDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out cities))
+                {
+                    cities = (await GetAllCities()).GetData();
+                }
+
+                var pagedResult = await cities
+                    .Where(r => r.MunicipalityId == pagedRequest.AdditionalParams.Id)
+                    .AsQueryable()
+                    .GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<CityDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<PagedResult<CityDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za gradove po općini.");
+            }
+        }
+
+        public async Task<ActionResponse<List<CityDto>>> GetAllCitiesWithoutRegion()
+        {
+            try
+            {
+                List<CityDto> cities = new List<CityDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<CityDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out cities))
+                {
+                    cities = (await GetAllCities()).GetData();
+                }
+
+                var citiesWithoutRegion = cities.Where(c => !c.RegionId.HasValue).ToList();
+                return await ActionResponse<List<CityDto>>.ReturnSuccess(citiesWithoutRegion);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<CityDto>>.ReturnError("Greška prilikom dohvata gradova koji nemaju županiju.");
+            }
+        }
+
+        public async Task<ActionResponse<List<CityDto>>> GetAllCitiesWithoutMunicipality()
+        {
+            try
+            {
+                List<CityDto> cities = new List<CityDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<CityDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out cities))
+                {
+                    cities = (await GetAllCities()).GetData();
+                }
+
+                var citiesWithoutMunicipality = cities.Where(c => !c.MunicipalityId.HasValue).ToList();
+                return await ActionResponse<List<CityDto>>.ReturnSuccess(citiesWithoutMunicipality);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<CityDto>>.ReturnError("Greška prilikom dohvata gradova koji nemaju općinu.");
+            }
+        }
+
         #endregion City
+
+        #region Municipality
+
+        public async Task<ActionResponse<MunicipalityDto>> DeleteMunicipality(int id)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<Municipality>().Delete(id);
+                unitOfWork.Save();
+                return await ActionResponse<MunicipalityDto>.ReturnSuccess(null, "Brisanje općine uspješno.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<MunicipalityDto>.ReturnError("Greška prilikom brisanja općine.");
+            }
+            finally
+            {
+                await RefreshAllCache();
+            }
+        }
+
+        public async Task<ActionResponse<List<MunicipalityDto>>> GetAllMunicipalities()
+        {
+            try
+            {
+                var entities = unitOfWork.GetGenericRepository<Municipality>()
+                    .GetAll(includeProperties: municipalityInclude);
+                return await ActionResponse<List<MunicipalityDto>>
+                    .ReturnSuccess(mapper.Map<List<Municipality>, List<MunicipalityDto>>(entities));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<MunicipalityDto>>.ReturnError("Greška prilikom dohvata svih općina.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<MunicipalityDto>>> GetAllMunicipalitiesPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<MunicipalityDto> Municipalitys = new List<MunicipalityDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<MunicipalityDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out Municipalitys))
+                {
+                    Municipalitys = (await GetAllMunicipalities()).GetData();
+                }
+
+                var pagedResult = await Municipalitys.AsQueryable().GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<MunicipalityDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<PagedResult<MunicipalityDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za općine.");
+            }
+        }
+
+        public async Task<ActionResponse<MunicipalityDto>> GetMunicipalityById(int id)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<Municipality>()
+                    .FindBy(c => c.Id == id, includeProperties: municipalityInclude);
+                return await ActionResponse<MunicipalityDto>
+                    .ReturnSuccess(mapper.Map<Municipality, MunicipalityDto>(entity));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<MunicipalityDto>.ReturnError("Greška prilikom dohvata općine.");
+            }
+        }
+
+        public async Task<ActionResponse<List<MunicipalityDto>>> GetMunicipalitiesByCountryId(int id)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<Municipality>()
+                    .GetAll(c => c.CountryId == id, includeProperties: municipalityInclude);
+                return await ActionResponse<List<MunicipalityDto>>
+                    .ReturnSuccess(mapper.Map<List<Municipality>, List<MunicipalityDto>>(entity));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<MunicipalityDto>>.ReturnError("Greška prilikom dohvata općina za državu.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<MunicipalityDto>>> GetMunicipalitiesByCountryIdPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<MunicipalityDto> Municipalitys = new List<MunicipalityDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<MunicipalityDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out Municipalitys))
+                {
+                    Municipalitys = (await GetAllMunicipalities()).GetData();
+                }
+
+                var pagedResult = await Municipalitys
+                    .Where(r => r.CountryId == pagedRequest.AdditionalParams.Id)
+                    .AsQueryable()
+                    .GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<MunicipalityDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<PagedResult<MunicipalityDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za općine po državi.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<MunicipalityDto>>> GetMunicipalitiesBySearchQuery(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<MunicipalityDto> Municipalitys = new List<MunicipalityDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<MunicipalityDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out Municipalitys))
+                {
+                    Municipalitys = (await GetAllMunicipalities()).GetData();
+                }
+
+                var pagedResult = await Municipalitys.AsQueryable().GetBySearchQuery(pagedRequest);
+                return await ActionResponse<PagedResult<MunicipalityDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<PagedResult<MunicipalityDto>>.ReturnError("Greška prilikom dohvata straničnih podataka država.");
+            }
+        }
+
+        public async Task<ActionResponse<MunicipalityDto>> UpdateMunicipality(MunicipalityDto entityDto)
+        {
+            try
+            {
+                var entityToUpdate = mapper.Map<MunicipalityDto, Municipality>(entityDto);
+                unitOfWork.GetGenericRepository<Municipality>().Update(entityToUpdate);
+                unitOfWork.Save();
+                unitOfWork.GetContext().Entry(entityToUpdate).Collection(p => p.Cities).Load();
+                mapper.Map(entityToUpdate, entityDto);
+
+                return await ActionResponse<MunicipalityDto>.ReturnSuccess(entityDto);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<MunicipalityDto>.ReturnError($"Greška prilikom ažuriranja općine.");
+            }
+            finally
+            {
+                await RefreshAllCache();
+            }
+        }
+
+        public async Task<ActionResponse<MunicipalityDto>> InsertMunicipality(MunicipalityDto entityDto)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<MunicipalityDto, Municipality>(entityDto);
+                unitOfWork.GetGenericRepository<Municipality>().Add(entityToAdd);
+                unitOfWork.Save();
+
+                mapper.Map(entityToAdd, entityDto);
+                return await ActionResponse<MunicipalityDto>.ReturnSuccess(entityDto);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<MunicipalityDto>.ReturnError($"Greška prilikom upisa općine.");
+            }
+            finally
+            {
+                await RefreshAllCache();
+            }
+        }
+
+        public async Task<ActionResponse<List<MunicipalityDto>>> InsertMunicipalities(List<MunicipalityDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<MunicipalityDto>>.ReturnSuccess(entityDtos, "Općine uspješno dodane.");
+                entityDtos.ForEach(async Municipality =>
+                {
+                    if ((await InsertMunicipality(Municipality))
+                        .IsNotSuccess(out ActionResponse<MunicipalityDto> actionResponse, out Municipality))
+                    {
+                        response = await ActionResponse<List<MunicipalityDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<MunicipalityDto>>.ReturnError($"Greška prilikom upisa općina.");
+            }
+            finally
+            {
+                await RefreshAllCache();
+            }
+        }
+
+        [CacheRefreshSource(typeof(MunicipalityDto))]
+        public async Task<ActionResponse<List<MunicipalityDto>>> GetAllMunicipalitiesForCache()
+        {
+            try
+            {
+                var allEntities = unitOfWork.GetGenericRepository<Municipality>()
+                    .GetAll(includeProperties: municipalityInclude);
+                return await ActionResponse<List<MunicipalityDto>>.ReturnSuccess(
+                    mapper.Map<List<Municipality>, List<MunicipalityDto>>(allEntities));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<MunicipalityDto>>.ReturnError("Greška prilikom dohvata svih općina za brzu memoriju.");
+            }
+        }
+
+        public async Task<ActionResponse<List<MunicipalityDto>>> GetMunicipalitiesByRegionId(int id)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<Municipality>()
+                    .GetAll(c => c.RegionId == id, includeProperties: municipalityInclude);
+                return await ActionResponse<List<MunicipalityDto>>
+                    .ReturnSuccess(mapper.Map<List<Municipality>, List<MunicipalityDto>>(entity));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<MunicipalityDto>>.ReturnError("Greška prilikom dohvata općina za županiju.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<MunicipalityDto>>> GetMunicipalitiesByRegionIdPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                List<MunicipalityDto> Municipalitys = new List<MunicipalityDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<MunicipalityDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out Municipalitys))
+                {
+                    Municipalitys = (await GetAllMunicipalities()).GetData();
+                }
+
+                var pagedResult = await Municipalitys
+                    .Where(r => r.RegionId == pagedRequest.AdditionalParams.Id)
+                    .AsQueryable()
+                    .GetPaged(pagedRequest);
+                return await ActionResponse<PagedResult<MunicipalityDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<PagedResult<MunicipalityDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za općine po državi.");
+            }
+        }
+
+        public async Task<ActionResponse<List<MunicipalityDto>>> GetAllMunicipalitiesWithoutRegion()
+        {
+            List<MunicipalityDto> Municipalities = new List<MunicipalityDto>();
+            var cachedResponse = await cacheService.GetFromCache<List<MunicipalityDto>>();
+            if (!cachedResponse.IsSuccessAndHasData(out Municipalities))
+            {
+                Municipalities = (await GetAllMunicipalities()).GetData();
+            }
+            var municipalitiesWithoutRegion = Municipalities.Where(m => !m.RegionId.HasValue).ToList();
+            return await ActionResponse<List<MunicipalityDto>>.ReturnSuccess(municipalitiesWithoutRegion);
+        }
+
+        #endregion Municipality
 
         #region BattutaClient
 

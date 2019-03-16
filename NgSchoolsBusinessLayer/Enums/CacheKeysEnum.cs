@@ -4,6 +4,7 @@
     {
         Country,
         Region,
+        Municipality,
         City,
         User,
         ClassType,

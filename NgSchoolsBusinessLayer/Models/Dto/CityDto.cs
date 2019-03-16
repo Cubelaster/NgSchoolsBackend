@@ -14,6 +14,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Latitude { get; set; }
         public string Longtitude { get; set; }
         public int? RegionId { get; set; }
+        public int? MunicipalityId { get; set; }
         public int? CountryId { get; set; }
     }
 }

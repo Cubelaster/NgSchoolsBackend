@@ -167,6 +167,34 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
+        public async Task<ActionResponse<List<CityDto>>> GetCitiesByMunicipalityId(SimpleRequestBase request)
+        {
+            return await locationService.GetCitiesByMunicipalityId(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<PagedResult<CityDto>>> GetCitiesByMunicipalityIdPaged([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await locationService.GetCitiesByMunicipalityIdPaged(pagedRequest);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<CityDto>>> GetCitiesByCountryId(SimpleRequestBase request)
+        {
+            return await locationService.GetCitiesByCountryId(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<PagedResult<CityDto>>> GetCitiesByCountryIdPaged([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await locationService.GetCitiesByCountryIdPaged(pagedRequest);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
         public async Task<ActionResponse<CityDto>> InsertCity([FromBody] CityDto entityDto)
         {
             return await locationService.InsertCity(entityDto);
@@ -184,6 +212,20 @@ namespace NgSchoolsWebApi.Controllers
         public async Task<ActionResponse<List<CityDto>>> GetAllCities()
         {
             return await locationService.GetAllCities();
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<CityDto>>> GetAllCitiesWithoutRegion()
+        {
+            return await locationService.GetAllCitiesWithoutRegion();
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<CityDto>>> GetAllCitiesWithoutMunicipality()
+        {
+            return await locationService.GetAllCitiesWithoutMunicipality();
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -208,5 +250,93 @@ namespace NgSchoolsWebApi.Controllers
         }
 
         #endregion City
+
+        #region Municipality
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<MunicipalityDto>> DeleteMunicipality([FromBody] SimpleRequestBase request)
+        {
+            return await locationService.DeleteMunicipality(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<MunicipalityDto>> GetMunicipalityById(SimpleRequestBase request)
+        {
+            return await locationService.GetMunicipalityById(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<MunicipalityDto>>> GetMunicipalitysByCountryId(SimpleRequestBase request)
+        {
+            return await locationService.GetMunicipalitiesByCountryId(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<MunicipalityDto>>> GetMunicipalitysByRegionId(SimpleRequestBase request)
+        {
+            return await locationService.GetMunicipalitiesByRegionId(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<MunicipalityDto>> InsertMunicipality([FromBody] MunicipalityDto entityDto)
+        {
+            return await locationService.InsertMunicipality(entityDto);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<MunicipalityDto>> UpdateMunicipality([FromBody] MunicipalityDto entityDto)
+        {
+            return await locationService.UpdateMunicipality(entityDto);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<MunicipalityDto>>> GetAllMunicipalitys()
+        {
+            return await locationService.GetAllMunicipalities();
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<MunicipalityDto>>> GetAllMunicipalitiesWithoutRegion()
+        {
+            return await locationService.GetAllMunicipalitiesWithoutRegion();
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<PagedResult<MunicipalityDto>>> GetAllMunicipalitysPaged([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await locationService.GetAllMunicipalitiesPaged(pagedRequest);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<PagedResult<MunicipalityDto>>> GetMunicipalitysByCountryIdPaged([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await locationService.GetMunicipalitiesByCountryIdPaged(pagedRequest);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<PagedResult<MunicipalityDto>>> GetMunicipalitysByRegionIdPaged([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await locationService.GetMunicipalitiesByRegionIdPaged(pagedRequest);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<PagedResult<MunicipalityDto>>> GetMunicipalitysBySearchQuery([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await locationService.GetMunicipalitiesBySearchQuery(pagedRequest);
+        }
+
+        #endregion Municipality
     }
 }
