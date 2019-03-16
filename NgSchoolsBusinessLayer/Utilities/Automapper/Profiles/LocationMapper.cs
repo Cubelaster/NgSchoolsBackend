@@ -28,6 +28,11 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<CityDto, City>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.City));
+
+            CreateMap<MunicipalityDto, Municipality>()
+                .ForMember(dest => dest.Cities, opt => opt.Ignore());
+
+            CreateMap<Municipality, MunicipalityDto>();
         }
     }
 }
