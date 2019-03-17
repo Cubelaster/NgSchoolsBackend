@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,6 +21,7 @@ using NgSchoolsBusinessLayer.Services.Implementations.Common;
 using NgSchoolsDataLayer.Context;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
+using NgSchoolsWebApi.Utilities;
 using System;
 using System.IO;
 using System.Text;
@@ -47,6 +50,8 @@ namespace NgSchoolsBackend
             services.AddDbContext<NgSchoolsContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"),
                 opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
+
+            LoadDinkDll(services);
 
             ConfigureServicesDI(services);
 
@@ -117,10 +122,17 @@ namespace NgSchoolsBackend
             });
         }
 
+        private void LoadDinkDll(IServiceCollection services)
+        {
+            var context = new CustomAssemblyLoadContext();
+            context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), "libwkhtmltox.dll"));
+        }
+
         private void ConfigureServicesDI(IServiceCollection services)
         {
             services.AddSingleton<IJwtFactory, JwtFactory>();
             services.AddSingleton<ILoggerService, LoggerService>();
+            services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
@@ -146,6 +158,7 @@ namespace NgSchoolsBackend
             services.AddScoped<IDiaryService, DiaryService>();
             services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IStudentRegisterService, StudentRegisterService>();
+            services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
         }
 
         private void ConfigureJWT(IServiceCollection services)
