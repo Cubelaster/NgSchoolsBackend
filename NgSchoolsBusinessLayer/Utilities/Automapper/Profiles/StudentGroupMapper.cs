@@ -25,6 +25,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Program, opt => opt.Ignore())
                 .ForMember(dest => dest.SubjectTeachers, opt => opt.Ignore())
                 .ForMember(dest => dest.StudentsInGroups, opt => opt.Ignore())
+                .ForMember(dest => dest.Director, opt => opt.Ignore())
                 .ForMember(dest => dest.StudentGroupClassAttendances, opt => opt.Ignore());
 
             CreateMap<StudentsInGroups, StudentInGroupDto>()

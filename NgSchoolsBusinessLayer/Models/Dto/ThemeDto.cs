@@ -7,5 +7,7 @@
         public string Name { get; set; }
         public string Content { get; set; }
         public string LearningOutcomes { get; set; }
+        public int? HoursNumber { get; set; }
+        public string WorkShopClasses { get; set; }
     }
 }
