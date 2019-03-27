@@ -208,6 +208,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var daysToAdd = newDays
                     .Where(nt => !currentDays.Select(cd => cd.Id).Contains(nt.Id))
+                    .Select(pd => { pd.PlanId = plan.Id; return pd; })
                     .ToList();
 
                 var daysToModify = newDays.Where(cd => currentDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
