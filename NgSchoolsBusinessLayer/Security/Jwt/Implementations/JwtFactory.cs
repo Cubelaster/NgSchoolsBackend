@@ -33,13 +33,14 @@ namespace NgSchoolsBusinessLayer.Security.Jwt.Implementations
                 //EncryptingCredentials = new EncryptingCredentials(jwtIssuerOptions.SecurityKey, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128CbcHmacSha256),
                 Issuer = jwtIssuerOptions.Issuer,
                 IssuedAt = DateTime.UtcNow,
-                NotBefore = DateTime.UtcNow
+                NotBefore = DateTime.UtcNow,
+                Expires = DateTime.UtcNow.AddYears(1)
             };
 
-            if (!rememberMe)
-            {
-                tokenDescriptor.Expires = DateTime.UtcNow.AddHours(1);
-            }
+            //if (!rememberMe)
+            //{
+            //    tokenDescriptor.Expires = DateTime.UtcNow.AddHours(1);
+            //}
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
