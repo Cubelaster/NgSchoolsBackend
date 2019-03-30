@@ -16,6 +16,7 @@ namespace NgSchoolsBusinessLayer.Extensions
         public static async Task<PagedResult<T>> GetPaged<T>(this IQueryable<T> query, BasePagedRequest pagedRequest) where T : class
         {
             Type objectType = query.FirstOrDefault()?.GetType();
+
             if (objectType != null)
             {
                 var currentPage = pagedRequest.PageIndex + 1;
@@ -52,10 +53,7 @@ namespace NgSchoolsBusinessLayer.Extensions
                 List<PropertyInfo> searchableProperties;
                 if (!string.IsNullOrEmpty(pagedRequest.SearchQuery))
                 {
-                    searchableProperties = objectType
-                        .GetProperties()
-                        .Where(p => p.GetCustomAttributes().OfType<Searchable>().Any())
-                        .ToList();
+                    searchableProperties = GetSearchableProperties(objectType);
 
                     if (searchableProperties.Any())
                     {
@@ -120,6 +118,26 @@ namespace NgSchoolsBusinessLayer.Extensions
             {
                 Results = new List<T>()
             };
+        }
+
+        private static List<PropertyInfo> GetSearchableProperties(Type objectType)
+        {
+            if (!objectType.FullName.Contains("Dto"))
+            {
+                string typeName = "NgSchoolsBusinessLayer.Models.Dto."
+                    + objectType.FullName.Substring(objectType.FullName.LastIndexOf('.') + 1) + "Dto";
+                var objectTypeForSearchable = Assembly.GetExecutingAssembly().GetType(typeName);
+
+                var searchableProperties = objectTypeForSearchable.GetProperties()
+                    .Where(p => p.GetCustomAttributes().OfType<Searchable>().Any()).ToList();
+
+                var realSearchableProperties = objectType.GetProperties()
+                    .Where(p => searchableProperties.Any(sp => sp.Name == p.Name)).ToList();
+
+                return realSearchableProperties;
+            }
+
+            return objectType.GetProperties().Where(p => p.GetCustomAttributes().OfType<Searchable>().Any()).ToList();
         }
     }
 }
