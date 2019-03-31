@@ -117,7 +117,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    List<int> studentIds = new List<int>(entityDto.StudentIds);
                     entityDto.StudentNames = null;
 
                     List<StudentInGroupDto> studentsInGroup = entityDto.StudentsInGroup != null ?
@@ -141,7 +140,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     unitOfWork.Save();
                     mapper.Map(entityToAdd, entityDto);
 
-                    entityDto.StudentIds = new List<int>(studentIds);
                     entityDto.StudentsInGroup = new List<StudentInGroupDto>(studentsInGroup);
 
                     if ((await ModifyStudentsInGroup(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> response, out entityDto))
@@ -198,7 +196,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    List<int> studentIds = new List<int>(entityDto.StudentIds);
                     entityDto.StudentNames = null;
 
                     List<StudentInGroupDto> studentsInGroup = entityDto.StudentsInGroup != null ?
@@ -229,7 +226,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     unitOfWork.Save();
 
                     mapper.Map(entityToUpdate, entityDto);
-                    entityDto.StudentIds = new List<int>(studentIds);
                     entityDto.StudentsInGroup = new List<StudentInGroupDto>(studentsInGroup);
 
                     if ((await ModifyStudentsInGroup(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> response, out entityDto))
@@ -330,6 +326,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var studentsToRemove = currentStudents.Where(cet => !newStudents.Select(ns => ns.Id).Contains(cet.Id)).ToList();
 
+                var studentsToModify = newStudents.Where(ns => currentStudents.Select(cs => cs.StudentId).Contains(ns.StudentId)).ToList();
+
                 var studentsToAdd = newStudents
                     .Where(nt => !currentStudents.Select(uec => uec.Id).Contains(nt.Id))
                     .Select(nt =>
@@ -342,6 +340,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .IsNotSuccess(out ActionResponse<List<StudentInGroupDto>> actionResponse))
                 {
                     return await ActionResponse<StudentGroupDto>.ReturnError("Neuspješna ažuriranje studenata u grupi.");
+                }
+
+                if ((await ModifyStudentsInGroup(studentsToModify))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<StudentGroupDto>.ReturnError("Neuspješno ažuriranje podataka studenata u grupi.");
                 }
 
                 if ((await AddStudentsInGroup(studentsToAdd))
@@ -432,6 +436,45 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<List<StudentInGroupDto>>> ModifyStudentsInGroup(List<StudentInGroupDto> students)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentInGroupDto>>.ReturnSuccess(students, "Podaci o studentima unutar grupe uspješno izmijenjeni.");
+                students.ForEach(async s =>
+                {
+                    if ((await ModifyStudentInGroup(s))
+                    .IsNotSuccess(out ActionResponse<StudentInGroupDto> actionResponse, out s))
+                    {
+                        response = await ActionResponse<List<StudentInGroupDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentInGroupDto>>.ReturnError("Greška prilikom ažuriranja studenata u grupu.");
+            }
+        }
+
+        private async Task<ActionResponse<StudentInGroupDto>> ModifyStudentInGroup(StudentInGroupDto entityDto)
+        {
+            try
+            {
+                var entityToUpdate = unitOfWork.GetGenericRepository<StudentsInGroups>().FindSingle(entityDto.Id.Value);
+                mapper.Map(entityDto, entityToUpdate);
+                unitOfWork.GetGenericRepository<StudentsInGroups>().Update(entityToUpdate);
+                unitOfWork.Save();
+                mapper.Map(entityToUpdate, entityDto);
+                return await ActionResponse<StudentInGroupDto>.ReturnSuccess(entityDto, "Podaci o studentu unutar grupe ažurirani.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentInGroupDto>.ReturnError("Greška prilikom izmjene podataka o studentu unutar grupe.");
+            }
+        }
+
         #endregion Students in Group
 
         #region Exam Commission
@@ -462,7 +505,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                 return await ActionResponse<StudentGroupDto>.ReturnError(deleteResponse.Message);
                             }
                         }
-                        else
+                        else if (entityDto.ExamCommission != null)
                         {
                             if ((await examCommissionService.Insert(entityDto.ExamCommission))
                                 .IsNotSuccess(out ActionResponse<ExamCommissionDto> insertResponse, out ExamCommissionDto examCommission))

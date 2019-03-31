@@ -10,9 +10,6 @@
     "ProgramId": 3006,
     "ClassLocationId": 2004,
     "EducationLeaderId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
-    "StudentIds": [
-    	1006, 1007, 1008
-		],
 		"StudentsInGroup": [
 			{
 				"StudentId": 4012,
