@@ -55,14 +55,12 @@ namespace NgSchoolsBusinessLayer.Extensions
                 {
                     searchableProperties = GetSearchableProperties(objectType);
 
-                    var searchQueries = pagedRequest.SearchQuery.Trim().Split(" ");
-
                     if (searchableProperties.Any())
                     {
                         query = query
                         .Where(q => searchableProperties
-                            .Any(p => searchQueries.Any(sq => (p.GetValue(q) != null ? p.GetValue(q).ToString() : "")
-                            .Contains(sq, StringComparison.OrdinalIgnoreCase))));
+                            .Any(p => (p.GetValue(q) != null ? p.GetValue(q).ToString() : "")
+                            .Contains(pagedRequest.SearchQuery, StringComparison.OrdinalIgnoreCase)));
                     }
                 }
 
