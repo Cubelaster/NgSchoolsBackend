@@ -55,12 +55,14 @@ namespace NgSchoolsBusinessLayer.Extensions
                 {
                     searchableProperties = GetSearchableProperties(objectType);
 
+                    var searchQueries = pagedRequest.SearchQuery.Trim().Split(" ");
+
                     if (searchableProperties.Any())
                     {
                         query = query
                         .Where(q => searchableProperties
-                            .Any(p => (p.GetValue(q) != null ? p.GetValue(q).ToString() : "")
-                            .Contains(pagedRequest.SearchQuery, StringComparison.OrdinalIgnoreCase)));
+                            .Any(p => searchQueries.Any(sq => (p.GetValue(q) != null ? p.GetValue(q).ToString() : "")
+                            .Contains(sq, StringComparison.OrdinalIgnoreCase))));
                     }
                 }
 
@@ -122,7 +124,7 @@ namespace NgSchoolsBusinessLayer.Extensions
 
         private static List<PropertyInfo> GetSearchableProperties(Type objectType)
         {
-            if (!objectType.FullName.Contains("Dto"))
+            if (!objectType.FullName.Contains("Dto") && !objectType.FullName.Contains("ViewModel"))
             {
                 string typeName = "NgSchoolsBusinessLayer.Models.Dto."
                     + objectType.FullName.Substring(objectType.FullName.LastIndexOf('.') + 1) + "Dto";
