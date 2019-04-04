@@ -389,7 +389,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<StudentsInGroups>().Delete(studentInGroup.Id.Value);
                 unitOfWork.Save();
-                return await ActionResponse<StudentInGroupDto>.ReturnSuccess(null, "Student upsješno izbrisan iz grupe.");
+
+                if ((await GetAllAttendanceForStudentAndGroup(studentInGroup.StudentId.Value, studentInGroup.GroupId.Value))
+                    .IsNotSuccess(out ActionResponse<List<StudentClassAttendanceDto>> attendancesResponse, out List<StudentClassAttendanceDto> attendances))
+                {
+                    return await ActionResponse<StudentInGroupDto>.ReturnError(attendancesResponse.Message);
+                }
+
+                if ((await RemoveAttendances(attendances))
+                    .IsNotSuccess(out ActionResponse<List<StudentClassAttendanceDto>> removeAttendanceResponse))
+                {
+                    return await ActionResponse<StudentInGroupDto>.ReturnError(removeAttendanceResponse.Message);
+                }
+
+                return await ActionResponse<StudentInGroupDto>.ReturnSuccess(null, "Student uspješno izbrisan iz grupe i podaci o evidencijama nastave također maknuti.");
             }
             catch (Exception)
             {
@@ -426,9 +439,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToAdd = mapper.Map<StudentInGroupDto, StudentsInGroups>(student);
                 unitOfWork.GetGenericRepository<StudentsInGroups>().Add(entityToAdd);
                 unitOfWork.Save();
-                return await ActionResponse<StudentInGroupDto>
-                    .ReturnSuccess(mapper.Map<StudentsInGroups, StudentInGroupDto>(entityToAdd),
-                    "Student uspješno dodan u grupu.");
+                mapper.Map(entityToAdd, student);
+                return await ActionResponse<StudentInGroupDto>.ReturnSuccess(student, "Student uspješno dodan u grupu.");
             }
             catch (Exception)
             {
@@ -917,7 +929,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-
         public async Task<ActionResponse<List<StudentClassAttendanceDto>>> AddAttendances(List<StudentClassAttendanceDto> entityDtos)
         {
             try
@@ -992,6 +1003,58 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<StudentClassAttendanceDto>.ReturnError("Greška prilikom ažuriranja teme u danu plana.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentClassAttendanceDto>>> RemoveAttendances(List<StudentClassAttendanceDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentClassAttendanceDto>>.ReturnSuccess(null, "Evidencije nastave uspješno izbrisane.");
+                entityDtos.ForEach(async pds =>
+                {
+                    if ((await RemoveAttendance(pds))
+                        .IsNotSuccess(out ActionResponse<StudentClassAttendanceDto> removeResponse, out pds))
+                    {
+                        response = await ActionResponse<List<StudentClassAttendanceDto>>.ReturnError(removeResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentClassAttendanceDto>>.ReturnError("Greška prilikom brisanja evidencija nastave.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentClassAttendanceDto>> RemoveAttendance(StudentClassAttendanceDto entityDto)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<StudentClassAttendance>().Delete(entityDto.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<StudentClassAttendanceDto>.ReturnSuccess(null, "Evidencija nastave za studenta iz grupe uspješno izbrisana.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentClassAttendanceDto>.ReturnError("Greška prilikom brisanja evidencije nastave za studenta u grupi.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentClassAttendanceDto>>> GetAllAttendanceForStudentAndGroup(int studentId, int studentGroupId)
+        {
+            try
+            {
+                var entites = unitOfWork.GetGenericRepository<StudentClassAttendance>()
+                    .GetAll(sca => sca.StudentId == studentId && sca.StudentGroupClassAttendance.StudentGroupId == studentGroupId);
+
+                return await ActionResponse<List<StudentClassAttendanceDto>>
+                    .ReturnSuccess(mapper.Map<List<StudentClassAttendanceDto>>(entites));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentClassAttendanceDto>>.ReturnError("Greška prilikom dohvata evidencije nastave za studenta u grupi.");
             }
         }
 
