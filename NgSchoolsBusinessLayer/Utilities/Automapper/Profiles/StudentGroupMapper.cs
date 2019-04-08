@@ -47,7 +47,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.StudentClassAttendances, opt => opt.Ignore());
 
             CreateMap<CombinedGroup, CombinedGroupDto>()
-                .ForMember(dest => dest.StudentGroups, opt => opt.MapFrom(src => src.StudentGroups.Where(sg => sg.Status == DatabaseEntityStatusEnum.Active)))
+                .ForMember(dest => dest.StudentGroups, opt => opt.MapFrom(src => src.StudentGroups != null ? src.StudentGroups.Where(sg => sg.Status == DatabaseEntityStatusEnum.Active).ToList() : new List<StudentGroup>()))
                 .ForMember(dest => dest.StudentGroupIds, opt => opt.MapFrom(src => src.StudentGroups != null ? src.StudentGroups.Where(sg => sg.Status == DatabaseEntityStatusEnum.Active).Select(sg => sg.Id).ToList() : new List<int>()));
 
             CreateMap<CombinedGroupDto, CombinedGroup>()
