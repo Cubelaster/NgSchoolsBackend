@@ -2,6 +2,7 @@
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
@@ -44,6 +45,13 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<StudentGroupClassAttendanceDto, StudentGroupClassAttendance>()
                 .ForMember(dest => dest.StudentClassAttendances, opt => opt.Ignore());
+
+            CreateMap<CombinedGroup, CombinedGroupDto>()
+                .ForMember(dest => dest.StudentGroups, opt => opt.MapFrom(src => src.StudentGroups.Where(sg => sg.Status == DatabaseEntityStatusEnum.Active)))
+                .ForMember(dest => dest.StudentGroupIds, opt => opt.MapFrom(src => src.StudentGroups != null ? src.StudentGroups.Where(sg => sg.Status == DatabaseEntityStatusEnum.Active).Select(sg => sg.Id).ToList() : new List<int>()));
+
+            CreateMap<CombinedGroupDto, CombinedGroup>()
+                .ForMember(dest => dest.StudentGroups, opt => opt.Ignore());
         }
     }
 }

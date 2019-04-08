@@ -69,5 +69,51 @@ namespace NgSchoolsWebApi.Controllers
         {
             return await studentGroupService.GetTotalNumber();
         }
+
+        #region CombinedGroups
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<CombinedGroupDto>>> GetAllCombined()
+        {
+            return await studentGroupService.GetAllCombined();
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<PagedResult<CombinedGroupDto>>> GetAllCombinedPaged([FromBody] BasePagedRequest pagedRequest)
+        {
+            return await studentGroupService.GetAllCombinedPaged(pagedRequest);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<CombinedGroupDto>> GetCombinedById(SimpleRequestBase request)
+        {
+            return await studentGroupService.GetCombinedById(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<CombinedGroupDto>> InsertCombined([FromBody] CombinedGroupDto request)
+        {
+            return await studentGroupService.InsertCombined(request);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<CombinedGroupDto>> UpdateCombined([FromBody] CombinedGroupDto request)
+        {
+            return await studentGroupService.UpdateCombined(request);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<CombinedGroupDto>> DeleteCombined([FromBody] SimpleRequestBase request)
+        {
+            return await studentGroupService.DeleteCombined(request.Id);
+        }
+
+        #endregion CombinedGroups
     }
 }

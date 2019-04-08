@@ -37,6 +37,9 @@ namespace NgSchoolsDataLayer.Models
         public Guid? DirectorId { get; set; }
         public virtual User Director { get; set; }
 
+        public int? CombinedGroupId { get; set; }
+        public virtual CombinedGroup CombinedGroup { get; set; }
+
         public virtual ICollection<StudentGroupClassAttendance> StudentGroupClassAttendances { get; set; }
     }
 }

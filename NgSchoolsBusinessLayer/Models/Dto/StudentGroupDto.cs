@@ -38,6 +38,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public Guid? DirectorId { get; set; }
         public UserDto Director { get; set; }
 
+        public int? CombinedGroupId { get; set; }
+
         public List<StudentGroupClassAttendanceDto> StudentGroupClassAttendances { get; set; }
     }
 }
