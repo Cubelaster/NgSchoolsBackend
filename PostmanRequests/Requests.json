@@ -1107,3 +1107,36 @@
 	"EntryId": 9,
 	"Notes": "Notes 2"
 }
+
+//StudentGroup/GetAllCombined
+//StudentGroup/GetCombinedById
+{
+	"Id": 7
+}
+
+//StudentGroup/GetAllCombinedPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0
+}
+
+//StudentGroup/InsertCombined
+{
+	"StudentGroupIds": [2, 3]
+}
+
+//StudentGroup/UpdateCombined
+{
+	"Id": 7,
+	"StudentGroupIds": [2, 3]
+}
+
+//StudentGroup/DeleteCombined
+{
+	"Id": 7
+}
