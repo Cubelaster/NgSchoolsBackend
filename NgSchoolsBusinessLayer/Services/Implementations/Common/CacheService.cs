@@ -62,22 +62,29 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
 
         public async Task<ActionResponse<T>> RefreshCache<T>()
         {
-            var refreshMethod = Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .SelectMany(t => t.GetMethods()
-                .Where(m => m.GetCustomAttributes().OfType<CacheRefreshSource>()
-                    .Any(a => a.type == typeof(T).GenericTypeArguments[0])
-                ).ToList())
-                .FirstOrDefault();
+            try
+            {
+                var refreshMethod = Assembly.GetExecutingAssembly()
+                    .GetTypes()
+                    .SelectMany(t => t.GetMethods()
+                    .Where(m => m.GetCustomAttributes().OfType<CacheRefreshSource>()
+                        .Any(a => a.type == typeof(T).GenericTypeArguments[0])
+                    ).ToList())
+                    .FirstOrDefault();
 
-            var callingClassTypeInterfaces = refreshMethod.DeclaringType.GetInterfaces();
+                var callingClassTypeInterfaces = refreshMethod.DeclaringType.GetInterfaces();
 
-            var caller = serviceProvider.GetService(callingClassTypeInterfaces.First());
-            var result = (ActionResponse<T>)await (dynamic)refreshMethod.Invoke(caller, null);
+                var caller = serviceProvider.GetService(callingClassTypeInterfaces.First());
+                var result = (ActionResponse<T>)await (dynamic)refreshMethod.Invoke(caller, null);
 
-            await SetInCache<T>(result.Data);
+                await SetInCache<T>(result.Data);
 
-            return result;
+                return result;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<T>.ReturnError("Greška prilikom osvježavanja podataka u cache-u.");
+            }
         }
 
         /// <summary>

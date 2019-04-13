@@ -103,6 +103,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 mapper.Map(userDetails, entityToUpdate);
 
                 unitOfWork.GetGenericRepository<UserDetails>().Update(entityToUpdate);
+                unitOfWork.Save();
+
                 userDetails = mapper.Map<UserDetails, UserDetailsDto>(entityToUpdate);
                 userDetails.TeacherFiles = teacherFiles;
 
@@ -154,7 +156,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 }
 
                 unitOfWork.GetGenericRepository<UserDetails>().Update(userDetailsEntity);
-
+                unitOfWork.Save();
                 return await ActionResponse<UserViewModel>.ReturnSuccess(userDetails);
             }
             catch (Exception)

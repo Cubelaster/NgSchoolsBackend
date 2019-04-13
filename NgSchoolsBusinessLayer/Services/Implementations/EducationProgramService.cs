@@ -145,12 +145,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 List<ClassTypeDto> classTypes = entityDto.ClassTypes != null ?
                     new List<ClassTypeDto>(entityDto.ClassTypes) : new List<ClassTypeDto>();
+                List<int> classTypeIds = entityDto.ClassTypeIds != null ? 
+                    new List<int>(entityDto.ClassTypeIds) : new List<int>();
 
                 var entityToAdd = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
                 unitOfWork.GetGenericRepository<EducationProgram>().Add(entityToAdd);
                 unitOfWork.Save();
                 mapper.Map(entityToAdd, entityDto);
-                entityDto.ClassTypes = classTypes;
+                entityDto.ClassTypeIds = classTypeIds;
 
                 if ((await ModifyClassTypes(entityDto))
                     .IsNotSuccess(out ActionResponse<EducationProgramDto> ctResponse, out entityDto))
@@ -180,13 +182,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 List<ClassTypeDto> classTypes = entityDto.ClassTypes != null ?
                     new List<ClassTypeDto>(entityDto.ClassTypes) : new List<ClassTypeDto>();
+                List<int> classTypeIds = entityDto.ClassTypeIds != null ?
+                    new List<int>(entityDto.ClassTypeIds) : new List<int>();
 
                 var entityToUpdate = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
                 unitOfWork.GetGenericRepository<EducationProgram>().Update(entityToUpdate);
                 unitOfWork.Save();
 
                 mapper.Map(entityToUpdate, entityDto);
-                entityDto.ClassTypes = classTypes;
+                entityDto.ClassTypeIds = classTypeIds;
 
                 if ((await ModifyClassTypes(entityDto))
                     .IsNotSuccess(out ActionResponse<EducationProgramDto> ctResponse, out entityDto))
@@ -236,20 +240,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entity = unitOfWork.GetGenericRepository<EducationProgram>()
                     .FindBy(e => e.Id == entityDto.Id, includeProperties: "EducationProgramClassTypes.ClassType");
 
-                var currentClassTypes = mapper.Map<List<EducationProgramClassType>, List<EducationProgramClassTypeDto>>(
-                    entity.EducationProgramClassTypes.ToList());
+                var currentClassTypes = entity.EducationProgramClassTypes.Select(edct => edct.ClassTypeId).ToList();
 
-                var newClassTypes = entityDto.ClassTypes;
+                var newClassTypes = entityDto.ClassTypeIds;
 
                 var classTypesToRemove = currentClassTypes
-                    .Where(cet => !newClassTypes.Select(f => f.Id).Contains(cet.ClassTypeId))
-                    .ToList();
-
-                var classTypesToAdd = newClassTypes
-                    .Where(nt => !currentClassTypes.Select(uec => uec.ClassTypeId).Contains(nt.Id))
+                    .Where(cet => !newClassTypes.Contains(cet))
                     .Select(sf => new EducationProgramClassTypeDto
                     {
-                        ClassTypeId = sf.Id,
+                        ClassTypeId = sf,
+                        EducationProgramId = entityDto.Id
+                    }).ToList();
+
+                var classTypesToAdd = newClassTypes
+                    .Where(nt => !currentClassTypes.Contains(nt))
+                    .Select(sf => new EducationProgramClassTypeDto
+                    {
+                        ClassTypeId = sf,
                         EducationProgramId = entityDto.Id
                     }).ToList();
 

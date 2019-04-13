@@ -360,7 +360,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entityToUpdate = unitOfWork.GetGenericRepository<ContactPerson>().FindBy(c => c.Id == entityDto.Id.Value);
-                mapper.Map<ContactPersonDto, ContactPerson>(entityDto, entityToUpdate);
+                mapper.Map(entityDto, entityToUpdate);
                 unitOfWork.GetGenericRepository<ContactPerson>().Update(entityToUpdate);
                 unitOfWork.Save();
                 mapper.Map(entityToUpdate, entityDto);

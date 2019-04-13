@@ -1,14 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using NgSchoolsBusinessLayer.Utilities.Attributes;
+using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
     public class BusinessPartnerDto
     {
         public int? Id { get; set; }
+        [Searchable]
         public string Name { get; set; }
+        [Searchable]
         public string Phone { get; set; }
+        [Searchable]
         public string Mobile { get; set; }
+        [Searchable]
         public string Email { get; set; }
+        [Searchable]
         public string Oib { get; set; }
         public string Address { get; set; }
 

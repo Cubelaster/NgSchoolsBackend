@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190320172515_Add_New_Fields_2003")]
+    partial class Add_New_Fields_2003
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -240,25 +242,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ClassTypes");
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.CombinedGroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateCreated");
-
-                    b.Property<DateTime?>("DateModified");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("Status");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CombinedGroup");
                 });
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.ContactPerson", b =>
@@ -1056,8 +1039,6 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<int?>("ClassLocationId");
 
-                    b.Property<int?>("CombinedGroupId");
-
                     b.Property<DateTime>("CredentialDate");
 
                     b.Property<DateTime>("DateCreated");
@@ -1093,8 +1074,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ClassLocationId");
-
-                    b.HasIndex("CombinedGroupId");
 
                     b.HasIndex("DirectorId");
 
@@ -1919,10 +1898,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasOne("NgSchoolsDataLayer.Models.ClassLocations", "ClassLocation")
                         .WithMany()
                         .HasForeignKey("ClassLocationId");
-
-                    b.HasOne("NgSchoolsDataLayer.Models.CombinedGroup", "CombinedGroup")
-                        .WithMany("StudentGroups")
-                        .HasForeignKey("CombinedGroupId");
 
                     b.HasOne("NgSchoolsDataLayer.Models.User", "Director")
                         .WithMany()

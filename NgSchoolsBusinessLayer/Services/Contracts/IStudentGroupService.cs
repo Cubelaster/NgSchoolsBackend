@@ -17,5 +17,11 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<StudentGroupDto>> Delete(int id);
         Task<ActionResponse<StudentGroupDto>> Insert(StudentGroupDto entityDto);
         Task<ActionResponse<StudentGroupDto>> Update(StudentGroupDto entityDto);
+        Task<ActionResponse<List<CombinedGroupDto>>> GetAllCombined();
+        Task<ActionResponse<PagedResult<CombinedGroupDto>>> GetAllCombinedPaged(BasePagedRequest pagedRequest);
+        Task<ActionResponse<CombinedGroupDto>> GetCombinedById(int id);
+        Task<ActionResponse<CombinedGroupDto>> InsertCombined(CombinedGroupDto request);
+        Task<ActionResponse<CombinedGroupDto>> UpdateCombined(CombinedGroupDto request);
+        Task<ActionResponse<CombinedGroupDto>> DeleteCombined(int id);
     }
 }

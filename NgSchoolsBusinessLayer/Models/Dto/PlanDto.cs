@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using NgSchoolsBusinessLayer.Utilities.Attributes;
+using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
     public class PlanDto
     {
         public int? Id { get; set; }
+        [Searchable]
         public string Name { get; set; }
         public int? EducationProgramId { get; set; }
 

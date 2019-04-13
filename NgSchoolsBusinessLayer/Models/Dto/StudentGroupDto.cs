@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NgSchoolsBusinessLayer.Utilities.Attributes;
+using System;
 using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
@@ -6,6 +7,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
     public class StudentGroupDto
     {
         public int? Id { get; set; }
+        [Searchable]
         public string Name { get; set; }
         public string SchoolYear { get; set; }
         public string StartDate { get; set; }
@@ -32,6 +34,11 @@ namespace NgSchoolsBusinessLayer.Models.Dto
 
         public int? ExamCommissionId { get; set; }
         public ExamCommissionDto ExamCommission { get; set; }
+
+        public Guid? DirectorId { get; set; }
+        public UserDto Director { get; set; }
+
+        public int? CombinedGroupId { get; set; }
 
         public List<StudentGroupClassAttendanceDto> StudentGroupClassAttendances { get; set; }
     }

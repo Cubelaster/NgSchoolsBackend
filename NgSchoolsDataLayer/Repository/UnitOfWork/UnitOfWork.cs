@@ -17,6 +17,7 @@ namespace NgSchoolsDataLayer.Repository.UnitOfWork
         public UnitOfWork(NgSchoolsContext context)
         {
             this.context = context;
+            this.context.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
             if (repositoryProvider == null)
             {

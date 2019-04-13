@@ -10,9 +10,6 @@
     "ProgramId": 3006,
     "ClassLocationId": 2004,
     "EducationLeaderId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
-    "StudentIds": [
-    	1006, 1007, 1008
-		],
 		"StudentsInGroup": [
 			{
 				"StudentId": 4012,
@@ -46,44 +43,193 @@
 // StudentGroup/Update
 
 {
-	"Id": 4032,
-    "StartDate": "2019-02-13",
-    "EndDate": "2019-12-01",
-    "CredentialDate": "2019-12-01",
-    "FirstExamDate": "2019-12-01",
-    "SecondExamDate": "2019-12-01",
-    "Notes": "Exam Commission",
-    "EnrolmentDate": "2019-12-01",
-    "ProgramId": 3006,
-    "ClassLocationId": 2004,
-    "EducationLeaderId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
-    "StudentsInGroup": [
-    	{
-    		"StudentId": 4012,
-    		"EmployerId": 6006,
-    		"CompletedPractice": true
-    	}
-	],
-    "StudentIds": [
-    	4012
-	],
-    "ExamCommission": {
-    	"Name": "Komisija",
-    	"TeacherIds": [
-    		"1a1bfa81-53ee-4cd3-c039-08d652b91ccb"
-		]
+    "Id": 2,
+    "Name": "Ime",
+    "SchoolYear": null,
+    "StartDate": "22.01.2019. 00:00:00",
+    "EndDate": "23.01.2019. 00:00:00",
+    "CredentialDate": "23.01.2019. 00:00:00",
+    "FirstExamDate": "16.01.2019. 00:00:00",
+    "SecondExamDate": "23.01.2019. 00:00:00",
+    "Notes": "<p>ffdgdgf</p>",
+    "EnrolmentDate": "01.12.2019. 00:00:00",
+    "ProgramId": 1,
+    "EducationProgram": null,
+    "ClassLocationId": 1,
+    "ClassLocation": {
+        "Id": 1,
+        "Name": "Novo Mjesto",
+        "Address": null,
+        "Telephone": null,
+        "Mobile": null,
+        "Email": null,
+        "CountryId": 49,
+        "Country": null,
+        "RegionId": 1,
+        "Region": null,
+        "MunicipalityId": 1,
+        "Municipality": null,
+        "CityId": 1,
+        "City": null
     },
-    "StudentGroupClassAttendances": [
-    	{
-	    	"Date": "2019-01-01",
-	    	"StudentClassAttendances": [
-	    		{
-	    			"StudentId": 4012,
-	    			"Attendance": true
-	    		}
-			]
-    	}
-	]
+    "StudentIds": [
+        1,
+        2
+    ],
+    "StudentNames": [
+        "David Čubela Čubela",
+        "David Čubela"
+    ],
+    "Students": [
+        {
+            "Id": 1,
+            "PhotoId": null,
+            "Photo": null,
+            "FirstName": "David Čubela",
+            "LastName": "Čubela",
+            "Dob": null,
+            "Mentor": null,
+            "Oib": "38761800703",
+            "CityOfBirthId": null,
+            "CityOfBirth": null,
+            "CountryOfBirthId": null,
+            "CountryOfBirth": null,
+            "RegionOfBirthId": null,
+            "RegionOfBirth": null,
+            "MunicipalityOfBirthId": null,
+            "MunicipalityOfBirth": null,
+            "Mob": null,
+            "Citizenship": null,
+            "Proffesion": null,
+            "IdCard": false,
+            "FathersFullName": null,
+            "MothersFullName": null,
+            "Gender": null,
+            "AddressStreet": null,
+            "AddressCountryId": null,
+            "AddressCountry": null,
+            "AddressCityId": null,
+            "AddressCity": null,
+            "AddressRegionId": null,
+            "AddressRegion": null,
+            "AddressMunicipalityId": null,
+            "AddressMunicipality": null,
+            "Mobile": null,
+            "Email": null,
+            "Employed": false,
+            "EducationContract": false,
+            "FinalExam": false,
+            "CompletedSchoolCertificate": false,
+            "PractiacalTrainingContract": false,
+            "DoctorCertification": false,
+            "DriversLicence": false,
+            "KnowledgeTest": false,
+            "CitizenshipCertificate": false,
+            "BirthCertificate": false,
+            "PracticeDiary": false,
+            "EnrolmentDate": "01.12.2019. 00:00:00",
+            "FinishedSchool": null,
+            "CertificateNumber": null,
+            "SchoolLevel": null,
+            "Vocation": null,
+            "Gdpr": false,
+            "Notes": null,
+            "DateCreated": "2019-03-31T18:59:08.1433326",
+            "EmployerId": null,
+            "Employer": null,
+            "Files": []
+        },
+        {
+            "Id": 2,
+            "PhotoId": null,
+            "Photo": null,
+            "FirstName": "David",
+            "LastName": "Čubela",
+            "Dob": null,
+            "Mentor": null,
+            "Oib": "38761800703",
+            "CityOfBirthId": null,
+            "CityOfBirth": null,
+            "CountryOfBirthId": null,
+            "CountryOfBirth": null,
+            "RegionOfBirthId": null,
+            "RegionOfBirth": null,
+            "MunicipalityOfBirthId": null,
+            "MunicipalityOfBirth": null,
+            "Mob": null,
+            "Citizenship": null,
+            "Proffesion": null,
+            "IdCard": false,
+            "FathersFullName": null,
+            "MothersFullName": null,
+            "Gender": null,
+            "AddressStreet": null,
+            "AddressCountryId": null,
+            "AddressCountry": null,
+            "AddressCityId": null,
+            "AddressCity": null,
+            "AddressRegionId": null,
+            "AddressRegion": null,
+            "AddressMunicipalityId": null,
+            "AddressMunicipality": null,
+            "Mobile": null,
+            "Email": null,
+            "Employed": false,
+            "EducationContract": false,
+            "FinalExam": false,
+            "CompletedSchoolCertificate": false,
+            "PractiacalTrainingContract": false,
+            "DoctorCertification": false,
+            "DriversLicence": false,
+            "KnowledgeTest": false,
+            "CitizenshipCertificate": false,
+            "BirthCertificate": false,
+            "PracticeDiary": false,
+            "EnrolmentDate": "01.12.2019. 00:00:00",
+            "FinishedSchool": null,
+            "CertificateNumber": null,
+            "SchoolLevel": null,
+            "Vocation": null,
+            "Gdpr": false,
+            "Notes": null,
+            "DateCreated": "2019-03-31T19:26:37.4380344",
+            "EmployerId": null,
+            "Employer": null,
+            "Files": []
+        }
+    ],
+    "StudentsInGroup": [
+        {
+            "Id": 1,
+            "StudentId": 1,
+            "GroupId": 2,
+            "CompletedPractice": false,
+            "EmployerId": null,
+            "Employer": null
+        },
+        {
+            "Id": 3,
+            "StudentId": 2,
+            "GroupId": 2,
+            "CompletedPractice": false,
+            "EmployerId": null,
+            "Employer": null
+        },
+        {
+            "StudentId": 3,
+            "GroupId": 2,
+            "CompletedPractice": true,
+            "EmployerId": null,
+            "Employer": null
+        }
+    ],
+    "SubjectTeachers": [],
+    "EducationLeaderId": null,
+    "ExamCommissionId": null,
+    "ExamCommission": null,
+    "DirectorId": null,
+    "Director": null,
+    "StudentGroupClassAttendances": []
 }
 
 // EducationProgram/Insert
@@ -404,7 +550,7 @@
 // Student/Insert
 
 {
-	"FirstName": "David Čubela",
+	"FirstName": "David",
 	"LastName": "Čubela",
 	"Oib": "38761800703",
 	"Photo": {
@@ -960,4 +1106,37 @@
 {
 	"EntryId": 9,
 	"Notes": "Notes 2"
+}
+
+//StudentGroup/GetAllCombined
+//StudentGroup/GetCombinedById
+{
+	"Id": 7
+}
+
+//StudentGroup/GetAllCombinedPaged
+{
+	"OrderBy": "",
+	"PageIndex": 0,
+	"PageSize": 10,
+	"SearchQuery": "",
+	"SortDirection": 0,
+	"Where": {},
+	"itemsTotal": 0
+}
+
+//StudentGroup/InsertCombined
+{
+	"StudentGroupIds": [2, 3]
+}
+
+//StudentGroup/UpdateCombined
+{
+	"Id": 7,
+	"StudentGroupIds": [2, 3]
+}
+
+//StudentGroup/DeleteCombined
+{
+	"Id": 7
 }

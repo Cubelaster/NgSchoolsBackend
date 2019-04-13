@@ -64,7 +64,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<Subject>().GetAllAsQueryable().Count());
+                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<Theme>().GetAllAsQueryable().Count());
             }
             catch (Exception)
             {

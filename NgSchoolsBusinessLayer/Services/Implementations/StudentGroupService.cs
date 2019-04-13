@@ -24,6 +24,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IExamCommissionService examCommissionService;
         private readonly IStudentService studentService;
         private readonly string includeProperties = "ClassLocation,StudentsInGroups.Student,StudentsInGroups.Employer,SubjectTeachers,EducationLeader,ExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances";
+        private readonly string includeCombinedProperties = "StudentGroups.ClassLocation,StudentGroups.StudentsInGroups.Student,StudentGroups.StudentsInGroups.Employer,StudentGroups.SubjectTeachers,StudentGroups.EducationLeader,StudentGroups.ExamCommission.UserExamCommissions.User.UserDetails,StudentGroups.StudentGroupClassAttendances.StudentClassAttendances";
 
         public StudentGroupService(IMapper mapper,
             IUnitOfWork unitOfWork, IExamCommissionService examCommissionService,
@@ -117,7 +118,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    List<int> studentIds = new List<int>(entityDto.StudentIds);
                     entityDto.StudentNames = null;
 
                     List<StudentInGroupDto> studentsInGroup = entityDto.StudentsInGroup != null ?
@@ -141,7 +141,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     unitOfWork.Save();
                     mapper.Map(entityToAdd, entityDto);
 
-                    entityDto.StudentIds = new List<int>(studentIds);
                     entityDto.StudentsInGroup = new List<StudentInGroupDto>(studentsInGroup);
 
                     if ((await ModifyStudentsInGroup(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> response, out entityDto))
@@ -198,7 +197,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    List<int> studentIds = new List<int>(entityDto.StudentIds);
                     entityDto.StudentNames = null;
 
                     List<StudentInGroupDto> studentsInGroup = entityDto.StudentsInGroup != null ?
@@ -229,7 +227,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     unitOfWork.Save();
 
                     mapper.Map(entityToUpdate, entityDto);
-                    entityDto.StudentIds = new List<int>(studentIds);
                     entityDto.StudentsInGroup = new List<StudentInGroupDto>(studentsInGroup);
 
                     if ((await ModifyStudentsInGroup(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> response, out entityDto))
@@ -248,7 +245,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return response;
                     }
 
-                    if (!string.IsNullOrEmpty(entityDto.EnrolmentDate))
+                    if (!string.IsNullOrEmpty(entityDto.EnrolmentDate) && entityDto.Students.Any(s => s.EnrolmentDate == null))
                     {
                         if ((await UpdateEnrolmentDate(entityDto)).IsNotSuccess(out response, out entityDto))
                         {
@@ -268,7 +265,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     }
 
                     scope.Complete();
-
                     return await ActionResponse<StudentGroupDto>.ReturnSuccess(entityDto, "Grupa studenata uspješno izmijenjena.");
                 }
             }
@@ -301,7 +297,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var response = await ActionResponse<StudentGroupDto>.ReturnSuccess(entityDto, "Datumi upisa za studente uspješno izmijenjeni.");
-                entityDto.Students.ForEach(async studentDto =>
+                entityDto.Students.Where(s => s.EnrolmentDate == null)
+                    .ToList().ForEach(async studentDto =>
                 {
                     studentDto.EnrolmentDate = entityDto.EnrolmentDate;
                     if ((await studentService.UpdateEnrollmentDate(studentDto)).IsNotSuccess(out ActionResponse<StudentDto> sUpResponse, out studentDto))
@@ -330,6 +327,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var studentsToRemove = currentStudents.Where(cet => !newStudents.Select(ns => ns.Id).Contains(cet.Id)).ToList();
 
+                var studentsToModify = newStudents.Where(ns => currentStudents.Select(cs => cs.StudentId).Contains(ns.StudentId)).ToList();
+
                 var studentsToAdd = newStudents
                     .Where(nt => !currentStudents.Select(uec => uec.Id).Contains(nt.Id))
                     .Select(nt =>
@@ -342,6 +341,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .IsNotSuccess(out ActionResponse<List<StudentInGroupDto>> actionResponse))
                 {
                     return await ActionResponse<StudentGroupDto>.ReturnError("Neuspješna ažuriranje studenata u grupi.");
+                }
+
+                if ((await ModifyStudentsInGroup(studentsToModify))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<StudentGroupDto>.ReturnError("Neuspješno ažuriranje podataka studenata u grupi.");
                 }
 
                 if ((await AddStudentsInGroup(studentsToAdd))
@@ -385,7 +390,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<StudentsInGroups>().Delete(studentInGroup.Id.Value);
                 unitOfWork.Save();
-                return await ActionResponse<StudentInGroupDto>.ReturnSuccess(null, "Student upsješno izbrisan iz grupe.");
+
+                if ((await GetAllAttendanceForStudentAndGroup(studentInGroup.StudentId.Value, studentInGroup.GroupId.Value))
+                    .IsNotSuccess(out ActionResponse<List<StudentClassAttendanceDto>> attendancesResponse, out List<StudentClassAttendanceDto> attendances))
+                {
+                    return await ActionResponse<StudentInGroupDto>.ReturnError(attendancesResponse.Message);
+                }
+
+                if ((await RemoveAttendances(attendances))
+                    .IsNotSuccess(out ActionResponse<List<StudentClassAttendanceDto>> removeAttendanceResponse))
+                {
+                    return await ActionResponse<StudentInGroupDto>.ReturnError(removeAttendanceResponse.Message);
+                }
+
+                return await ActionResponse<StudentInGroupDto>.ReturnSuccess(null, "Student uspješno izbrisan iz grupe i podaci o evidencijama nastave također maknuti.");
             }
             catch (Exception)
             {
@@ -422,13 +440,51 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToAdd = mapper.Map<StudentInGroupDto, StudentsInGroups>(student);
                 unitOfWork.GetGenericRepository<StudentsInGroups>().Add(entityToAdd);
                 unitOfWork.Save();
-                return await ActionResponse<StudentInGroupDto>
-                    .ReturnSuccess(mapper.Map<StudentsInGroups, StudentInGroupDto>(entityToAdd),
-                    "Student uspješno dodan u grupu.");
+                mapper.Map(entityToAdd, student);
+                return await ActionResponse<StudentInGroupDto>.ReturnSuccess(student, "Student uspješno dodan u grupu.");
             }
             catch (Exception)
             {
                 return await ActionResponse<StudentInGroupDto>.ReturnError("Greška prilikom dodavanja studenta u grupu.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentInGroupDto>>> ModifyStudentsInGroup(List<StudentInGroupDto> students)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentInGroupDto>>.ReturnSuccess(students, "Podaci o studentima unutar grupe uspješno izmijenjeni.");
+                students.ForEach(async s =>
+                {
+                    if ((await ModifyStudentInGroup(s))
+                    .IsNotSuccess(out ActionResponse<StudentInGroupDto> actionResponse, out s))
+                    {
+                        response = await ActionResponse<List<StudentInGroupDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentInGroupDto>>.ReturnError("Greška prilikom ažuriranja studenata u grupu.");
+            }
+        }
+
+        private async Task<ActionResponse<StudentInGroupDto>> ModifyStudentInGroup(StudentInGroupDto entityDto)
+        {
+            try
+            {
+                var entityToUpdate = unitOfWork.GetGenericRepository<StudentsInGroups>().FindSingle(entityDto.Id.Value);
+                mapper.Map(entityDto, entityToUpdate);
+                unitOfWork.GetGenericRepository<StudentsInGroups>().Update(entityToUpdate);
+                unitOfWork.Save();
+                mapper.Map(entityToUpdate, entityDto);
+                return await ActionResponse<StudentInGroupDto>.ReturnSuccess(entityDto, "Podaci o studentu unutar grupe ažurirani.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentInGroupDto>.ReturnError("Greška prilikom izmjene podataka o studentu unutar grupe.");
             }
         }
 
@@ -462,7 +518,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                 return await ActionResponse<StudentGroupDto>.ReturnError(deleteResponse.Message);
                             }
                         }
-                        else
+                        else if (entityDto.ExamCommission != null)
                         {
                             if ((await examCommissionService.Insert(entityDto.ExamCommission))
                                 .IsNotSuccess(out ActionResponse<ExamCommissionDto> insertResponse, out ExamCommissionDto examCommission))
@@ -874,7 +930,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-
         public async Task<ActionResponse<List<StudentClassAttendanceDto>>> AddAttendances(List<StudentClassAttendanceDto> entityDtos)
         {
             try
@@ -952,8 +1007,347 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<List<StudentClassAttendanceDto>>> RemoveAttendances(List<StudentClassAttendanceDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentClassAttendanceDto>>.ReturnSuccess(null, "Evidencije nastave uspješno izbrisane.");
+                entityDtos.ForEach(async pds =>
+                {
+                    if ((await RemoveAttendance(pds))
+                        .IsNotSuccess(out ActionResponse<StudentClassAttendanceDto> removeResponse, out pds))
+                    {
+                        response = await ActionResponse<List<StudentClassAttendanceDto>>.ReturnError(removeResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentClassAttendanceDto>>.ReturnError("Greška prilikom brisanja evidencija nastave.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentClassAttendanceDto>> RemoveAttendance(StudentClassAttendanceDto entityDto)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<StudentClassAttendance>().Delete(entityDto.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<StudentClassAttendanceDto>.ReturnSuccess(null, "Evidencija nastave za studenta iz grupe uspješno izbrisana.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentClassAttendanceDto>.ReturnError("Greška prilikom brisanja evidencije nastave za studenta u grupi.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentClassAttendanceDto>>> GetAllAttendanceForStudentAndGroup(int studentId, int studentGroupId)
+        {
+            try
+            {
+                var entites = unitOfWork.GetGenericRepository<StudentClassAttendance>()
+                    .GetAll(sca => sca.StudentId == studentId && sca.StudentGroupClassAttendance.StudentGroupId == studentGroupId);
+
+                return await ActionResponse<List<StudentClassAttendanceDto>>
+                    .ReturnSuccess(mapper.Map<List<StudentClassAttendanceDto>>(entites));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentClassAttendanceDto>>.ReturnError("Greška prilikom dohvata evidencije nastave za studenta u grupi.");
+            }
+        }
+
         #endregion StudentAttendance
 
         #endregion Class Attendance
+
+        #region CombinedGroups
+
+        #region Readers
+
+        public async Task<ActionResponse<List<CombinedGroupDto>>> GetAllCombined()
+        {
+            try
+            {
+                var entities = unitOfWork.GetGenericRepository<CombinedGroup>()
+                    .GetAll(includeProperties: includeCombinedProperties);
+                return await ActionResponse<List<CombinedGroupDto>>
+                    .ReturnSuccess(mapper.Map<List<CombinedGroup>, List<CombinedGroupDto>>(entities));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<CombinedGroupDto>>.ReturnError("Greška prilikom dohvata svih kombiniranih grupa studenata.");
+            }
+        }
+
+        public async Task<ActionResponse<PagedResult<CombinedGroupDto>>> GetAllCombinedPaged(BasePagedRequest pagedRequest)
+        {
+            try
+            {
+                var pagedEntityResult = await unitOfWork.GetGenericRepository<CombinedGroup>()
+                    .GetAllAsQueryable(includeProperties: includeCombinedProperties)
+                    .GetPaged(pagedRequest);
+
+                var pagedResult = new PagedResult<CombinedGroupDto>
+                {
+                    CurrentPage = pagedEntityResult.CurrentPage,
+                    PageSize = pagedEntityResult.PageSize,
+                    PageCount = pagedEntityResult.PageCount,
+                    RowCount = pagedEntityResult.RowCount,
+                    Results = mapper.Map<List<CombinedGroup>, List<CombinedGroupDto>>(pagedEntityResult.Results)
+                };
+
+                return await ActionResponse<PagedResult<CombinedGroupDto>>.ReturnSuccess(pagedResult);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<PagedResult<CombinedGroupDto>>.ReturnError("Greška prilikom dohvata straničnih podataka kombiniranih grupa studenata.");
+            }
+        }
+
+        public async Task<ActionResponse<CombinedGroupDto>> GetCombinedById(int id)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<CombinedGroup>()
+                    .FindBy(c => c.Id == id, includeProperties: includeCombinedProperties);
+
+                return await ActionResponse<CombinedGroupDto>
+                    .ReturnSuccess(mapper.Map<CombinedGroupDto>(entity));
+            }
+            catch (Exception ex)
+            {
+                return await ActionResponse<CombinedGroupDto>.ReturnError("Greška prilikom dohvata kombinirane grupe studenata.");
+            }
+        }
+
+        #endregion Readers
+
+        #region Writers
+
+        public async Task<ActionResponse<CombinedGroupDto>> InsertCombined(CombinedGroupDto entityDto)
+        {
+            try
+            {
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var studentGroupIds = entityDto.StudentGroupIds != null ?
+                        new List<int>(entityDto.StudentGroupIds) : new List<int>();
+
+                    var entityToAdd = mapper.Map<CombinedGroupDto, CombinedGroup>(entityDto);
+                    unitOfWork.GetGenericRepository<CombinedGroup>().Add(entityToAdd);
+                    unitOfWork.Save();
+                    mapper.Map(entityToAdd, entityDto);
+
+                    entityDto.StudentGroupIds = studentGroupIds;
+                    if ((await ModifyGroupsInCombinedGroup(entityDto))
+                        .IsNotSuccess(out ActionResponse<CombinedGroupDto> response, out entityDto))
+                    {
+                        scope.Dispose();
+                        return response;
+                    }
+
+                    if ((await GetCombinedById(entityDto.Id.Value)).IsNotSuccess(out response, out entityDto))
+                    {
+                        return response;
+                    }
+
+                    scope.Complete();
+                    return await ActionResponse<CombinedGroupDto>.ReturnSuccess(entityDto, "Kombinirana grupa studenata uspješno upisana.");
+                }
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<CombinedGroupDto>.ReturnError("Greška prilikom upisa kombinirane grupe studenata.");
+            }
+        }
+
+        public async Task<ActionResponse<CombinedGroupDto>> UpdateCombined(CombinedGroupDto entityDto)
+        {
+            using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                var studentGroupIds = entityDto.StudentGroupIds != null ?
+                    new List<int>(entityDto.StudentGroupIds) : new List<int>();
+
+                var entityToUpdate = mapper.Map<CombinedGroupDto, CombinedGroup>(entityDto);
+                unitOfWork.GetGenericRepository<CombinedGroup>().Update(entityToUpdate);
+                unitOfWork.Save();
+                mapper.Map(entityToUpdate, entityDto);
+
+                entityDto.StudentGroupIds = studentGroupIds;
+                if ((await ModifyGroupsInCombinedGroup(entityDto))
+                    .IsNotSuccess(out ActionResponse<CombinedGroupDto> response, out entityDto))
+                {
+                    scope.Dispose();
+                    return response;
+                }
+
+                if ((await GetCombinedById(entityDto.Id.Value)).IsNotSuccess(out response, out entityDto))
+                {
+                    return response;
+                }
+
+                scope.Complete();
+                return await ActionResponse<CombinedGroupDto>.ReturnSuccess(entityDto, "Kombinirana grupa studenata uspješno ažurirana.");
+            }
+        }
+
+        public async Task<ActionResponse<CombinedGroupDto>> DeleteCombined(int id)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<CombinedGroup>().Delete(id);
+                unitOfWork.Save();
+                return await ActionResponse<CombinedGroupDto>.ReturnSuccess(null, "Brisanje kombinirane grupe studenata uspješno.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<CombinedGroupDto>.ReturnError("Greška prilikom brisanja kombinirane grupe studenata.");
+            }
+        }
+
+        #region Groups In Combined Groups
+
+        public async Task<ActionResponse<CombinedGroupDto>> ModifyGroupsInCombinedGroup(CombinedGroupDto combinedGroup)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<CombinedGroup>()
+                    .FindBy(e => e.Id == combinedGroup.Id.Value, includeProperties: "StudentGroups");
+
+                var currentGroups = mapper.Map<List<StudentGroup>, List<StudentGroupDto>>(entity.StudentGroups.ToList());
+
+                var newGroups = combinedGroup.StudentGroupIds;
+
+                var groupsToRemove = currentGroups.Where(cet => !newGroups.Contains(cet.Id.Value)).ToList();
+
+                var groupsToAdd = newGroups
+                    .Where(nt => !currentGroups.Select(uec => uec.Id).Contains(nt))
+                    .Select(ng => new StudentGroupDto
+                    {
+                        Id = ng,
+                        CombinedGroupId = combinedGroup.Id
+                    }).ToList();
+
+                if ((await RemoveGroupsFromCombinedGroup(groupsToRemove))
+                    .IsNotSuccess(out ActionResponse<List<StudentGroupDto>> actionResponse))
+                {
+                    return await ActionResponse<CombinedGroupDto>.ReturnError("Neuspješna ažuriranje grupa u kombiniranoj grupi.");
+                }
+
+                if ((await AddGroupsToCombinedGroup(groupsToAdd))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<CombinedGroupDto>.ReturnError("Neuspješna promjena grupa u kombiniranoj grupi.");
+                }
+
+                return await ActionResponse<CombinedGroupDto>.ReturnSuccess(combinedGroup, "Uspješno izmijenjene grupe unutar kombinirane grupe.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<CombinedGroupDto>.ReturnError("Greška prilikom ažuriranja kombinirane grupe studenata.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentGroupDto>>> AddGroupsToCombinedGroup(List<StudentGroupDto> groups)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentGroupDto>>.ReturnSuccess(groups, "Grupe uspješno dodane u kombiniranu grupu.");
+                groups.ForEach(async s =>
+                {
+                    if ((await AddGroupToCombinedGroup(s))
+                    .IsNotSuccess(out ActionResponse<StudentGroupDto> actionResponse, out s))
+                    {
+                        response = await ActionResponse<List<StudentGroupDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentGroupDto>>.ReturnError("Greška prilikom dodavanja grupa u kombiniranu grupu.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentGroupDto>> AddGroupToCombinedGroup(StudentGroupDto group)
+        {
+            try
+            {
+                int combinedGroupId = group.CombinedGroupId.Value;
+                if ((await GetById(group.Id.Value)).IsNotSuccess(out ActionResponse<StudentGroupDto> response, out group))
+                {
+                    return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom pripreme podataka za dodavanje " +
+                        "grupe u kombiniranu grupu.");
+                }
+
+                group.CombinedGroupId = combinedGroupId;
+                if ((await Update(group)).IsNotSuccess(out response, out group))
+                {
+                    return response;
+                }
+
+                return await ActionResponse<StudentGroupDto>.ReturnSuccess(group, "Grupa uspješno dodana u kombiniranu grupu.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom dodavanja grupe u kombiniranu grupu.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentGroupDto>>> RemoveGroupsFromCombinedGroup(List<StudentGroupDto> groups)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentGroupDto>>.ReturnSuccess(groups, "Grupe uspješno maknute iz kombinirane grupe.");
+                groups.ForEach(async s =>
+                {
+                    if ((await RemoveGroupFromCombinedGroup(s))
+                    .IsNotSuccess(out ActionResponse<StudentGroupDto> actionResponse, out s))
+                    {
+                        response = await ActionResponse<List<StudentGroupDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentGroupDto>>.ReturnError("Greška prilikom micanja grupa iz kombinirane grupe.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentGroupDto>> RemoveGroupFromCombinedGroup(StudentGroupDto group)
+        {
+            try
+            {
+                if ((await GetById(group.Id.Value)).IsNotSuccess(out ActionResponse<StudentGroupDto> response, out group))
+                {
+                    return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom pripreme podataka za micanje " +
+                        "grupe iz kombinirane grupe.");
+                }
+
+                group.CombinedGroupId = null;
+                if ((await Update(group)).IsNotSuccess(out response, out group))
+                {
+                    return response;
+                }
+
+                return await ActionResponse<StudentGroupDto>.ReturnSuccess(group, "Grupa uspješno maknuta iz kombinirane grupe.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom micanja grupe iz kombinirane grupe.");
+            }
+        }
+
+        #endregion Groups In Combined Groups
+
+        #endregion Writers
+
+        #endregion CombinedGroups
     }
 }
