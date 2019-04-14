@@ -12,6 +12,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         public StudentGroupMapper()
         {
             CreateMap<StudentGroup, StudentGroupDto>()
+                .ForMember(dest => dest.EducationProgram, opt => opt.MapFrom(src => src.Program))
                 .ForMember(dest => dest.SubjectTeachers, opt => opt.MapFrom(src => src.SubjectTeachers.Where(st => st.Status == DatabaseEntityStatusEnum.Active)))
                 .ForMember(dest => dest.StudentGroupClassAttendances, opt => opt.MapFrom(src => src.StudentGroupClassAttendances.Where(sgca => sgca.Status == DatabaseEntityStatusEnum.Active)))
                 .ForMember(dest => dest.StudentIds, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active).Select(sig => sig.StudentId)))
