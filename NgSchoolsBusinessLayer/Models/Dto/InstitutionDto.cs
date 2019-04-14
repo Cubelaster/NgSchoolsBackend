@@ -8,6 +8,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int? Id { get; set; }
         public string Name { get; set; }
         public string InstitutionCode { get; set; }
+        public string Oib { get; set; }
         public int? CityId { get; set; }
         public CityDto City { get; set; }
         public string InstitutionClassFirstPart { get; set; }

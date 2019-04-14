@@ -1,12 +1,14 @@
-﻿using System.IO;
-using System.Security.Principal;
-using System.Threading.Tasks;
+﻿using AutoMapper;
 using DinkToPdf;
 using DinkToPdf.Contracts;
 using Microsoft.Extensions.Configuration;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Services.Contracts;
+using NgSchoolsDataLayer.Models;
+using NgSchoolsDataLayer.Repository.UnitOfWork;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -16,28 +18,32 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         private readonly IConverter converter;
         private readonly IConfiguration configuration;
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IMapper mapper;
 
-        public PdfGeneratorService(IConverter converter, IConfiguration configuration)
+        public PdfGeneratorService(IConverter converter, IConfiguration configuration,
+            IUnitOfWork unitOfWork, IMapper mapper)
         {
             this.converter = converter;
             this.configuration = configuration;
+            this.unitOfWork = unitOfWork;
+            this.mapper = mapper;
         }
 
         #endregion Ctors and Members
 
-        public async Task<ActionResponse<FileDto>> GeneratePdf()
+        public async Task<ActionResponse<FileDto>> GeneratePdf(string fileName)
         {
             string uploadFolderName = configuration.GetValue<string>("UploadDestination").Replace("/", "");
             string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), uploadFolderName);
-            string filePath = Path.Combine(directoryPath, "Pdf_Test.pdf");
+            string filePath = Path.Combine(directoryPath, fileName);
 
             var globalSettings = new GlobalSettings
             {
                 ColorMode = ColorMode.Color,
                 Orientation = Orientation.Portrait,
                 PaperSize = PaperKind.A4,
-                Margins = new MarginSettings { Top = 10 },
-                DocumentTitle = "PDF Report",
+                DocumentTitle = fileName,
                 Out = filePath
             };
 
@@ -58,11 +64,35 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 PagesCount = true,
                 HtmlContent = @"
-                        <html>
-                            <head>
-                            </head>
-                            <body>
-                                <div class='header'><h1>This is the generated PDF report!!!</h1></div>
+                    <html lang='en'>
+                    <head>
+                        <style>
+                            .header {
+                                text-align: center;
+                                color: green;
+                                padding-bottom: 35px;
+                            }
+ 
+                            table {
+                                width: 80%;
+                                border-collapse: collapse;
+                            }
+ 
+                            td, th {
+                                border: 1px solid gray;
+                                padding: 15px;
+                                font-size: 22px;
+                                text-align: center;
+                            }
+ 
+                            table th {
+                                background-color: green;
+                                color: white;
+                            }
+                        </style>
+                        </head>
+                        <body>
+                            <div class='header'><h1>This is the generated PDF report!!!</h1></div>
                                 <table align='center'>
                                     <tr>
                                         <th>Name</th>
@@ -71,11 +101,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                         <th>Gender</th>
                                     </tr>
                                 </table>
-                            </body>
+                        </body>
                         </html>",
                 WebSettings = { DefaultEncoding = "utf-8" },
-                HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
-                FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Report Footer" }
+                HeaderSettings = { FontName = "Arial", FontSize = 0, Right = "", Line = false },
+                FooterSettings = { FontName = "Arial", FontSize = 0, Center = "", Line = false }
             };
 
             var pdf = new HtmlToPdfDocument()
@@ -84,10 +114,17 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 Objects = { objectSettings }
             };
 
-
             byte[] file = converter.Convert(pdf);
 
-            return await ActionResponse<FileDto>.ReturnSuccess();
+            UploadedFile generatedFile = new UploadedFile
+            {
+                FileName = pdf.GlobalSettings.DocumentTitle
+            };
+
+            unitOfWork.GetGenericRepository<UploadedFile>().Add(generatedFile);
+            unitOfWork.Save();
+
+            return await ActionResponse<FileDto>.ReturnSuccess(mapper.Map<UploadedFile, FileDto>(generatedFile), "Datoteka uspješno generirana i spremljena.");
         }
     }
 }

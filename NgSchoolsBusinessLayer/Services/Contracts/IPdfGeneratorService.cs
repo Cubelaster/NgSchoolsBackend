@@ -7,6 +7,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
 {
     public interface IPdfGeneratorService
     {
-        Task<ActionResponse<FileDto>> GeneratePdf();
+        Task<ActionResponse<FileDto>> GeneratePdf(string fileName);
     }
 }

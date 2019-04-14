@@ -11,6 +11,7 @@ namespace NgSchoolsDataLayer.Models
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
+        public string Oib { get; set; }
         [Required]
         public string InstitutionCode { get; set; }
         public int CityId { get; set; }
