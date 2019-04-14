@@ -1,4 +1,5 @@
 ﻿using NgSchoolsDataLayer.Models.BaseTypes;
+using System;
 using System.Collections.Generic;
 
 namespace NgSchoolsDataLayer.Models
@@ -8,6 +9,7 @@ namespace NgSchoolsDataLayer.Models
         public int Id { get; set; }
         public int BookNumber { get; set; }
         public bool Full { get; set; }
+        public DateTime? ExamDate { get;set; }
 
         public virtual ICollection<StudentRegisterEntry> StudentRegisterEntries { get; set; }
     }

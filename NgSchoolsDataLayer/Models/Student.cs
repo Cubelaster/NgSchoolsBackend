@@ -72,7 +72,7 @@ namespace NgSchoolsDataLayer.Models
         public int? EmployerId { get; set; }
         public virtual BusinessPartner Employer { get; set; }
 
-        public ICollection<StudentsInGroups> StudentsInGroups { get; set; }
-        public ICollection<StudentFiles> Files { get; set; }
+        public virtual ICollection<StudentsInGroups> StudentsInGroups { get; set; }
+        public virtual ICollection<StudentFiles> Files { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace NgSchoolsBusinessLayer.Models.Requests
+﻿using System;
+
+namespace NgSchoolsBusinessLayer.Models.Requests
 {
     public class StudentRegisterEntryInsertRequest
     {
@@ -12,5 +14,6 @@
         public int? StudentInGroupId { get; set; }
         public bool CreateNewBook { get; set; }
         public string Notes { get; set; }
+        public DateTime? ExamDate { get; set; }
     }
 }

@@ -1097,9 +1097,14 @@
 //StudentRegister/InsertEntry
 {
 	"EducationProgramId": 1,
-	"StudentGroupId": 1,
+	"StudentGroupId": 1, -- Id GrupeStudenta - To + StudentId nađu točan redak vezne tablice StudentInGroup
 	"StudentId": 1,
-	"Notes": "Notes"
+	"Notes": "Notes",
+	"BookNumber": 1, -- If sent, it's manual insert
+	"StudentRegisterNumber": 1, -- If sent, it's manual insert
+	"StudentInGroupId": 1, -- Id koji je bitan, kaže koji je točno student upisan (student + Grupa)
+	"CreateNewBook": true,
+	"ExamDate": "datum"
 }
 
 //StudentRegister/UpdateEntry

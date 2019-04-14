@@ -16,5 +16,6 @@ namespace NgSchoolsDataLayer.Models
         public bool CompletedPractice { get; set; }
         public int? EmployerId { get; set; }
         public BusinessPartner Employer { get; set; }
+        public virtual StudentRegisterEntry StudentRegisterEntry { get; set; }
     }
 }
