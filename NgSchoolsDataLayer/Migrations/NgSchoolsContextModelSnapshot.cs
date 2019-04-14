@@ -636,6 +636,8 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<string>("Name")
                         .IsRequired();
 
+                    b.Property<string>("Oib");
+
                     b.Property<Guid?>("PrincipalId");
 
                     b.Property<int?>("RegionId");
