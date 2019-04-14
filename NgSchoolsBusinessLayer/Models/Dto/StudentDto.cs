@@ -68,5 +68,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public BusinessPartnerDto Employer { get; set; }
 
         public List<FileDto> Files { get; set; }
+        public List<int> StudentRegisterEducationProgramIds { get; set; }
     }
 }
