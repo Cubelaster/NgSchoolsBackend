@@ -272,7 +272,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 {
                     var chosenBook = unitOfWork.GetGenericRepository<StudentRegister>()
                         .FindBy(b => b.BookNumber == request.BookNumber);
-                    request.BookId = chosenBook.Id;
+
+                    if (chosenBook == null)
+                    {
+                        request.CreateNewBook = true;
+                    }
+                    request.BookId = chosenBook?.Id;
                 }
 
                 if (!request.StudentRegisterNumber.HasValue)
@@ -467,7 +472,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         StudentsInGroupsId = studentInGroupId,
                         StudentRegisterNumber = request.StudentRegisterNumber.Value,
                         Notes = request.Notes,
-                        EntryDate = DateTime.Now                        
+                        EntryDate = DateTime.Now
                     };
 
                     unitOfWork.GetGenericRepository<StudentRegisterEntry>().Add(entityToAdd);
