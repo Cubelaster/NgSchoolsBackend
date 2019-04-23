@@ -141,13 +141,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                if ((await GetAll())
-                    .IsNotSuccess(out ActionResponse<List<StudentRegisterDto>> response, out List<StudentRegisterDto> entityDtos))
-                {
-                    return response;
-                }
 
-                return await ActionResponse<List<StudentRegisterDto>>.ReturnSuccess(entityDtos);
+                var entities = unitOfWork.GetGenericRepository<StudentRegister>()
+                    .GetAll(includeProperties: registerIncludes);
+
+                return await ActionResponse<List<StudentRegisterDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterDto>>(entities));
             }
             catch (Exception)
             {
@@ -193,6 +191,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom upisa matične knjige.");
             }
+            finally
+            {
+                await cacheService.RefreshCache<List<StudentRegisterDto>>();
+            }
         }
 
         public async Task<ActionResponse<StudentRegisterDto>> Update(StudentRegisterDto entityDto)
@@ -208,6 +210,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom upisa matične knjige.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<StudentRegisterDto>>();
             }
         }
 
@@ -524,6 +530,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom ažuriranja zapisa matične knjige.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
             }
         }
 
