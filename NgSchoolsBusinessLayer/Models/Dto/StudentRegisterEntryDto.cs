@@ -10,7 +10,9 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int? Id { get; set; }
         public int? StudentRegisterNumber { get; set; }
         public string Notes { get; set; }
-        public string EntryDate { get; set; }
+        public DateTime EntryDate { get; set; }
+        public DateTime? ExamDate { get; set; }
+        public int? ExamDateNumber { get; set; }
 
         public int? StudentRegisterId { get; set; }
 

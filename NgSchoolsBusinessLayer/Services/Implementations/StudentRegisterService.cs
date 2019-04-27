@@ -7,6 +7,7 @@ using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
+using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
@@ -416,7 +417,26 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 var insertedStudents = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
                     .GetAll(sre => sre.EducationProgramId == request.EducationProgramId.Value
-                        && sre.StudentsInGroups.StudentId == request.StudentId.Value).ToList();
+                        && sre.StudentsInGroups.StudentId == request.StudentId.Value
+                        && sre.Status == DatabaseEntityStatusEnum.Active)
+                        .ToList();
+                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterEntryDto>>(insertedStudents));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata zapisa koji sadrže traženi program i studenta.");
+            }
+        }
+
+        private async Task<ActionResponse<List<StudentRegisterEntryDto>>> GetEntriesForStudentNumberAndBookNumber(StudentRegisterEntryInsertRequest request)
+        {
+            try
+            {
+                var insertedStudents = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
+                    .GetAll(sre => sre.StudentRegisterNumber == request.StudentRegisterNumber
+                        && sre.StudentRegister.BookNumber == request.BookNumber
+                        && sre.Status == DatabaseEntityStatusEnum.Active)
+                        .ToList();
                 return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterEntryDto>>(insertedStudents));
             }
             catch (Exception)
@@ -446,6 +466,17 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Nemoguće unjeti novi zapis za kombinaciju studenta i edukacijskog programa, takav zapis već postoji.");
                     }
 
+                    if ((await GetEntriesForStudentNumberAndBookNumber(request))
+                        .IsNotSuccess(out checkResponse, out alreadyExisting))
+                    {
+                        return await ActionResponse<StudentRegisterEntryDto>.ReturnError(checkResponse.Message);
+                    }
+
+                    if (alreadyExisting.Any())
+                    {
+                        return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Nemoguće unjeti novi zapis jer zapis sa istim brojem studenta već postoji unutar izabrane knjige.");
+                    }
+
                     if ((await PrepareForInsert(request))
                         .IsNotSuccess(out ActionResponse<StudentRegisterEntryInsertRequest> prepareResponse, out request))
                     {
@@ -456,8 +487,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     {
                         var entityDto = new StudentRegisterDto
                         {
-                            BookNumber = request.BookNumber,
-                            ExamDate = request.ExamDate
+                            BookNumber = request.BookNumber
                         };
 
                         if ((await Insert(entityDto)).IsNotSuccess(out ActionResponse<StudentRegisterDto> bookInsertResponse, out entityDto))
@@ -478,7 +508,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         StudentsInGroupsId = studentInGroupId,
                         StudentRegisterNumber = request.StudentRegisterNumber.Value,
                         Notes = request.Notes,
-                        EntryDate = DateTime.Now
+                        EntryDate = request.EntryDate,
+                        ExamDate = request.ExamDate,
+                        ExamDateNumber = request.ExamDateNumber
                     };
 
                     unitOfWork.GetGenericRepository<StudentRegisterEntry>().Add(entityToAdd);

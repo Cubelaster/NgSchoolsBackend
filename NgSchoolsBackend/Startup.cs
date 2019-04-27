@@ -67,6 +67,7 @@ namespace NgSchoolsBackend
             services.AddMvc()
                 .AddJsonOptions(options =>
                 {
+                    options.SerializerSettings.DateFormatString = "dd.MM.yyyy.";
                     var resolver = options.SerializerSettings.ContractResolver;
                     if (resolver != null)
                     {

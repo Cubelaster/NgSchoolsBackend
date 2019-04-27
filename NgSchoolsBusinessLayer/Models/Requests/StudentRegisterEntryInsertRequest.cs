@@ -15,5 +15,7 @@ namespace NgSchoolsBusinessLayer.Models.Requests
         public bool CreateNewBook { get; set; }
         public string Notes { get; set; }
         public DateTime? ExamDate { get; set; }
+        public DateTime? EntryDate { get; set; }
+        public int? ExamDateNumber { get; set; }
     }
 }

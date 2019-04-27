@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190427130244_Modify_StudentRegister_AddExamDateNumber")]
+    partial class Modify_StudentRegister_AddExamDateNumber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1169,6 +1171,10 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<DateTime?>("DateModified");
 
+                    b.Property<DateTime?>("ExamDate");
+
+                    b.Property<int?>("ExamDateNumber");
+
                     b.Property<bool>("Full");
 
                     b.Property<int>("Status");
@@ -1190,11 +1196,7 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<int>("EducationProgramId");
 
-                    b.Property<DateTime?>("EntryDate");
-
-                    b.Property<DateTime?>("ExamDate");
-
-                    b.Property<int?>("ExamDateNumber");
+                    b.Property<DateTime>("EntryDate");
 
                     b.Property<string>("Notes");
 
