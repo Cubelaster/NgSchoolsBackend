@@ -23,7 +23,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IUnitOfWork unitOfWork;
         private readonly IExamCommissionService examCommissionService;
         private readonly IStudentService studentService;
-        private readonly string includeProperties = "ClassLocation,StudentsInGroups.Student,StudentsInGroups.Employer,SubjectTeachers,EducationLeader,ExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances";
+        private readonly string includeProperties = "ClassLocation,StudentsInGroups.Student,StudentsInGroups.Student.StudentsInGroups.StudentRegisterEntry,StudentsInGroups.Employer,SubjectTeachers,EducationLeader,ExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances";
         private readonly string includeCombinedProperties = "StudentGroups.ClassLocation,StudentGroups.StudentsInGroups.Student,StudentGroups.StudentsInGroups.Employer,StudentGroups.SubjectTeachers,StudentGroups.EducationLeader,StudentGroups.ExamCommission.UserExamCommissions.User.UserDetails,StudentGroups.StudentGroupClassAttendances.StudentClassAttendances,StudentGroups.Program";
 
         public StudentGroupService(IMapper mapper,

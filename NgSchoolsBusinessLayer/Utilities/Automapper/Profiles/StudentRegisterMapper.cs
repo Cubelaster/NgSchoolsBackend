@@ -17,7 +17,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<StudentRegisterDto, StudentRegister>();
 
-            CreateMap<StudentRegisterEntry, StudentRegisterEntryDto>();
+            CreateMap<StudentRegisterEntry, StudentRegisterEntryDto>()
+                .ForMember(dest => dest.Student, opt => opt.MapFrom(src => src.StudentsInGroups.Student));
 
             CreateMap<StudentRegisterEntryDto, StudentRegisterEntry>()
                 .ForMember(dest => dest.EducationProgram, opt => opt.Ignore())
