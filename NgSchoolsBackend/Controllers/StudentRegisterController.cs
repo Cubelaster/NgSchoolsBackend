@@ -81,6 +81,13 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
+        public async Task<ActionResponse<List<StudentRegisterEntryDto>>> GetAllEntriesByBookId(SimpleRequestBase request)
+        {
+            return await studentRegisterService.GetAllEntriesByBookId(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
         public async Task<ActionResponse<StudentRegisterEntryDto>> InsertEntry(StudentRegisterEntryInsertRequest request)
         {
             return await studentRegisterService.InsertEntry(request);

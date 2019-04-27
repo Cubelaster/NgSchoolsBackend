@@ -316,7 +316,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         #endregion Student Register
 
-        #region StudentRegisterEntryd
+        #region StudentRegisterEntry
 
         #region Readers
 
@@ -392,7 +392,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         public async Task<ActionResponse<PagedResult<StudentRegisterEntryDto>>> GetAllEntriesByBookIdPaged(BasePagedRequest pagedRequest)
         {
             try
-            {
+            {             
                 List<StudentRegisterEntryDto> entityDtos = new List<StudentRegisterEntryDto>();
                 var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterEntryDto>>();
                 if (!cachedResponse.IsSuccessAndHasData(out entityDtos))
@@ -408,6 +408,26 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata straničnih podataka zapisa matične knjige.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentRegisterEntryDto>>> GetAllEntriesByBookId(int id)
+        {
+            try
+            {
+                List<StudentRegisterEntryDto> entityDtos = new List<StudentRegisterEntryDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterEntryDto>>();
+                if (!cachedResponse.IsSuccessAndHasData(out entityDtos))
+                {
+                    entityDtos = (await GetAllEntries()).GetData();
+                }
+
+                entityDtos = entityDtos.Where(sre => sre.StudentRegisterId == id).ToList();
+                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(entityDtos);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata svih zapisa matičnih knjiga za odabranu knjigu.");
             }
         }
 
