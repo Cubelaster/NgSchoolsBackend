@@ -23,7 +23,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private const string registerIncludes = "StudentRegisterEntries";
-        private const string entryIncludes = "EducationProgram.EducationGroup,StudentsInGroups.Student,StudentsInGroups.StudentGroup.Director,StudentsInGroups.Student.StudentsInGroups.StudentRegisterEntry";
+        private const string entryIncludes = "EducationProgram.EducationGroup,EducationProgram.Subjects,StudentsInGroups.Student,StudentsInGroups.StudentGroup.Director.UserDetails,StudentsInGroups.StudentGroup.EducationLeader.UserDetails,StudentsInGroups.Student.StudentsInGroups.StudentRegisterEntry";
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;

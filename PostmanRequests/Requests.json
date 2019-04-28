@@ -1093,6 +1093,10 @@
 		"Id": 1
 	}
 }
+// StudentRegister/GetAllEntriesByBookId
+{
+	"Id": 1
+}
 
 //StudentRegister/InsertEntry
 {
