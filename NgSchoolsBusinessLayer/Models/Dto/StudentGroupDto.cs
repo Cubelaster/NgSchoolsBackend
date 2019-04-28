@@ -31,6 +31,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public List<StudentGroupSubjectTeachersDto> SubjectTeachers { get; set; }
 
         public Guid? EducationLeaderId { get; set; }
+        public UserDto EducationLeader { get; set; }
 
         public int? ExamCommissionId { get; set; }
         public ExamCommissionDto ExamCommission { get; set; }
