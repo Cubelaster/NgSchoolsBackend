@@ -68,7 +68,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.UserDetails.City))
                 .ForMember(dest => dest.EmploymentPlace, opt => opt.MapFrom(src => src.UserDetails.EmploymentPlace))
                 .ForMember(dest => dest.RoleNames, opt => opt.MapFrom(src => string.Join(", ", src.UserRoles.Select(r => r.Name))))
-                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(r => r.Id)));
+                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(r => r.Id)))
+                .ForMember(dest => dest.Files, opt => opt.MapFrom(src => src.UserDetails.TeacherFiles));
 
             CreateMap<TeacherViewModel, UserViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId));
