@@ -8,6 +8,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
     public class StudentRegisterEntryDto
     {
         public int? Id { get; set; }
+        [Searchable]
         public int? StudentRegisterNumber { get; set; }
         public string Notes { get; set; }
         public DateTime EntryDate { get; set; }

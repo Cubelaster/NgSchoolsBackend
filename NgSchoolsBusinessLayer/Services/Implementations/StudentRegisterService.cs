@@ -82,7 +82,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<StudentRegister>()
-                    .GetAll();
+                    .GetAll(includeProperties: registerIncludes);
                 return await ActionResponse<List<StudentRegisterDto>>
                     .ReturnSuccess(mapper.Map<List<StudentRegister>, List<StudentRegisterDto>>(entities));
             }

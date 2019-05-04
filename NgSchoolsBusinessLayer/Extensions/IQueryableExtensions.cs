@@ -30,36 +30,44 @@ namespace NgSchoolsBusinessLayer.Extensions
 
                 int skip = (currentPage - 1) * pagedRequest.PageSize;
 
-                PropertyInfo propertyForSort = null;
                 if (!string.IsNullOrEmpty(pagedRequest.OrderBy) && totalCount > 1)
                 {
-                    propertyForSort = objectType.GetProperty(pagedRequest.OrderBy);
+                    if (pagedRequest.SortDirection == SortDirectionEnum.ASC)
+                    {
+                        query = query.OrderBy(q => q.GetPropValue(pagedRequest.OrderBy));
+                    }
+                    else
+                    {
+                        query = query.OrderByDescending(q => q.GetPropValue(pagedRequest.OrderBy));
+                    }
                 }
 
                 query = query.AsNoTracking();
 
-                if (propertyForSort != null)
-                {
-                    if (pagedRequest.SortDirection == SortDirectionEnum.ASC)
-                    {
-                        query = query.OrderBy(q => propertyForSort.GetValue(q));
-                    }
-                    else
-                    {
-                        query = query.OrderByDescending(q => propertyForSort.GetValue(q));
-                    }
-                }
-
                 List<PropertyInfo> searchableProperties;
                 if (!string.IsNullOrEmpty(pagedRequest.SearchQuery))
                 {
-                    searchableProperties = GetSearchableProperties(objectType);
+                    searchableProperties = objectType.GetSearchableProperties();
+
+                    List<string> searchablePropertyNames = new List<string>();
 
                     if (searchableProperties.Any())
                     {
+                        searchableProperties.ForEach(sp =>
+                        {
+                            if (sp.DeclaringType.Name != objectType.Name)
+                            {
+                                searchablePropertyNames.AddRange(objectType.GetPropertiesByTypeNameForValueFetch(sp));
+                            }
+                            else
+                            {
+                                searchablePropertyNames.Add(sp.Name);
+                            }
+                        });
+
                         query = query
-                        .Where(q => searchableProperties
-                            .Any(p => (p.GetValue(q) != null ? p.GetValue(q).ToString() : "")
+                        .Where(q => searchablePropertyNames
+                            .Any(p => (q.GetPropValue(p) != null ? q.GetPropValue(p).ToString() : "")
                             .Contains(pagedRequest.SearchQuery, StringComparison.OrdinalIgnoreCase)));
                     }
                 }
@@ -118,26 +126,6 @@ namespace NgSchoolsBusinessLayer.Extensions
             {
                 Results = new List<T>()
             };
-        }
-
-        private static List<PropertyInfo> GetSearchableProperties(Type objectType)
-        {
-            if (!objectType.FullName.Contains("Dto") && !objectType.FullName.Contains("ViewModel"))
-            {
-                string typeName = "NgSchoolsBusinessLayer.Models.Dto."
-                    + objectType.FullName.Substring(objectType.FullName.LastIndexOf('.') + 1) + "Dto";
-                var objectTypeForSearchable = Assembly.GetExecutingAssembly().GetType(typeName);
-
-                var searchableProperties = objectTypeForSearchable.GetProperties()
-                    .Where(p => p.GetCustomAttributes().OfType<Searchable>().Any()).ToList();
-
-                var realSearchableProperties = objectType.GetProperties()
-                    .Where(p => searchableProperties.Any(sp => sp.Name == p.Name)).ToList();
-
-                return realSearchableProperties;
-            }
-
-            return objectType.GetProperties().Where(p => p.GetCustomAttributes().OfType<Searchable>().Any()).ToList();
         }
     }
 }
