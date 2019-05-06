@@ -23,6 +23,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<PagedResult<StudentRegisterEntryDto>>> GetAllEntriesByBookIdPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<StudentRegisterEntryDto>> InsertEntry(StudentRegisterEntryInsertRequest request);
         Task<ActionResponse<StudentRegisterEntryDto>> UpdateEntry(StudentRegisterEntryInsertRequest request);
+        Task<ActionResponse<StudentRegisterEntryDto>> DeleteEntry(int id);
         Task<ActionResponse<int>> GetTotalNumber();
     }
 }

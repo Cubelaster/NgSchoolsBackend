@@ -43,5 +43,6 @@ namespace NgSchoolsDataLayer.Models
         public virtual Plan Plan { get; set; }
 
         public virtual ICollection<EducationProgramClassType> EducationProgramClassTypes { get; set; }
+        public virtual ICollection<EducationProgramFile> Files { get; set; }
     }
 }

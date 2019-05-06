@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -46,7 +47,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 var entity = unitOfWork.GetGenericRepository<EducationProgram>()
                     .FindBy(c => c.Id == id,
-                    includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType,Plan");
+                    includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType,Plan,Files.File");
                 return await ActionResponse<EducationProgramDto>
                     .ReturnSuccess(mapper.Map<EducationProgram, EducationProgramDto>(entity));
             }
@@ -61,7 +62,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .GetAll(includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType,Plan");
+                    .GetAll(includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType,Plan,Files.File");
                 return await ActionResponse<List<EducationProgramDto>>
                     .ReturnSuccess(mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(entities));
             }
@@ -89,7 +90,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var allEntities = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .GetAll(includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType,Plan");
+                    .GetAll(includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType,Plan,Files.File");
                 return await ActionResponse<List<EducationProgramDto>>.ReturnSuccess(
                     mapper.Map<List<EducationProgram>, List<EducationProgramDto>>(allEntities));
             }
@@ -143,28 +144,45 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<ClassTypeDto> classTypes = entityDto.ClassTypes != null ?
-                    new List<ClassTypeDto>(entityDto.ClassTypes) : new List<ClassTypeDto>();
-                List<int> classTypeIds = entityDto.ClassTypeIds != null ? 
-                    new List<int>(entityDto.ClassTypeIds) : new List<int>();
-
-                var entityToAdd = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
-                unitOfWork.GetGenericRepository<EducationProgram>().Add(entityToAdd);
-                unitOfWork.Save();
-                mapper.Map(entityToAdd, entityDto);
-                entityDto.ClassTypeIds = classTypeIds;
-
-                if ((await ModifyClassTypes(entityDto))
-                    .IsNotSuccess(out ActionResponse<EducationProgramDto> ctResponse, out entityDto))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    return ctResponse;
+                    List<ClassTypeDto> classTypes = entityDto.ClassTypes != null ?
+                    new List<ClassTypeDto>(entityDto.ClassTypes) : new List<ClassTypeDto>();
+                    List<int> classTypeIds = entityDto.ClassTypeIds != null ?
+                        new List<int>(entityDto.ClassTypeIds) : new List<int>();
+                    List<FileDto> files = entityDto.Files != null
+                        ? new List<FileDto>(entityDto.Files) : new List<FileDto>();
+
+                    var entityToAdd = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
+                    unitOfWork.GetGenericRepository<EducationProgram>().Add(entityToAdd);
+                    unitOfWork.Save();
+                    mapper.Map(entityToAdd, entityDto);
+
+                    entityDto.ClassTypeIds = classTypeIds;
+                    if ((await ModifyClassTypes(entityDto))
+                        .IsNotSuccess(out ActionResponse<EducationProgramDto> ctResponse, out entityDto))
+                    {
+                        return ctResponse;
+                    }
+
+                    entityDto.Files = files;
+                    if ((await ModifyFiles(entityDto))
+                        .IsNotSuccess(out ActionResponse<EducationProgramDto> fileResponse, out entityDto))
+                    {
+                        return fileResponse;
+                    }
+
+                    entityDto.Id = entityToAdd.Id;
+                    scope.Complete();
                 }
 
-                entityToAdd = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .FindBy(e => e.Id == entityToAdd.Id,
-                    includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType");
+                if ((await GetById(entityDto.Id.Value))
+                    .IsNotSuccess(out ActionResponse<EducationProgramDto> response, out entityDto))
+                {
+                    return response;
+                }
 
-                return await ActionResponse<EducationProgramDto>.ReturnSuccess(mapper.Map(entityToAdd, entityDto));
+                return await ActionResponse<EducationProgramDto>.ReturnSuccess(entityDto);
             }
             catch (Exception)
             {
@@ -180,29 +198,44 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<ClassTypeDto> classTypes = entityDto.ClassTypes != null ?
-                    new List<ClassTypeDto>(entityDto.ClassTypes) : new List<ClassTypeDto>();
-                List<int> classTypeIds = entityDto.ClassTypeIds != null ?
-                    new List<int>(entityDto.ClassTypeIds) : new List<int>();
-
-                var entityToUpdate = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
-                unitOfWork.GetGenericRepository<EducationProgram>().Update(entityToUpdate);
-                unitOfWork.Save();
-
-                mapper.Map(entityToUpdate, entityDto);
-                entityDto.ClassTypeIds = classTypeIds;
-
-                if ((await ModifyClassTypes(entityDto))
-                    .IsNotSuccess(out ActionResponse<EducationProgramDto> ctResponse, out entityDto))
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    return ctResponse;
+                    List<ClassTypeDto> classTypes = entityDto.ClassTypes != null ?
+                    new List<ClassTypeDto>(entityDto.ClassTypes) : new List<ClassTypeDto>();
+                    List<int> classTypeIds = entityDto.ClassTypeIds != null ?
+                        new List<int>(entityDto.ClassTypeIds) : new List<int>();
+                    List<FileDto> files = entityDto.Files != null
+                        ? new List<FileDto>(entityDto.Files) : new List<FileDto>();
+
+                    var entityToUpdate = mapper.Map<EducationProgramDto, EducationProgram>(entityDto);
+                    unitOfWork.GetGenericRepository<EducationProgram>().Update(entityToUpdate);
+                    unitOfWork.Save();
+                    mapper.Map(entityToUpdate, entityDto);
+
+                    entityDto.ClassTypeIds = classTypeIds;
+                    if ((await ModifyClassTypes(entityDto))
+                        .IsNotSuccess(out ActionResponse<EducationProgramDto> ctResponse, out entityDto))
+                    {
+                        return ctResponse;
+                    }
+
+                    entityDto.Files = files;
+                    if ((await ModifyFiles(entityDto))
+                        .IsNotSuccess(out ActionResponse<EducationProgramDto> fileResponse, out entityDto))
+                    {
+                        return fileResponse;
+                    }
+
+                    scope.Complete();
                 }
 
-                entityToUpdate = unitOfWork.GetGenericRepository<EducationProgram>()
-                    .FindBy(e => e.Id == entityToUpdate.Id,
-                    includeProperties: "EducationGroup,Subjects.Themes,EducationProgramClassTypes.ClassType");
+                if ((await GetById(entityDto.Id.Value))
+                    .IsNotSuccess(out ActionResponse<EducationProgramDto> response, out entityDto))
+                {
+                    return response;
+                }
 
-                return await ActionResponse<EducationProgramDto>.ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
+                return await ActionResponse<EducationProgramDto>.ReturnSuccess(entityDto);
             }
             catch (Exception)
             {
@@ -352,5 +385,124 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<EducationProgramClassTypeDto>.ReturnError("Greška prilikom dodavanja vrste nastave edukacijskom programu.");
             }
         }
+
+        #region Files
+
+        public async Task<ActionResponse<EducationProgramDto>> ModifyFiles(EducationProgramDto entityDto)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<EducationProgram>()
+                    .FindBy(e => e.Id == entityDto.Id, includeProperties: "Files.File");
+
+                var currentFiles = mapper.Map<List<EducationProgramFile>, List<EducationProgramFileDto>>(entity.Files.ToList());
+
+                var newFiles = entityDto.Files;
+
+                var filesToRemove = currentFiles
+                    .Where(cet => !newFiles.Select(f => f.Id).Contains(cet.FileId)).ToList();
+
+                var filesToAdd = newFiles
+                    .Where(nt => !currentFiles.Select(uec => uec.FileId).Contains(nt.Id))
+                    .Select(sf => new EducationProgramFileDto
+                    {
+                        FileId = sf.Id,
+                        EducationProgramId = entityDto.Id
+                    })
+                    .ToList();
+
+                if ((await RemoveFiles(filesToRemove))
+                    .IsNotSuccess(out ActionResponse<List<EducationProgramFileDto>> removeResponse))
+                {
+                    return await ActionResponse<EducationProgramDto>.ReturnError("Neuspješno micanje dokumenata iz programa.");
+                }
+
+                if ((await AddFiles(filesToAdd)).IsNotSuccess(out ActionResponse<List<EducationProgramFileDto>> addResponse, out filesToAdd))
+                {
+                    return await ActionResponse<EducationProgramDto>.ReturnError("Neuspješno dodavanje dokumenata programu.");
+                }
+                return await ActionResponse<EducationProgramDto>.ReturnSuccess(entityDto, "Uspješno izmijenjeni dokumenti programa.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom izmjene dokumenata programa.");
+            }
+        }
+
+        public async Task<ActionResponse<List<EducationProgramFileDto>>> RemoveFiles(List<EducationProgramFileDto> entities)
+        {
+            try
+            {
+                var response = await ActionResponse<List<EducationProgramFileDto>>.ReturnSuccess(null, "Datoteke uspješno maknute iz programa.");
+                entities.ForEach(async file =>
+                {
+                    if ((await RemoveFile(file))
+                        .IsNotSuccess(out ActionResponse<EducationProgramFileDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<EducationProgramFileDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<EducationProgramFileDto>>.ReturnError("Greška prilikom micanja dokumenata iz programa.");
+            }
+        }
+
+        public async Task<ActionResponse<EducationProgramFileDto>> RemoveFile(EducationProgramFileDto entity)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<EducationProgramFile>().Delete(entity.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<EducationProgramFileDto>.ReturnSuccess(null, "Dokument uspješno maknut iz programa.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<EducationProgramFileDto>.ReturnError("Greška prilikom micanja dokumenta programa.");
+            }
+        }
+
+        public async Task<ActionResponse<List<EducationProgramFileDto>>> AddFiles(List<EducationProgramFileDto> entities)
+        {
+            try
+            {
+                var response = await ActionResponse<List<EducationProgramFileDto>>.ReturnSuccess(null, "Dokumenti uspješno dodani programu.");
+                entities.ForEach(async s =>
+                {
+                    if ((await AddFile(s))
+                        .IsNotSuccess(out ActionResponse<EducationProgramFileDto> actionResponse, out s))
+                    {
+                        response = await ActionResponse<List<EducationProgramFileDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<EducationProgramFileDto>>.ReturnError("Greška prilikom dodavanja dokumenata programu.");
+            }
+        }
+
+        public async Task<ActionResponse<EducationProgramFileDto>> AddFile(EducationProgramFileDto file)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<EducationProgramFileDto, EducationProgramFile>(file);
+                unitOfWork.GetGenericRepository<EducationProgramFile>().Add(entityToAdd);
+                unitOfWork.Save();
+                return await ActionResponse<EducationProgramFileDto>
+                    .ReturnSuccess(mapper.Map<EducationProgramFile, EducationProgramFileDto>(entityToAdd), "Dokument uspješno dodan programu.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<EducationProgramFileDto>.ReturnError("Greška prilikom dodavanja dokumenta programu.");
+            }
+        }
+
+        #endregion Files
     }
 }

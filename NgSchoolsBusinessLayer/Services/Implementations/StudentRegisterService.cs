@@ -395,7 +395,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         public async Task<ActionResponse<PagedResult<StudentRegisterEntryDto>>> GetAllEntriesByBookIdPaged(BasePagedRequest pagedRequest)
         {
             try
-            {             
+            {
                 List<StudentRegisterEntryDto> entityDtos = new List<StudentRegisterEntryDto>();
                 var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterEntryDto>>();
                 if (!cachedResponse.IsSuccessAndHasData(out entityDtos))
@@ -593,6 +593,25 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom ažuriranja zapisa matične knjige.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
+            }
+        }
+
+        public async Task<ActionResponse<StudentRegisterEntryDto>> DeleteEntry(int id)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<StudentRegisterEntry>().Delete(id);
+                unitOfWork.Save();
+                await cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(null, "Brisanje zapisa iz matične knjige uspješno.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom brisanja zapisa u matičnoj knjizi.");
             }
             finally
             {

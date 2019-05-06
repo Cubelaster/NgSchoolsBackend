@@ -233,7 +233,6 @@
 }
 
 // EducationProgram/Insert
-
 {
     "Name": "Program 1",
     "ShorthandName": "PR1",
@@ -253,9 +252,11 @@
     "ProgramCompetencies": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
     "PerformingWay": "<p>Način izvođenja</p>\n<p>&nbsp;</p>",
     "KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>",
-    "ClassTypes": [{
-    	"Id" : 2
-    }]
+    "ClassTypeIds": [1],
+    "Files": [
+    	{ "Id": 1, "FileName": "PDF Report" },
+    	{ "Id": 16, "FileName": "Test.pdf" }
+    ]
 }
 
 // EducationProgram/Update
@@ -280,12 +281,11 @@
     "ProgramCompetencies": "<p>Uvjeti upisa</p>\n<p>&nbsp;</p>",
     "PerformingWay": "<p>Način izvođenja</p>\n<p>&nbsp;</p>",
     "KnoweledgeVerification": "<p>Provjera stečenog znanja</p>\n<p>&nbsp;</p>",
-    "ClassTypes": [{
-    	"Id" : 3
-    },
-    {
-    	"Id" : 2
-    }]
+    "ClassTypeIds": [1],
+    "Files": [
+    	{ "Id": 1, "FileName": "PDF Report" },
+    	{ "Id": 16, "FileName": "Test.pdf" }
+    ]
 }
 
 // Subject/Insert
@@ -1115,6 +1115,11 @@
 {
 	"EntryId": 9,
 	"Notes": "Notes 2"
+}
+
+//StudentRegister/DeleteEntry
+{
+	"Id": 9
 }
 
 //StudentGroup/GetAllCombined

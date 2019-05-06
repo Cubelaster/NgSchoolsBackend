@@ -49,7 +49,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    List<FileDto> files = new List<FileDto>(institution.Files);
+                    List<FileDto> files = institution.Files != null 
+                        ? new List<FileDto>(institution.Files) : new List<FileDto>();
+
                     var institutionToAdd = mapper.Map<InstitutionDto, Institution>(institution);
                     unitOfWork.GetGenericRepository<Institution>().Add(institutionToAdd);
                     unitOfWork.Save();
@@ -78,7 +80,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    List<FileDto> files = new List<FileDto>(institution.Files);
+                    List<FileDto> files = institution.Files != null
+                        ? new List<FileDto>(institution.Files) : new List<FileDto>();
+
                     var institutionToUpdate = mapper.Map<InstitutionDto, Institution>(institution);
                     unitOfWork.GetGenericRepository<Institution>().Update(institutionToUpdate);
                     unitOfWork.Save();

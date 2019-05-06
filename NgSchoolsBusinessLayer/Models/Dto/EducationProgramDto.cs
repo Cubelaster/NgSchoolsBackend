@@ -43,5 +43,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public List<int> ClassTypeIds { get; set; }
         public int? EducationGroupId { get; set; }
         public EducationGroupDto EducationGroup { get; set; }
+        public List<FileDto> Files { get; set; }
     }
 }

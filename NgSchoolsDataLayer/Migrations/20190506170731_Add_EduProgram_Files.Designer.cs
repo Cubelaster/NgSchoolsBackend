@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190506170731_Add_EduProgram_Files")]
+    partial class Add_EduProgram_Files
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -563,15 +565,9 @@ namespace NgSchoolsDataLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("DateCreated");
-
-                    b.Property<DateTime?>("DateModified");
-
                     b.Property<int>("EducationProgramId");
 
                     b.Property<int>("FileId");
-
-                    b.Property<int>("Status");
 
                     b.HasKey("Id");
 
