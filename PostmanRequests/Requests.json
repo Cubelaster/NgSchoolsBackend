@@ -1113,8 +1113,16 @@
 
 //StudentRegister/UpdateEntry
 {
-	"EntryId": 9,
-	"Notes": "Notes 2"
+	"EntryId":1,
+	"EducationProgramId":36,
+	"StudentGroupId":1,
+	"StudentId":3,
+	"Notes":null,
+	"BookId":1,
+	"StudentRegisterNumber":1,
+	"StudentInGroupId":9,
+	"ExamDate":"05.01.2018.",
+	"EntryDate":"10.01.2018."
 }
 
 //StudentRegister/DeleteEntry
