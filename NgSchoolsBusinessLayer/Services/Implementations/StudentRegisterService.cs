@@ -576,7 +576,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entityToUpdate = unitOfWork.GetGenericRepository<StudentRegisterEntry>().FindSingle(request.EntryId.Value);
+
                 entityToUpdate.Notes = request.Notes;
+                entityToUpdate.EducationProgramId = request.EducationProgramId.Value;
+                entityToUpdate.StudentRegisterId = request.BookId.Value;
+                entityToUpdate.StudentRegisterNumber = request.StudentRegisterNumber.Value;
+                entityToUpdate.EntryDate = request.EntryDate;
+                entityToUpdate.ExamDate = request.ExamDate;
+                entityToUpdate.ExamDateNumber = request.ExamDateNumber;
+
                 unitOfWork.GetGenericRepository<StudentRegisterEntry>().Update(entityToUpdate);
                 unitOfWork.Save();
 
