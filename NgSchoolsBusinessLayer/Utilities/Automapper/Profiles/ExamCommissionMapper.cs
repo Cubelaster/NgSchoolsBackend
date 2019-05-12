@@ -12,8 +12,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         {
             CreateMap<ExamCommission, ExamCommissionDto>()
                 .ForMember(dest => dest.TeacherIds, opt => opt.MapFrom(src => src.UserExamCommissions.Where(a => a.Status == DatabaseEntityStatusEnum.Active).Select(uex => uex.UserId)))
-                .ForMember(dest => dest.TeacherName, opt => opt.MapFrom(src => src.UserExamCommissions.Where(a => a.Status == DatabaseEntityStatusEnum.Active).Select(uex => $"{uex.User.UserDetails.FirstName} {uex.User.UserDetails.LastName}").ToList()))
-                .ForMember(dest => dest.Teachers, opt => opt.MapFrom(src => string.Join(",", src.UserExamCommissions.Where(a => a.Status == DatabaseEntityStatusEnum.Active).Select(uex => $"{uex.User.UserDetails.FirstName} {uex.User.UserDetails.LastName}").ToList())));
+                .ForMember(dest => dest.Teachers, opt => opt.MapFrom(src => src.UserExamCommissions.Where(a => a.Status == DatabaseEntityStatusEnum.Active).Select(uex => uex.User).ToList()));
 
             CreateMap<ExamCommissionDto, ExamCommission>();
         }

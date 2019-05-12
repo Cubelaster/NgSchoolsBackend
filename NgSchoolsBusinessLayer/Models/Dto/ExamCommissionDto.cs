@@ -10,7 +10,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         [Searchable]
         public string Name { get; set; }
         public List<Guid> TeacherIds { get; set; }
-        public List<string> TeacherName { get; set; }
-        public string Teachers { get; set; }
+        public List<UserDto> Teachers { get; set; }
     }
 }
