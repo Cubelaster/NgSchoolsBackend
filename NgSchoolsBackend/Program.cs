@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using NgSchoolsBusinessLayer.Utilities.DbUtils;
+using System;
 
 namespace NgSchoolsBackend
 {
@@ -17,6 +18,8 @@ namespace NgSchoolsBackend
                 var services = scope.ServiceProvider;
                 DbInitializer.Initialize(services);
             }
+
+            Environment.SetEnvironmentVariable("Version", new Version("1.4.0.2").ToString());
 
             host.Run();
         }
