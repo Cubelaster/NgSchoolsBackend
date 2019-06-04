@@ -520,15 +520,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         request.BookId = entityDto.Id;
                     }
 
-                    var studentInGroupId = unitOfWork.GetGenericRepository<StudentsInGroups>()
+                    var studentInGroup = unitOfWork.GetGenericRepository<StudentsInGroups>()
                         .FindBy(sig => sig.StudentId == request.StudentId.Value
-                        && sig.StudentGroupId == request.StudentGroupId).Id;
+                        && sig.StudentGroupId == request.StudentGroupId);
+
+                    if (studentInGroup == null)
+                    {
+                        return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Specificirani student još ne postoji u grupi. Molimo prvo spremite studenta u grupu.");
+                    }
 
                     var entityToAdd = new StudentRegisterEntry
                     {
                         StudentRegisterId = request.BookId.Value,
                         EducationProgramId = request.EducationProgramId.Value,
-                        StudentsInGroupsId = studentInGroupId,
+                        StudentsInGroupsId = studentInGroup.Id,
                         StudentRegisterNumber = request.StudentRegisterNumber.Value,
                         Notes = request.Notes,
                         EntryDate = request.EntryDate,
