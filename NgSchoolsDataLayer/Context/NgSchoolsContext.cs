@@ -188,6 +188,10 @@ namespace NgSchoolsDataLayer.Context
                 .WithMany()
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<StudentRegisterEntry>()
+                .HasIndex(s => s.StudentsInGroupsId)
+                .IsUnique(false);
+
             builder.Entity<EducationProgramSubject>()
                 .HasOne(s => s.EducationProgram)
                 .WithMany()

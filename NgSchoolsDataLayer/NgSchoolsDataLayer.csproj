@@ -43,6 +43,9 @@
     <Compile Remove="Migrations\20190316084146_Modify_Municipality_Keys_and_Connections.cs" />
     <Compile Remove="Migrations\20190506170627_Add_EduProgram_Files.cs" />
     <Compile Remove="Migrations\20190506173025_Modify_EduProgram_V1.cs" />
+    <Compile Remove="Migrations\20190605202542_Modify_StudentRegisterEntries.cs" />
+    <Compile Remove="Migrations\20190605202706_Modify_StudentRegisterEntries.cs" />
+    <Compile Remove="Migrations\20190605202925_Modify_StudentRegisterEntries.cs" />
   </ItemGroup>
 
   <ItemGroup>
