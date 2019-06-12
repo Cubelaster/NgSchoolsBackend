@@ -36,6 +36,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string ProgramType { get; set; }
         public string RegularClassesWorkShop { get; set; }
         public string CIClassesWorkShop { get; set; }
+        public string Version { get; set; }
 
         public List<SubjectDto> Subjects { get; set; }
         public PlanDto Plan { get; set; }
