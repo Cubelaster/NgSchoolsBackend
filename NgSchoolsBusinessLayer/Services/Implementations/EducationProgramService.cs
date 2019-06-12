@@ -41,6 +41,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         #endregion Ctors and Members
 
+        #region Readers
+
         public async Task<ActionResponse<EducationProgramDto>> GetById(int id)
         {
             try
@@ -139,6 +141,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PagedResult<EducationProgramDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za programe.");
             }
         }
+
+        #endregion Readers
+
+        #region Writers
 
         public async Task<ActionResponse<EducationProgramDto>> Insert(EducationProgramDto entityDto)
         {
@@ -247,6 +253,95 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<EducationProgramDto>> Copy(EducationProgramDto entityDto)
+        {
+            try
+            {
+                var entityDtoNewData = new EducationProgramDto
+                {
+                    Name = entityDto.Name,
+                    Version = entityDto.Version
+                };
+
+                if ((await GetById(entityDto.Id.Value))
+                    .IsNotSuccess(out ActionResponse<EducationProgramDto> response, out EducationProgramDto oldEntityDto))
+                {
+                    return response;
+                }
+
+                mapper.Map(oldEntityDto, entityDto);
+
+                entityDto.Id = null;
+                entityDto.Name = entityDtoNewData.Name;
+                entityDto.Version = entityDtoNewData.Version;
+
+                if (entityDto.Subjects != null && entityDto.Subjects.Count > 0)
+                {
+                    entityDto.Subjects.ForEach(s =>
+                    {
+                        s.Id = null;
+                        s.EducationProgramId = null;
+
+                        if (s.Themes != null)
+                        {
+                            s.Themes.ForEach(t =>
+                            {
+                                t.Id = null;
+                                t.SubjectId = null;
+                            });
+                        }
+                    });
+
+                }
+
+                if (entityDto.Plan != null)
+                {
+                    entityDto.Plan.Id = null;
+                    entityDto.Plan.EducationProgramId = null;
+
+                    if (entityDto.Plan.PlanDays != null && entityDto.Plan.PlanDays.Count > 0)
+                    {
+                        entityDto.Plan.PlanDays.ForEach(pd =>
+                        {
+                            pd.Id = null;
+                            pd.PlanId = null;
+
+                            if (pd.PlanDaySubjects != null && pd.PlanDaySubjects.Count > 0)
+                            {
+                                pd.PlanDaySubjects.ForEach(pds =>
+                                {
+                                    pds.Id = null;
+                                    pds.PlanDayId = null;
+                                    pds.SubjectId = null;
+
+                                    if (pds.PlanDaySubjectThemes != null && pds.PlanDaySubjectThemes.Count > 0)
+                                    {
+                                        pds.PlanDaySubjectThemes.ForEach(pdst =>
+                                        {
+                                            pdst.Id = null;
+                                            pdst.PlanDaySubjectId = null;
+                                            pdst.ThemeId = null;
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+
+                if ((await Insert(entityDto)).IsNotSuccess(out response, out entityDto))
+                {
+                    return response;
+                }
+
+                return await ActionResponse<EducationProgramDto>.ReturnSuccess(entityDto, "Program uspješno kopiran.");
+            }
+            catch
+            {
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom kopiranja programa.");
+            }
+        }
+
         public async Task<ActionResponse<EducationProgramDto>> Delete(int id)
         {
             try
@@ -265,6 +360,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 await cacheService.RefreshCache<List<EducationProgramDto>>();
             }
         }
+
+        #region ClassTypes
 
         public async Task<ActionResponse<EducationProgramDto>> ModifyClassTypes(EducationProgramDto entityDto)
         {
@@ -386,6 +483,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        #endregion ClassTypes
+
         #region Files
 
         public async Task<ActionResponse<EducationProgramDto>> ModifyFiles(EducationProgramDto entityDto)
@@ -504,5 +603,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         }
 
         #endregion Files
+
+        #endregion Writers
     }
 }
