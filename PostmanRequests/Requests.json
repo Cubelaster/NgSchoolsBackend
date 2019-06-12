@@ -288,6 +288,13 @@
     ]
 }
 
+// EducationProgram/Copy
+{
+	"Id": 1,
+	"Name": "Edu Program to Copy, new Name",
+	"Version": "Neka verzija"
+}
+
 // Subject/Insert
 
 {
