@@ -188,7 +188,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             catch (Exception)
             {
-                return await ActionResponse<List<SubjectDto>>.ReturnError("Greška prilikom upisa studenta.");
+                return await ActionResponse<List<SubjectDto>>.ReturnError("Greška prilikom upisa predmeta.");
             }
         }
 

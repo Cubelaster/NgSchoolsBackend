@@ -275,63 +275,102 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 entityDto.Name = entityDtoNewData.Name;
                 entityDto.Version = entityDtoNewData.Version;
 
-                if (entityDto.Subjects != null && entityDto.Subjects.Count > 0)
+
+                var subjectList = new List<SubjectDto>(entityDto.Subjects);
+                var plan = entityDto.Plan;
+
+                entityDto.Subjects = null;
+                entityDto.Plan = null;
+
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    entityDto.Subjects.ForEach(s =>
+
+                    if ((await Insert(entityDto)).IsNotSuccess(out response, out entityDto))
                     {
-                        s.Id = null;
-                        s.EducationProgramId = null;
+                        return response;
+                    }
 
-                        if (s.Themes != null)
-                        {
-                            s.Themes.ForEach(t =>
-                            {
-                                t.Id = null;
-                                t.SubjectId = null;
-                            });
-                        }
-                    });
-
-                }
-
-                if (entityDto.Plan != null)
-                {
-                    entityDto.Plan.Id = null;
-                    entityDto.Plan.EducationProgramId = null;
-
-                    if (entityDto.Plan.PlanDays != null && entityDto.Plan.PlanDays.Count > 0)
+                    if (subjectList != null && subjectList.Count > 0)
                     {
-                        entityDto.Plan.PlanDays.ForEach(pd =>
+                        subjectList.ForEach(async s =>
                         {
-                            pd.Id = null;
-                            pd.PlanId = null;
-
-                            if (pd.PlanDaySubjects != null && pd.PlanDaySubjects.Count > 0)
+                            s.Id = null;
+                            s.EducationProgramId = entityDto.Id;
+                            var themesList = new List<ThemeDto>();
+                            if (s.Themes != null && s.Themes.Count > 0)
                             {
-                                pd.PlanDaySubjects.ForEach(pds =>
+                                s.Themes.ForEach(t =>
                                 {
-                                    pds.Id = null;
-                                    pds.PlanDayId = null;
-                                    pds.SubjectId = null;
-
-                                    if (pds.PlanDaySubjectThemes != null && pds.PlanDaySubjectThemes.Count > 0)
-                                    {
-                                        pds.PlanDaySubjectThemes.ForEach(pdst =>
-                                        {
-                                            pdst.Id = null;
-                                            pdst.PlanDaySubjectId = null;
-                                            pdst.ThemeId = null;
-                                        });
-                                    }
+                                    t.Id = null;
+                                    t.SubjectId = null;
                                 });
+                                themesList = new List<ThemeDto>(s.Themes);
+                            }
+
+                            if ((await subjectService.Insert(s))
+                                .IsNotSuccess(out ActionResponse<SubjectDto> subjectResponse, out s))
+                            {
+                                response = await ActionResponse<EducationProgramDto>.ReturnError(subjectResponse.Message);
+                                return;
+                            }
+
+                            themesList.ForEach(t => t.SubjectId = s.Id);
+                            if ((await themeService.InsertThemes(themesList))
+                                .IsNotSuccess(out ActionResponse<List<ThemeDto>> themesResponse, out themesList))
+                            {
+                                response = await ActionResponse<EducationProgramDto>.ReturnError(themesResponse.Message);
+                                return;
                             }
                         });
-                    }
-                }
 
-                if ((await Insert(entityDto)).IsNotSuccess(out response, out entityDto))
-                {
-                    return response;
+                        if (response.IsNotSuccess())
+                        {
+                            return response;
+                        }
+                    }
+
+                    if (plan != null)
+                    {
+                        if ((await planService.GetById(plan.Id.Value))
+                            .IsNotSuccess(out ActionResponse<PlanDto> planResponse, out PlanDto oldPlan))
+                        {
+                            return await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                        }
+
+                        plan.Id = null;
+                        plan.EducationProgramId = entityDto.Id;
+
+                        if (plan.PlanDays != null && plan.PlanDays.Count > 0)
+                        {
+                            plan.PlanDays.ForEach(pd =>
+                            {
+                                pd.Id = null;
+                                pd.PlanId = null;
+
+                                if (pd.PlanDaySubjects != null && pd.PlanDaySubjects.Count > 0)
+                                {
+                                    pd.PlanDaySubjects.ForEach(pds =>
+                                    {
+                                        pds.Id = null;
+                                        pds.PlanDayId = null;
+                                        pds.SubjectId = null;
+
+                                        if (pds.PlanDaySubjectThemes != null && pds.PlanDaySubjectThemes.Count > 0)
+                                        {
+                                            pds.PlanDaySubjectThemes.ForEach(pdst =>
+                                            {
+                                                pdst.Id = null;
+                                                pdst.PlanDaySubjectId = null;
+                                                pdst.ThemeId = null;
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    }
+
+                    scope.Complete();
                 }
 
                 return await ActionResponse<EducationProgramDto>.ReturnSuccess(entityDto, "Program uspješno kopiran.");
