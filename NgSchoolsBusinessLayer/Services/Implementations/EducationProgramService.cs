@@ -275,6 +275,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 entityDto.Name = entityDtoNewData.Name;
                 entityDto.Version = entityDtoNewData.Version;
 
+                Dictionary<int, int> subjectDictionary = new Dictionary<int, int>();
+                Dictionary<int, int> themeDictionary = new Dictionary<int, int>();
 
                 var subjectList = new List<SubjectDto>(entityDto.Subjects);
                 var plan = entityDto.Plan;
@@ -284,7 +286,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-
                     if ((await Insert(entityDto)).IsNotSuccess(out response, out entityDto))
                     {
                         return response;
@@ -294,16 +295,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     {
                         subjectList.ForEach(async s =>
                         {
+                            var oldSubjectId = s.Id;
                             s.Id = null;
                             s.EducationProgramId = entityDto.Id;
+
                             var themesList = new List<ThemeDto>();
                             if (s.Themes != null && s.Themes.Count > 0)
                             {
-                                s.Themes.ForEach(t =>
-                                {
-                                    t.Id = null;
-                                    t.SubjectId = null;
-                                });
                                 themesList = new List<ThemeDto>(s.Themes);
                             }
 
@@ -314,13 +312,29 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                 return;
                             }
 
-                            themesList.ForEach(t => t.SubjectId = s.Id);
-                            if ((await themeService.InsertThemes(themesList))
-                                .IsNotSuccess(out ActionResponse<List<ThemeDto>> themesResponse, out themesList))
+                            subjectDictionary.Add(oldSubjectId.Value, s.Id.Value);
+
+                            themesList.ForEach(async t =>
                             {
-                                response = await ActionResponse<EducationProgramDto>.ReturnError(themesResponse.Message);
+                                var oldThemeId = t.Id;
+                                t.Id = null;
+                                t.SubjectId = s.Id;
+
+                                if ((await themeService.Insert(t))
+                                    .IsNotSuccess(out ActionResponse<ThemeDto> themeResponse, out t))
+                                {
+                                    response = await ActionResponse<EducationProgramDto>.ReturnError(themeResponse.Message);
+                                    return;
+                                }
+
+                                themeDictionary.Add(oldThemeId.Value, t.Id.Value);
+                            });
+
+                            if (response.IsNotSuccess())
+                            {
                                 return;
                             }
+
                         });
 
                         if (response.IsNotSuccess())
