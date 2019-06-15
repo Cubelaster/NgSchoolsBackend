@@ -11,6 +11,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public EducationProgramMapper()
         {
+            CreateMap<EducationProgramDto, EducationProgramDto>();
+
             CreateMap<EducationProgram, EducationProgramDto>()
                 .ForMember(dest => dest.EducationGroup, opt => opt.MapFrom(src => src.EducationGroup))
                 .ForMember(dest => dest.Subjects, opt => opt.MapFrom(src => src.Subjects.Where(s => s.Status == DatabaseEntityStatusEnum.Active)))

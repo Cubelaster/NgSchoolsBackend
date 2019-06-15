@@ -158,5 +158,27 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<ThemeDto>.ReturnError("Greška prilikom brisanja teme.");
             }
         }
+
+        public async Task<ActionResponse<List<ThemeDto>>> InsertThemes(List<ThemeDto> entityDtos)
+        {
+            try
+            {
+                var response = await ActionResponse<List<ThemeDto>>.ReturnSuccess(entityDtos, "Unos tema uspješan.");
+                entityDtos.ForEach(async s =>
+                {
+                    if ((await Insert(s)).IsNotSuccess(out ActionResponse<ThemeDto> insertResponse, out s))
+                    {
+                        response = await ActionResponse<List<ThemeDto>>.ReturnError(insertResponse.Message);
+                        return;
+                    }
+                });
+
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<ThemeDto>>.ReturnError("Greška prilikom upisa tema.");
+            }
+        }
     }
 }

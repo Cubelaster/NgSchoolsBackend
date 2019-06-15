@@ -41,6 +41,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         #endregion Ctors and Members
 
+        #region Readers
+
         public async Task<ActionResponse<EducationProgramDto>> GetById(int id)
         {
             try
@@ -139,6 +141,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<PagedResult<EducationProgramDto>>.ReturnError("Greška prilikom dohvata straničnih podataka za programe.");
             }
         }
+
+        #endregion Readers
+
+        #region Writers
 
         public async Task<ActionResponse<EducationProgramDto>> Insert(EducationProgramDto entityDto)
         {
@@ -247,6 +253,164 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<EducationProgramDto>> Copy(EducationProgramDto entityDto)
+        {
+            try
+            {
+                var response = await ActionResponse<EducationProgramDto>.ReturnSuccess(entityDto, "Program uspješno kopiran.");
+
+                var entityDtoNewData = new EducationProgramDto
+                {
+                    Name = entityDto.Name,
+                    Version = entityDto.Version
+                };
+
+                if ((await GetById(entityDto.Id.Value))
+                    .IsNotSuccess(out response, out EducationProgramDto oldEntityDto))
+                {
+                    return response;
+                }
+
+                mapper.Map(oldEntityDto, entityDto);
+
+                entityDto.Id = null;
+                entityDto.Name = entityDtoNewData.Name;
+                entityDto.Version = entityDtoNewData.Version;
+
+                Dictionary<int, int> subjectDictionary = new Dictionary<int, int>();
+                Dictionary<int, int> themeDictionary = new Dictionary<int, int>();
+
+                var subjectList = new List<SubjectDto>(entityDto.Subjects);
+                var plan = entityDto.Plan;
+
+                entityDto.Subjects = null;
+                entityDto.Plan = null;
+
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    if ((await Insert(entityDto)).IsNotSuccess(out response, out entityDto))
+                    {
+                        return response;
+                    }
+
+                    if (subjectList != null && subjectList.Count > 0)
+                    {
+                        subjectList.ForEach(async s =>
+                        {
+                            var oldSubjectId = s.Id;
+                            s.Id = null;
+                            s.EducationProgramId = entityDto.Id;
+
+                            var themesList = new List<ThemeDto>();
+                            if (s.Themes != null && s.Themes.Count > 0)
+                            {
+                                themesList = new List<ThemeDto>(s.Themes);
+                            }
+
+                            if ((await subjectService.Insert(s))
+                                .IsNotSuccess(out ActionResponse<SubjectDto> subjectResponse, out s))
+                            {
+                                response = await ActionResponse<EducationProgramDto>.ReturnError(subjectResponse.Message);
+                                return;
+                            }
+
+                            subjectDictionary.Add(oldSubjectId.Value, s.Id.Value);
+
+                            themesList.ForEach(async t =>
+                            {
+                                var oldThemeId = t.Id;
+                                t.Id = null;
+                                t.SubjectId = s.Id;
+
+                                if ((await themeService.Insert(t))
+                                    .IsNotSuccess(out ActionResponse<ThemeDto> themeResponse, out t))
+                                {
+                                    response = await ActionResponse<EducationProgramDto>.ReturnError(themeResponse.Message);
+                                    return;
+                                }
+
+                                themeDictionary.Add(oldThemeId.Value, t.Id.Value);
+                            });
+
+                            if (response.IsNotSuccess())
+                            {
+                                return;
+                            }
+
+                        });
+
+                        if (response.IsNotSuccess())
+                        {
+                            scope.Dispose();
+                            return response;
+                        }
+                    }
+
+                    if (plan != null)
+                    {
+                        if ((await planService.GetById(plan.Id.Value))
+                            .IsNotSuccess(out ActionResponse<PlanDto> planResponse, out plan))
+                        {
+                            response = await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                            scope.Dispose();
+                            return response;
+                        }
+
+                        plan.Id = null;
+                        plan.EducationProgramId = entityDto.Id;
+
+                        if (plan.PlanDays != null && plan.PlanDays.Count > 0)
+                        {
+                            plan.PlanDays.ForEach(pd =>
+                            {
+                                pd.Id = null;
+                                pd.PlanId = null;
+
+                                if (pd.PlanDaySubjects != null && pd.PlanDaySubjects.Count > 0)
+                                {
+                                    pd.PlanDaySubjects.ForEach(pds =>
+                                    {
+                                        pds.Id = null;
+                                        pds.PlanDayId = null;
+                                        pds.SubjectId = subjectDictionary[pds.SubjectId.Value];
+
+                                        if (pds.PlanDaySubjectThemes != null && pds.PlanDaySubjectThemes.Count > 0)
+                                        {
+                                            pds.PlanDaySubjectThemes.ForEach(pdst =>
+                                            {
+                                                pdst.Id = null;
+                                                pdst.PlanDaySubjectId = null;
+                                                pdst.ThemeId = themeDictionary[pdst.ThemeId.Value];
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+                        if ((await planService.Insert(plan)).IsNotSuccess(out planResponse, out plan))
+                        {
+                            response = await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                            scope.Dispose();
+                            return response;
+                        }
+                    }
+
+                    scope.Complete();
+                }
+
+                return response;
+            }
+            catch
+            {
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom kopiranja programa.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<EducationProgramDto>>();
+            }
+        }
+
         public async Task<ActionResponse<EducationProgramDto>> Delete(int id)
         {
             try
@@ -265,6 +429,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 await cacheService.RefreshCache<List<EducationProgramDto>>();
             }
         }
+
+        #region ClassTypes
 
         public async Task<ActionResponse<EducationProgramDto>> ModifyClassTypes(EducationProgramDto entityDto)
         {
@@ -386,6 +552,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        #endregion ClassTypes
+
         #region Files
 
         public async Task<ActionResponse<EducationProgramDto>> ModifyFiles(EducationProgramDto entityDto)
@@ -504,5 +672,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         }
 
         #endregion Files
+
+        #endregion Writers
     }
 }

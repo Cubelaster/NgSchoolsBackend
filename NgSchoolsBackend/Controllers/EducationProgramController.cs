@@ -65,6 +65,13 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
+        public async Task<ActionResponse<EducationProgramDto>> Copy([FromBody] EducationProgramDto request)
+        {
+            return await educationProgramService.Copy(request);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
         public async Task<ActionResponse<EducationProgramDto>> Delete([FromBody] SimpleRequestBase request)
         {
             return await educationProgramService.Delete(request.Id);

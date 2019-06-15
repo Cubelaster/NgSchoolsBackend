@@ -21,6 +21,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<ThemeDto>> Insert(ThemeDto entityDto);
         Task<ActionResponse<ThemeDto>> Update(ThemeDto entityDto);
         Task<ActionResponse<ThemeDto>> Delete(int id);
+        Task<ActionResponse<List<ThemeDto>>> InsertThemes(List<ThemeDto> entityDtos);
         Task<ActionResponse<int>> GetTotalNumber();
 
         #region Unused

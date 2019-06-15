@@ -18,5 +18,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<EducationProgramDto>> Update(EducationProgramDto entityDto);
         Task<ActionResponse<PagedResult<EducationProgramDto>>> GetBySearchQuery(BasePagedRequest pagedRequest);
         Task<ActionResponse<int>> GetTotalNumber();
+        Task<ActionResponse<EducationProgramDto>> Copy(EducationProgramDto entityDto);
     }
 }

@@ -622,7 +622,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     HoursNumber = pds.HoursNumber
                 }).ToList();
 
-            var themesToModify = currentThemes.Where(cd => entityDto.PlanDaySubjectThemes
+            var themesToModify = entityDto.PlanDaySubjectThemes.Where(cd => currentThemes
             .Select(pdst => pdst.ThemeId.Value)
             .Contains(cd.ThemeId.Value)).ToList();
 
