@@ -257,6 +257,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                var response = await ActionResponse<EducationProgramDto>.ReturnSuccess(entityDto, "Program uspješno kopiran.");
+
                 var entityDtoNewData = new EducationProgramDto
                 {
                     Name = entityDto.Name,
@@ -264,7 +266,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 };
 
                 if ((await GetById(entityDto.Id.Value))
-                    .IsNotSuccess(out ActionResponse<EducationProgramDto> response, out EducationProgramDto oldEntityDto))
+                    .IsNotSuccess(out response, out EducationProgramDto oldEntityDto))
                 {
                     return response;
                 }
@@ -339,6 +341,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                         if (response.IsNotSuccess())
                         {
+                            scope.Dispose();
                             return response;
                         }
                     }
@@ -346,9 +349,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     if (plan != null)
                     {
                         if ((await planService.GetById(plan.Id.Value))
-                            .IsNotSuccess(out ActionResponse<PlanDto> planResponse, out PlanDto oldPlan))
+                            .IsNotSuccess(out ActionResponse<PlanDto> planResponse, out plan))
                         {
-                            return await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                            response = await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                            scope.Dispose();
+                            return response;
                         }
 
                         plan.Id = null;
@@ -367,7 +372,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                     {
                                         pds.Id = null;
                                         pds.PlanDayId = null;
-                                        pds.SubjectId = null;
+                                        pds.SubjectId = subjectDictionary[pds.SubjectId.Value];
 
                                         if (pds.PlanDaySubjectThemes != null && pds.PlanDaySubjectThemes.Count > 0)
                                         {
@@ -375,23 +380,34 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                             {
                                                 pdst.Id = null;
                                                 pdst.PlanDaySubjectId = null;
-                                                pdst.ThemeId = null;
+                                                pdst.ThemeId = themeDictionary[pdst.ThemeId.Value];
                                             });
                                         }
                                     });
                                 }
                             });
                         }
+
+                        if ((await planService.Insert(plan)).IsNotSuccess(out planResponse, out plan))
+                        {
+                            response = await ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                            scope.Dispose();
+                            return response;
+                        }
                     }
 
                     scope.Complete();
                 }
 
-                return await ActionResponse<EducationProgramDto>.ReturnSuccess(entityDto, "Program uspješno kopiran.");
+                return response;
             }
             catch
             {
                 return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom kopiranja programa.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<EducationProgramDto>>();
             }
         }
 
