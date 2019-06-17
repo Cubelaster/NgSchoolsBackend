@@ -18,6 +18,7 @@ namespace NgSchoolsDataLayer.Models
         public DateTime SecondExamDate { get; set; }
         public string Notes { get; set; }
         public DateTime? EnrolmentDate { get; set; }
+        public string EducationGroupMark { get; set; }
 
         [Required]
         public int ProgramId { get; set; }

@@ -9,6 +9,7 @@ namespace NgSchoolsDataLayer.Models
         public string NameDomestic { get; set; }
         public string Latitude { get; set; }
         public string Longtitude { get; set; }
+        public string PoBoxNumber { get; set; }
 
         public int? RegionId { get; set; }
         public virtual Region Region { get; set; }
