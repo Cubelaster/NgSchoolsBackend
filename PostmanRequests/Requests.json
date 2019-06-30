@@ -1,43 +1,146 @@
 // StudentGroup/Insert
 {
-    "StartDate": "2019-02-13",
-    "EndDate": "2019-12-01",
-    "CredentialDate": "2019-12-01",
-    "FirstExamDate": "2019-12-01",
-    "SecondExamDate": "2019-12-01",
-    "Notes": "Exam Commission",
-    "EnrolmentDate": "2019-12-01",
-    "ProgramId": 3006,
-    "ClassLocationId": 2004,
-    "EducationLeaderId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb",
-		"StudentsInGroup": [
-			{
-				"StudentId": 4012,
-				"EmployerId": 6006,
-				"CompletedPractice": true
-			}
-		],
-    "ExamCommission": {
-    	"Name": "Komisija",
-    	"TeacherIds": [
-    		"1a1bfa81-53ee-4cd3-c039-08d652b91ccb"
-		]
-    },
-    "StudentGroupClassAttendances": [
-    	{
-	    	"Date": "2019-01-01",
-	    	"StudentClassAttendances": [
-	    		{
-	    			"StudentId": 1006,
-	    			"Attendance": true
-	    		},
-	    		{
-	    			"StudentId": 1007,
-	    			"Attendance": false
-	    		}
+	"Name": "Test Grupa Practical Exam Commission",
+	"SchoolYear": null,
+	"StartDate": "04.04.2019. 00:00:00",
+	"EndDate": "05.04.2019. 00:00:00",
+	"CredentialDate": "05.04.2019. 00:00:00",
+	"FirstExamDate": "04.04.2019. 00:00:00",
+	"SecondExamDate": "12.04.2019. 00:00:00",
+	"PracticalExamFirstDate": null,
+	"PracticalExamSecondDate": null,
+	"Notes": null,
+	"EnrolmentDate": "05.04.2019. 00:00:00",
+	"EducationGroupMark": null,
+	"ProgramId": 1,
+	"EducationProgram": null,
+	"ClassLocationId": 1,
+	"ClassLocation": {
+		"Id": 1,
+		"Name": "Novo Mjesto",
+		"Address": null,
+		"Telephone": null,
+		"Mobile": null,
+		"Email": null,
+		"CountryId": 49,
+		"Country": null,
+		"RegionId": 1,
+		"Region": null,
+		"MunicipalityId": 1,
+		"Municipality": null,
+		"CityId": 1,
+		"City": null
+	},
+	"StudentIds": [
+		2
+	],
+	"StudentNames": [
+		"David Čubela"
+	],
+	"Students": [
+		{
+			"Id": 2,
+			"PhotoId": null,
+			"Photo": null,
+			"FirstName": "David",
+			"LastName": "Čubela",
+			"Dob": null,
+			"Mentor": null,
+			"Oib": "38761800703",
+			"CityOfBirthId": null,
+			"CityOfBirth": null,
+			"CountryOfBirthId": null,
+			"CountryOfBirth": null,
+			"RegionOfBirthId": null,
+			"RegionOfBirth": null,
+			"MunicipalityOfBirthId": null,
+			"MunicipalityOfBirth": null,
+			"Mob": null,
+			"Citizenship": null,
+			"Proffesion": null,
+			"IdCard": false,
+			"FathersFullName": null,
+			"MothersFullName": null,
+			"Gender": null,
+			"AddressStreet": null,
+			"AddressCountryId": null,
+			"AddressCountry": null,
+			"AddressCityId": null,
+			"AddressCity": null,
+			"AddressRegionId": null,
+			"AddressRegion": null,
+			"AddressMunicipalityId": null,
+			"AddressMunicipality": null,
+			"Mobile": null,
+			"Email": null,
+			"Employed": false,
+			"EducationContract": false,
+			"FinalExam": false,
+			"CompletedSchoolCertificate": false,
+			"PractiacalTrainingContract": false,
+			"DoctorCertification": false,
+			"DriversLicence": false,
+			"KnowledgeTest": false,
+			"CitizenshipCertificate": false,
+			"BirthCertificate": false,
+			"PracticeDiary": false,
+			"EnrolmentDate": "01.12.2019. 00:00:00",
+			"FinishedSchool": null,
+			"CertificateNumber": null,
+			"SchoolLevel": null,
+			"Vocation": null,
+			"Gdpr": false,
+			"Notes": null,
+			"DateCreated": "31.03.2019.",
+			"EmployerId": null,
+			"Employer": null,
+			"Files": [],
+			"StudentRegisterEducationProgramIds": [
+				1,
+				1
 			]
-    	}
-	]
+		}
+	],
+	"StudentsInGroup": [
+		{
+			"StudentId": 2,
+			"CompletedPractice": true,
+			"EmployerId": null,
+			"Employer": null
+		}
+	],
+	"SubjectTeachers": [],
+	"EducationLeaderId": null,
+	"EducationLeader": null,
+	"ExamCommissionId": 3,
+	"ExamCommission": {
+		"Id": 3,
+		"Name": "Exam Commission Commission Role Test",
+		"CommissionMembers": [
+			{
+				"Id": 2,
+				"ExamCommissionId": 3,
+				"UserId": "5a1af993-bcf1-46e2-990e-08d6b5f9e359",
+				"CommissionRole": "Kralj 2"
+			}
+		]
+	},
+	"PracticalExamCommissionId": 3,
+	"PracticalExamCommission": {
+		"Id": 3,
+		"Name": "Exam Commission Commission Role Test",
+		"CommissionMembers": [
+			{
+				"Id": 2,
+				"ExamCommissionId": 3,
+				"UserId": "5a1af993-bcf1-46e2-990e-08d6b5f9e359",
+				"CommissionRole": "Kralj 2"
+			}
+		]
+	},
+	"DirectorId": null,
+	"Director": null,
+	"StudentGroupClassAttendances": []
 }
 
 // StudentGroup/Update
@@ -225,8 +328,32 @@
     ],
     "SubjectTeachers": [],
     "EducationLeaderId": null,
-    "ExamCommissionId": null,
-    "ExamCommission": null,
+	"ExamCommissionId": 3,
+	"ExamCommission": {
+		"Id": 3,
+		"Name": "Exam Commission Commission Role Test",
+		"CommissionMembers": [
+			{
+				"Id": 2,
+				"ExamCommissionId": 3,
+				"UserId": "5a1af993-bcf1-46e2-990e-08d6b5f9e359",
+				"CommissionRole": "Kralj 2"
+			}
+		]
+	},
+	"PracticalExamCommissionId": 3,
+	"PracticalExamCommission": {
+		"Id": 3,
+		"Name": "Exam Commission Commission Role Test",
+		"CommissionMembers": [
+			{
+				"Id": 2,
+				"ExamCommissionId": 3,
+				"UserId": "5a1af993-bcf1-46e2-990e-08d6b5f9e359",
+				"CommissionRole": "Kralj 2"
+			}
+		]
+	},
     "DirectorId": null,
     "Director": null,
     "StudentGroupClassAttendances": []
@@ -1018,20 +1145,28 @@
 //ExamCommission/Insert
 
 {
-    "Name": "Exam Commission",
-    "TeacherIds": [
-    		"1a1bfa81-53ee-4cd3-c039-08d652b91ccb"
-    	]
+    "Name": "Exam Commission Commission Role Test",
+    "CommissionMembers": [
+    	{
+    		"UserId": "5a1af993-bcf1-46e2-990e-08d6b5f9e359",
+    		"CommissionRole": "Kralj"
+    	}
+	]
 }
 
 //ExamCommission/Update
 
 {
-	"Id": 1,
-    "Name": "Exam Commission",
-    "TeacherIds": [
-    		"1a1bfa81-53ee-4cd3-c039-08d652b91ccb"
-    	]
+	"Id": 3,
+    "Name": "Exam Commission Commission Role Test",
+    "CommissionMembers": [
+    	{
+			"Id": 2,
+			"ExamCommissionId": 3,
+    		"UserId": "5a1af993-bcf1-46e2-990e-08d6b5f9e359",
+    		"CommissionRole": "Kralj 2"
+    	}
+	]
 }
 
 //EducationLevel/Insert

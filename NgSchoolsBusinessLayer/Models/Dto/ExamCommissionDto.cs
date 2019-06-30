@@ -11,5 +11,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string Name { get; set; }
         public List<Guid> TeacherIds { get; set; }
         public List<UserDto> Teachers { get; set; }
+        public List<UserExamCommissionDto> CommissionMembers { get; set; }
     }
 }

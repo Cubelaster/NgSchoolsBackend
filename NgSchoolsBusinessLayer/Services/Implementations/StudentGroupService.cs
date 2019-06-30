@@ -131,7 +131,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     List<StudentGroupClassAttendanceDto> classAttendances = entityDto.StudentGroupClassAttendances != null ?
                         new List<StudentGroupClassAttendanceDto>(entityDto.StudentGroupClassAttendances) : new List<StudentGroupClassAttendanceDto>();
 
+                    ExamCommissionDto practicalExamCommission = entityDto.PracticalExamCommission;
+
                     if ((await ModifyExamCommission(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> commissionResponse, out entityDto))
+                    {
+                        return commissionResponse;
+                    }
+
+                    entityDto.PracticalExamCommission = practicalExamCommission;
+                    if ((await ModifyPracticalExamCommission(entityDto)).IsNotSuccess(out commissionResponse, out entityDto))
                     {
                         return commissionResponse;
                     }
@@ -204,6 +212,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     entityDto.StudentsInGroup = null;
 
                     ExamCommissionDto examCommission = entityDto.ExamCommission;
+                    ExamCommissionDto practicalExamCommission = entityDto.PracticalExamCommission;
 
                     List<StudentGroupClassAttendanceDto> classAttendances = entityDto.StudentGroupClassAttendances != null ?
                         new List<StudentGroupClassAttendanceDto>(entityDto.StudentGroupClassAttendances) : new List<StudentGroupClassAttendanceDto>();
@@ -217,8 +226,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     unitOfWork.Save();
 
                     mapper.Map(entityToUpdate, entityDto);
+
                     entityDto.ExamCommission = examCommission;
                     if ((await ModifyExamCommission(entityDto)).IsNotSuccess(out ActionResponse<StudentGroupDto> commissionResponse, out entityDto))
+                    {
+                        return commissionResponse;
+                    }
+
+                    entityDto.PracticalExamCommission = practicalExamCommission;
+                    if ((await ModifyPracticalExamCommission(entityDto)).IsNotSuccess(out commissionResponse, out entityDto))
                     {
                         return commissionResponse;
                     }
@@ -548,6 +564,65 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<StudentGroupDto>.ReturnError($"Greška prilikom ažuriranja ispitne komisije za grupu studenata.");
+            }
+        }
+
+        public async Task<ActionResponse<StudentGroupDto>> ModifyPracticalExamCommission(StudentGroupDto entityDto)
+        {
+            try
+            {
+                if (entityDto.PracticalExamCommissionId.HasValue)
+                {
+                    if ((await examCommissionService.Update(entityDto.PracticalExamCommission))
+                        .IsNotSuccess(out ActionResponse<ExamCommissionDto> examCommissionResponse, out ExamCommissionDto examCommission))
+                    {
+                        return await ActionResponse<StudentGroupDto>.ReturnError(examCommissionResponse.Message);
+                    }
+                    entityDto.PracticalExamCommission = examCommission;
+                }
+                else
+                {
+                    if (entityDto.Id.HasValue)
+                    {
+                        var entityToCheck = unitOfWork.GetGenericRepository<StudentGroup>().FindBy(sg => sg.Id == entityDto.Id);
+                        if (entityToCheck.PracticalExamCommissionId.HasValue)
+                        {
+                            if ((await examCommissionService.Delete(entityToCheck.PracticalExamCommissionId.Value))
+                                .IsNotSuccess(out ActionResponse<ExamCommissionDto> deleteResponse))
+                            {
+                                return await ActionResponse<StudentGroupDto>.ReturnError(deleteResponse.Message);
+                            }
+                        }
+                        else if (entityDto.PracticalExamCommission != null)
+                        {
+                            if ((await examCommissionService.Insert(entityDto.PracticalExamCommission))
+                                .IsNotSuccess(out ActionResponse<ExamCommissionDto> insertResponse, out ExamCommissionDto examCommission))
+                            {
+                                return await ActionResponse<StudentGroupDto>.ReturnError(insertResponse.Message);
+                            }
+                            entityDto.PracticalExamCommission = examCommission;
+                            entityDto.PracticalExamCommissionId = examCommission.Id;
+                        }
+                    }
+                    else
+                    {
+                        if (entityDto.PracticalExamCommission != null)
+                        {
+                            if ((await examCommissionService.Insert(entityDto.PracticalExamCommission))
+                                .IsNotSuccess(out ActionResponse<ExamCommissionDto> insertResponse, out ExamCommissionDto examCommission))
+                            {
+                                return await ActionResponse<StudentGroupDto>.ReturnError(insertResponse.Message);
+                            }
+                            entityDto.PracticalExamCommission = examCommission;
+                            entityDto.PracticalExamCommissionId = examCommission.Id;
+                        }
+                    }
+                }
+                return await ActionResponse<StudentGroupDto>.ReturnSuccess(entityDto, "Praktična ispitna komisija za grupu studenata uspješno izmijenjena.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentGroupDto>.ReturnError($"Greška prilikom ažuriranja praktične ispitne komisije za grupu studenata.");
             }
         }
 

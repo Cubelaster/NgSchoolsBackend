@@ -32,7 +32,7 @@ namespace NgSchoolsDataLayer.Repository.UnitOfWork
             var changeTracker = context.ChangeTracker;
 
             var modifiedEntries = changeTracker.Entries()
-              .Where(x => x.Entity is DatabaseEntity && (x.State == EntityState.Deleted));
+              .Where(x => x.Entity is DatabaseEntity);
 
             foreach (var entry in modifiedEntries)
             {

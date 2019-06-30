@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -99,12 +100,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<Guid> teachers = new List<Guid>(entityDto.TeacherIds);
+                List<Guid> teachers = entityDto.TeacherIds != null ? new List<Guid>(entityDto.TeacherIds) : new List<Guid>();
+                List<UserExamCommissionDto> commissionMembers = new List<UserExamCommissionDto>(entityDto.CommissionMembers);
                 var entityToAdd = mapper.Map<ExamCommissionDto, ExamCommission>(entityDto);
                 unitOfWork.GetGenericRepository<ExamCommission>().Add(entityToAdd);
                 unitOfWork.Save();
                 mapper.Map(entityToAdd, entityDto);
                 entityDto.TeacherIds = new List<Guid>(teachers);
+                entityDto.CommissionMembers = new List<UserExamCommissionDto>(commissionMembers);
                 if ((await ModifyExamTeachers(entityDto)).IsNotSuccess(out ActionResponse<ExamCommissionDto> actionResponse, out entityDto))
                 {
                     return actionResponse;
@@ -140,9 +143,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     return response;
                 }
 
+                unitOfWork.GetContext().Entry(entityToUpdate).State = EntityState.Detached;
+                entityToUpdate = null;
+
                 return await ActionResponse<ExamCommissionDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return await ActionResponse<ExamCommissionDto>.ReturnError("Greška prilikom ažuriranja ispitne komisije.");
             }
@@ -168,28 +174,45 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 var entity = unitOfWork.GetGenericRepository<ExamCommission>()
                     .FindBy(e => e.Id == examCommission.Id.Value, includeProperties: "UserExamCommissions");
-                var currentExamTeachers = entity.UserExamCommissions.ToList();
-                var newTeachers = new List<Guid>(examCommission.TeacherIds);
 
-                var teachersToRemove = mapper.Map<List<UserExamCommission>, List<UserExamCommissionDto>>
-                    (currentExamTeachers.Where(cet => !newTeachers.Contains(cet.UserId)).ToList());
+                var currentCommissionMembers = entity.UserExamCommissions.ToList();
+                var newCommissionMembers = examCommission.CommissionMembers;
 
-                var teachersToAdd = newTeachers
-                    .Where(nt => !currentExamTeachers.Select(uec => uec.UserId).Contains(nt))
-                    .Select(nt => new UserExamCommissionDto { UserId = nt, ExamCommissionId = examCommission.Id })
+                var membersToRemove = mapper.Map<List<UserExamCommissionDto>>(currentCommissionMembers.Where(cem => !newCommissionMembers
+                    .Select(ncm => ncm.Id).Contains(cem.Id)));
+
+                var membersToAdd = newCommissionMembers
+                    .Where(ncm => !ncm.Id.HasValue
+                    || !currentCommissionMembers.Select(ccm => ccm.Id).Contains(ncm.Id.Value))
+                    .Select(ncm =>
+                    {
+                        ncm.ExamCommissionId = examCommission.Id;
+                        return ncm;
+                    })
                     .ToList();
 
-                if ((await RemoveExamTeachers(teachersToRemove))
+                var membersToModify = newCommissionMembers
+                    .Where(ncm => ncm.Id.HasValue && currentCommissionMembers.Select(ccm => ccm.Id).Contains(ncm.Id.Value))
+                    .ToList();
+
+                if ((await RemoveExamTeachers(membersToRemove))
                     .IsNotSuccess(out ActionResponse<List<UserExamCommissionDto>> actionResponse))
                 {
                     return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena nastavnika u ispitnoj komisiji.");
                 }
 
-                if ((await AddExamTeachers(teachersToAdd))
+                if ((await AddExamTeachers(membersToAdd))
                     .IsNotSuccess(out actionResponse))
                 {
                     return await ActionResponse<ExamCommissionDto>.ReturnError("Neuspješna promjena nastavnika u ispitnoj komisiji.");
                 }
+
+                if((await ModifyCommissionMembers(membersToModify))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<ExamCommissionDto>.ReturnError(actionResponse.Message);
+                }
+
                 return await ActionResponse<ExamCommissionDto>.ReturnSuccess(examCommission, "Uspješno izmijenjeni članovi ispitne komisije.");
             }
             catch (Exception)
@@ -270,6 +293,49 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<UserExamCommissionDto>.ReturnError("Greška prilikom dodavanja nastavnika u ispitnu komisiju.");
+            }
+        }
+
+        public async Task<ActionResponse<List<UserExamCommissionDto>>> ModifyCommissionMembers(List<UserExamCommissionDto> commissionMembers)
+        {
+            try
+            {
+                var response = await ActionResponse<List<UserExamCommissionDto>>.ReturnSuccess(null, "Članovi ispitne komisije uspješno ažurirani.");
+                commissionMembers.ForEach(async cm =>
+                {
+                    if ((await ModifyCommissionMember(cm))
+                    .IsNotSuccess(out ActionResponse<UserExamCommissionDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<UserExamCommissionDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<UserExamCommissionDto>>.ReturnError("Greška prilikom ažuriranja člana ispitne komisije.");
+            }
+        }
+
+        public async Task<ActionResponse<UserExamCommissionDto>> ModifyCommissionMember(UserExamCommissionDto member)
+        {
+            try
+            {
+                var entityToModify = mapper.Map<UserExamCommissionDto, UserExamCommission>(member);
+                unitOfWork.GetGenericRepository<UserExamCommission>().Update(entityToModify);
+                unitOfWork.Save();
+
+                mapper.Map(entityToModify, member);
+
+                unitOfWork.GetContext().Entry(entityToModify).State = EntityState.Detached;
+                entityToModify = null;
+
+                return await ActionResponse<UserExamCommissionDto>.ReturnSuccess(member,"Član komisije uspješno ažuriran.");
+            }
+            catch (Exception ex)
+            {
+                return await ActionResponse<UserExamCommissionDto>.ReturnError("Greška prilikom ažuriranja člana ispitne komisije.");
             }
         }
     }
