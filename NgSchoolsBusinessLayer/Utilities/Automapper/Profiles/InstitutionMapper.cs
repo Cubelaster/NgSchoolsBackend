@@ -11,6 +11,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
         public InstitutionMapper()
         {
             CreateMap<Institution, InstitutionDto>()
+                .ForMember(dest => dest.GoverningCouncil, opt => opt.MapFrom(src => src.GoverningCouncil))
                 .ForMember(dest => dest.Files, opt => opt.MapFrom(src => src.InstitutionFiles.Where(a => a.Status == DatabaseEntityStatusEnum.Active).Select(file => file.File )));
 
             CreateMap<InstitutionDto, Institution>()
@@ -21,7 +22,16 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Municipality, opt => opt.Ignore())
                 .ForMember(dest => dest.Logo, opt => opt.Ignore())
                 .ForMember(dest => dest.Principal, opt => opt.Ignore())
-                .ForMember(dest => dest.InstitutionFiles, opt => opt.Ignore());
+                .ForMember(dest => dest.InstitutionFiles, opt => opt.Ignore())
+                .ForMember(dest => dest.GoverningCouncil, opt => opt.Ignore());
+
+            CreateMap<GoverningCouncil, GoverningCouncilDto>()
+                .ForMember(dest => dest.GoverningCouncilMembers, opt => opt .MapFrom(src => src.GoverningCouncilMembers.Where(gcm => gcm.Status == DatabaseEntityStatusEnum.Active)));
+
+            CreateMap<GoverningCouncilDto, GoverningCouncil>()
+                .ForMember(dest => dest.GoverningCouncilMembers, opt => opt.Ignore());
+
+            CreateMap<GoverningCouncilMember, GoverningCouncilMemberDto>().ReverseMap();
 
             CreateMap<InstitutionFile, InstitutionFileDto>().ReverseMap();
         }

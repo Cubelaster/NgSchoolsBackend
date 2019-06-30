@@ -148,7 +148,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<ExamCommissionDto>.ReturnSuccess(entityDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return await ActionResponse<ExamCommissionDto>.ReturnError("Greška prilikom ažuriranja ispitne komisije.");
             }
@@ -333,7 +333,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<UserExamCommissionDto>.ReturnSuccess(member,"Član komisije uspješno ažuriran.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return await ActionResponse<UserExamCommissionDto>.ReturnError("Greška prilikom ažuriranja člana ispitne komisije.");
             }

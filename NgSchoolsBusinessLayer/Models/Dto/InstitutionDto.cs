@@ -25,5 +25,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int? MunicipalityId { get; set; }
         public MunicipalityDto Municipality { get; set; }
         public List<FileDto> Files { get; set; }
+        public GoverningCouncilDto GoverningCouncil { get; set; }
     }
 }

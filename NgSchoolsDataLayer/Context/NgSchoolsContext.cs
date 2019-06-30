@@ -143,6 +143,11 @@ namespace NgSchoolsDataLayer.Context
                 .WithMany(r => r.Cities)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Entity<Institution>().HasIndex(i => i.CountryId).IsUnique(false);
+            builder.Entity<Institution>().HasIndex(i => i.CityId).IsUnique(false);
+            builder.Entity<Institution>().HasIndex(i => i.RegionId).IsUnique(false);
+            builder.Entity<Institution>().HasIndex(i => i.MunicipalityId).IsUnique(false);
+
             builder.Entity<Institution>()
                 .HasOne(i => i.Region)
                 .WithOne()

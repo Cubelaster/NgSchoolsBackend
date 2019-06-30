@@ -589,7 +589,16 @@
 			"Id": 2,
 			"FileName": "Bla"
 		}
-	]
+	],
+	"GoverningCouncil": {
+		"Name": "Prvi GC",
+		"GoverningCouncilMembers": [
+			{
+				"UserId": "5a1af993-bcf1-46e2-990e-08d6b5f9e359",
+				"Role": "Kita"
+			}
+		]
+	}
 }
 
 // Institution/Update
@@ -611,7 +620,20 @@
 		"Id": 1,
 		"FileName": "Bla"
 	}
-	]
+	],
+	"GoverningCouncil": {
+		"Id": 1,
+		"Name": "Prvi GC",
+		"InstitutionId": 1,
+		"GoverningCouncilMembers": [
+			{
+				"Id": 1,
+				"GoverningCouncilId": 1,
+				"UserId": "5a1af993-bcf1-46e2-990e-08d6b5f9e359",
+				"Role": "Kita"
+			}
+		]
+	}
 }
 
 // User/Update

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Dto;
@@ -33,7 +34,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var institution = unitOfWork.GetGenericRepository<Institution>()
-                    .GetAll(includeProperties: "Principal,Country,Region,City,InstitutionFiles.File").FirstOrDefault();
+                    .GetAll(includeProperties: "Principal,Country,Region,City,InstitutionFiles.File,GoverningCouncil.GoverningCouncilMembers.User.UserDetails").FirstOrDefault();
+
                 return await ActionResponse<InstitutionDto>
                     .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institution));
             }
@@ -49,8 +51,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
-                    List<FileDto> files = institution.Files != null 
+                    List<FileDto> files = institution.Files != null
                         ? new List<FileDto>(institution.Files) : new List<FileDto>();
+
+                    GoverningCouncilDto governingCouncil = institution.GoverningCouncil;
 
                     var institutionToAdd = mapper.Map<InstitutionDto, Institution>(institution);
                     unitOfWork.GetGenericRepository<Institution>().Add(institutionToAdd);
@@ -60,6 +64,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     institution.Files = files;
                     if ((await ModifyFiles(institution))
                         .IsNotSuccess(out ActionResponse<InstitutionDto> fileResponse, out institution))
+                    {
+                        return fileResponse;
+                    }
+
+                    institution.GoverningCouncil = governingCouncil;
+                    institution.GoverningCouncil.InstitutionId = institution.Id;
+                    if ((await ModifyGoverningCouncil(institution)).IsNotSuccess(out fileResponse, out institution))
                     {
                         return fileResponse;
                     }
@@ -117,6 +128,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<InstitutionDto>.ReturnError("Greška prilikom brisanja institucije.");
             }
         }
+
+        #region Files
 
         public async Task<ActionResponse<InstitutionDto>> ModifyFiles(InstitutionDto entityDto)
         {
@@ -232,5 +245,303 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<InstitutionFileDto>.ReturnError("Greška prilikom dodavanja dokumenta instituciji.");
             }
         }
+
+        #endregion Files
+
+        #region Governing Council
+
+        public async Task<ActionResponse<InstitutionDto>> ModifyGoverningCouncil(InstitutionDto entityDto)
+        {
+            try
+            {
+                var response = await ActionResponse<InstitutionDto>.ReturnSuccess(entityDto, "Podaci o upravnom vijeću institucije uspješno ažurirani.");
+
+                if (entityDto.GoverningCouncil != null)
+                {
+                    if (entityDto.GoverningCouncil.Id.HasValue)
+                    {
+                        if ((await UpdateGoverningCouncil(entityDto.GoverningCouncil))
+                            .IsNotSuccess(out ActionResponse<GoverningCouncilDto> councilResponse, out GoverningCouncilDto governingCouncil))
+                        {
+                            return await ActionResponse<InstitutionDto>.ReturnError(councilResponse.Message);
+                        }
+                        entityDto.GoverningCouncil = governingCouncil;
+                    }
+                    else
+                    {
+                        if ((await InsertGoverningCouncil(entityDto.GoverningCouncil))
+                            .IsNotSuccess(out ActionResponse<GoverningCouncilDto> councilResponse, out GoverningCouncilDto governingCouncil))
+                        {
+                            return await ActionResponse<InstitutionDto>.ReturnError(councilResponse.Message);
+                        }
+                        entityDto.GoverningCouncil = governingCouncil;
+                    }
+                }
+                else
+                {
+                    var institution = unitOfWork.GetGenericRepository<Institution>().FindBy(i => i.Id == entityDto.Id.Value, includeProperties: "GoverningCouncil");
+                    if (institution.GoverningCouncil != null)
+                    {
+                        if ((await DeleteGoverningCouncil(institution.GoverningCouncil.Id))
+                            .IsNotSuccess(out ActionResponse<GoverningCouncilDto> councilResponse))
+                        {
+                            return await ActionResponse<InstitutionDto>.ReturnError(councilResponse.Message);
+                        }
+                    }
+                }
+
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<InstitutionDto>.ReturnError("Greška prilikom ažuriranja podataka upravnog vijeća.");
+            }
+        }
+
+        public async Task<ActionResponse<GoverningCouncilDto>> InsertGoverningCouncil(GoverningCouncilDto entityDto)
+        {
+            try
+            {
+                List<GoverningCouncilMemberDto> councilMembers = new List<GoverningCouncilMemberDto>(entityDto.GoverningCouncilMembers);
+
+                var entityToAdd = mapper.Map<GoverningCouncilDto, GoverningCouncil>(entityDto);
+                unitOfWork.GetGenericRepository<GoverningCouncil>().Add(entityToAdd);
+                unitOfWork.Save();
+
+                mapper.Map(entityToAdd, entityDto);
+
+                entityDto.GoverningCouncilMembers = councilMembers;
+                if ((await ModifyCouncilMembers(entityDto))
+                    .IsNotSuccess(out ActionResponse<GoverningCouncilDto> response, out entityDto))
+                {
+                    return response;
+                }
+
+                return await ActionResponse<GoverningCouncilDto>.ReturnSuccess(entityDto, "Upravno vijeće za instituciju uspješno uneseno.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<GoverningCouncilDto>.ReturnError("Greška prilikom unosa podataka za upravno vijeće.");
+            }
+        }
+
+        public async Task<ActionResponse<GoverningCouncilDto>> UpdateGoverningCouncil(GoverningCouncilDto entityDto)
+        {
+            try
+            {
+                List<GoverningCouncilMemberDto> councilMembers = new List<GoverningCouncilMemberDto>(entityDto.GoverningCouncilMembers);
+
+                var entityToUpdate = mapper.Map<GoverningCouncilDto, GoverningCouncil>(entityDto);
+                unitOfWork.GetGenericRepository<GoverningCouncil>().Update(entityToUpdate);
+                unitOfWork.Save();
+
+                mapper.Map(entityToUpdate, entityDto);
+
+                entityDto.GoverningCouncilMembers = councilMembers;
+                if ((await ModifyCouncilMembers(entityDto))
+                    .IsNotSuccess(out ActionResponse<GoverningCouncilDto> response, out entityDto))
+                {
+                    return response;
+                }
+
+                return await ActionResponse<GoverningCouncilDto>.ReturnSuccess(entityDto, "Upravno vijeće za instituciju uspješno ažurirano.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<GoverningCouncilDto>.ReturnError("Greška prilikom unosa podataka za upravno vijeće.");
+            }
+        }
+
+        public async Task<ActionResponse<GoverningCouncilDto>> DeleteGoverningCouncil(int id)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<GoverningCouncil>().Delete(id);
+                unitOfWork.Save();
+                return await ActionResponse<GoverningCouncilDto>.ReturnSuccess(null, "Brisanje upravnog vijeća institucije uspješno.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<GoverningCouncilDto>.ReturnError("Greška prilikom brisanja upravnog vijeća institucije.");
+            }
+        }
+
+        public async Task<ActionResponse<GoverningCouncilDto>> ModifyCouncilMembers(GoverningCouncilDto entityDto)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<GoverningCouncil>()
+                    .FindBy(e => e.Id == entityDto.Id.Value, includeProperties: "GoverningCouncilMembers");
+
+                var currentCouncilMembers = entity.GoverningCouncilMembers.ToList();
+                var newCouncilMembers = entityDto.GoverningCouncilMembers;
+
+                var membersToRemove = mapper.Map<List<GoverningCouncilMemberDto>>(currentCouncilMembers.Where(cem => !newCouncilMembers
+                    .Select(ncm => ncm.Id).Contains(cem.Id)));
+
+                var membersToAdd = newCouncilMembers
+                    .Where(ncm => !ncm.Id.HasValue
+                    || !currentCouncilMembers.Select(ccm => ccm.Id).Contains(ncm.Id.Value))
+                    .Select(ncm =>
+                    {
+                        ncm.GoverningCouncilId = entity.Id;
+                        return ncm;
+                    })
+                    .ToList();
+
+                var membersToModify = newCouncilMembers
+                    .Where(ncm => ncm.Id.HasValue && currentCouncilMembers.Select(ccm => ccm.Id).Contains(ncm.Id.Value))
+                    .ToList();
+
+                if ((await RemoveCouncilMembers(membersToRemove))
+                    .IsNotSuccess(out ActionResponse<List<GoverningCouncilMemberDto>> actionResponse))
+                {
+                    return await ActionResponse<GoverningCouncilDto>.ReturnError("Neuspješna promjena članova upravnog vijeća.");
+                }
+
+                if ((await AddCouncilMembers(membersToAdd))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<GoverningCouncilDto>.ReturnError("Neuspješna promjena članova upravnog vijeća.");
+                }
+
+                if ((await UpdateCouncilMembers(membersToModify))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<GoverningCouncilDto>.ReturnError(actionResponse.Message);
+                }
+
+                return await ActionResponse<GoverningCouncilDto>.ReturnSuccess(entityDto, "Uspješno ažurirani članovi upravnog vijeća.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<GoverningCouncilDto>.ReturnError("Greška prilikom ažuriranja članova upravnog vijeća.");
+            }
+        }
+
+        public async Task<ActionResponse<List<GoverningCouncilMemberDto>>> RemoveCouncilMembers(List<GoverningCouncilMemberDto> examCommissionTeachers)
+        {
+            try
+            {
+                var response = await ActionResponse<List<GoverningCouncilMemberDto>>.ReturnSuccess(null, "Članovi uspješno maknuti iz upravnog vijeća.");
+                examCommissionTeachers.ForEach(async ect =>
+                {
+                    if ((await RemoveCouncilMember(ect))
+                    .IsNotSuccess(out ActionResponse<GoverningCouncilMemberDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<GoverningCouncilMemberDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<GoverningCouncilMemberDto>>.ReturnError("Greška prilikom micanja članova upravnog vijeća.");
+            }
+        }
+
+        public async Task<ActionResponse<GoverningCouncilMemberDto>> RemoveCouncilMember(GoverningCouncilMemberDto teacher)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<GoverningCouncilMember>().Delete(teacher.Id.Value);
+                unitOfWork.Save();
+                return await ActionResponse<GoverningCouncilMemberDto>.ReturnSuccess(null, "Član upravnog vijeća uspješno izbrisan.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<GoverningCouncilMemberDto>.ReturnError("Greška prilikom micanja člana upravnog vijeća.");
+            }
+        }
+
+        public async Task<ActionResponse<List<GoverningCouncilMemberDto>>> AddCouncilMembers(List<GoverningCouncilMemberDto> examCommissionTeachers)
+        {
+            try
+            {
+                var response = await ActionResponse<List<GoverningCouncilMemberDto>>.ReturnSuccess(null, "Novi članovi uspješno dodani u upravno vijeće.");
+                examCommissionTeachers.ForEach(async ect =>
+                {
+                    if ((await AddCouncilMember(ect))
+                    .IsNotSuccess(out ActionResponse<GoverningCouncilMemberDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<GoverningCouncilMemberDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<GoverningCouncilMemberDto>>.ReturnError("Greška prilikom dodavanja članova u upravno vijeće.");
+            }
+        }
+
+        public async Task<ActionResponse<GoverningCouncilMemberDto>> AddCouncilMember(GoverningCouncilMemberDto entityDto)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<GoverningCouncilMemberDto, GoverningCouncilMember>(entityDto);
+                unitOfWork.GetGenericRepository<GoverningCouncilMember>().Add(entityToAdd);
+                unitOfWork.Save();
+
+                mapper.Map(entityToAdd, entityDto);
+
+                unitOfWork.GetContext().Entry(entityToAdd).State = EntityState.Detached;
+                entityToAdd = null;
+
+                return await ActionResponse<GoverningCouncilMemberDto>
+                    .ReturnSuccess(entityDto, "Novi član uspješno dodan u upravno vijeće.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<GoverningCouncilMemberDto>.ReturnError("Greška prilikom dodavanja člana u upravno vijeće.");
+            }
+        }
+
+        public async Task<ActionResponse<List<GoverningCouncilMemberDto>>> UpdateCouncilMembers(List<GoverningCouncilMemberDto> commissionMembers)
+        {
+            try
+            {
+                var response = await ActionResponse<List<GoverningCouncilMemberDto>>.ReturnSuccess(null, "Članovi upravnog vijeća uspješno ažurirani.");
+                commissionMembers.ForEach(async cm =>
+                {
+                    if ((await UpdateCouncilMember(cm))
+                    .IsNotSuccess(out ActionResponse<GoverningCouncilMemberDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<GoverningCouncilMemberDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<GoverningCouncilMemberDto>>.ReturnError("Greška prilikom ažuriranja članova upravnog vijeća.");
+            }
+        }
+
+        public async Task<ActionResponse<GoverningCouncilMemberDto>> UpdateCouncilMember(GoverningCouncilMemberDto member)
+        {
+            try
+            {
+                var entityToModify = mapper.Map<GoverningCouncilMemberDto, GoverningCouncilMember>(member);
+                unitOfWork.GetGenericRepository<GoverningCouncilMember>().Update(entityToModify);
+                unitOfWork.Save();
+
+                mapper.Map(entityToModify, member);
+
+                unitOfWork.GetContext().Entry(entityToModify).State = EntityState.Detached;
+                entityToModify = null;
+
+                return await ActionResponse<GoverningCouncilMemberDto>.ReturnSuccess(member, "Član upravnog vijeća uspješno ažuriran.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<GoverningCouncilMemberDto>.ReturnError("Greška prilikom ažuriranja člana upravnog vijeća.");
+            }
+        }
+
+        #endregion Governing Council
     }
 }

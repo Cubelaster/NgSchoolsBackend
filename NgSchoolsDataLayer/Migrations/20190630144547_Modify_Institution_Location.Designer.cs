@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190630144547_Modify_Institution_Location")]
+    partial class Modify_Institution_Location
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -660,15 +662,11 @@ namespace NgSchoolsDataLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("DateCreated");
+                    b.Property<int>("CouncilId");
 
-                    b.Property<DateTime?>("DateModified");
-
-                    b.Property<int>("GoverningCouncilId");
+                    b.Property<int?>("GoverningCouncilId");
 
                     b.Property<string>("Role");
-
-                    b.Property<int>("Status");
 
                     b.Property<Guid>("UserId");
 
@@ -1857,10 +1855,9 @@ namespace NgSchoolsDataLayer.Migrations
 
             modelBuilder.Entity("NgSchoolsDataLayer.Models.GoverningCouncilMember", b =>
                 {
-                    b.HasOne("NgSchoolsDataLayer.Models.GoverningCouncil", "GoverningCouncil")
+                    b.HasOne("NgSchoolsDataLayer.Models.GoverningCouncil")
                         .WithMany("GoverningCouncilMembers")
-                        .HasForeignKey("GoverningCouncilId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GoverningCouncilId");
 
                     b.HasOne("NgSchoolsDataLayer.Models.User", "User")
                         .WithMany()
