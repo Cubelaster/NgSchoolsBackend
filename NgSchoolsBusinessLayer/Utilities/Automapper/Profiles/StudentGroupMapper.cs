@@ -24,6 +24,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.ClassLocation, opt => opt.Ignore())
                 .ForMember(dest => dest.EducationLeader, opt => opt.Ignore())
                 .ForMember(dest => dest.ExamCommission, opt => opt.Ignore())
+                .ForMember(dest => dest.PracticalExamCommission, opt => opt.Ignore())
                 .ForMember(dest => dest.Program, opt => opt.Ignore())
                 .ForMember(dest => dest.SubjectTeachers, opt => opt.Ignore())
                 .ForMember(dest => dest.StudentsInGroups, opt => opt.Ignore())

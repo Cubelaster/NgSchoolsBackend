@@ -13,6 +13,7 @@ namespace NgSchoolsDataLayer.Models
         [Required]
         public Guid UserId { get; set; }
         public virtual User User { get; set; }
+        public string CommissionRole { get; set; }
         [Required]
         public int ExamCommissionId { get; set; }
         public virtual ExamCommission ExamCommission { get; set; }

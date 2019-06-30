@@ -15,6 +15,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string CredentialDate { get; set; }
         public string FirstExamDate { get; set; }
         public string SecondExamDate { get; set; }
+        public string PracticalExamFirstDate { get; set; }
+        public string PracticalExamSecondDate { get; set; }
         public string Notes { get; set; }
         public string EnrolmentDate { get; set; }
         public string EducationGroupMark { get; set; }
@@ -36,6 +38,9 @@ namespace NgSchoolsBusinessLayer.Models.Dto
 
         public int? ExamCommissionId { get; set; }
         public ExamCommissionDto ExamCommission { get; set; }
+
+        public int? PracticalExamCommissionId { get; set; }
+        public virtual ExamCommissionDto PracticalExamCommission { get; set; }
 
         public Guid? DirectorId { get; set; }
         public UserDto Director { get; set; }
