@@ -31,7 +31,10 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
             CreateMap<GoverningCouncilDto, GoverningCouncil>()
                 .ForMember(dest => dest.GoverningCouncilMembers, opt => opt.Ignore());
 
-            CreateMap<GoverningCouncilMember, GoverningCouncilMemberDto>().ReverseMap();
+            CreateMap<GoverningCouncilMember, GoverningCouncilMemberDto>();
+
+            CreateMap<GoverningCouncilMemberDto, GoverningCouncilMember>()
+                .ForMember(dest => dest.User, opt => opt.Ignore());
 
             CreateMap<InstitutionFile, InstitutionFileDto>().ReverseMap();
         }

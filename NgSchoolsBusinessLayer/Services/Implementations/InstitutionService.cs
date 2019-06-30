@@ -94,6 +94,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     List<FileDto> files = institution.Files != null
                         ? new List<FileDto>(institution.Files) : new List<FileDto>();
 
+                    GoverningCouncilDto governingCouncil = institution.GoverningCouncil;
+
                     var institutionToUpdate = mapper.Map<InstitutionDto, Institution>(institution);
                     unitOfWork.GetGenericRepository<Institution>().Update(institutionToUpdate);
                     unitOfWork.Save();
@@ -101,6 +103,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     institution.Files = files;
                     if ((await ModifyFiles(institution))
                         .IsNotSuccess(out ActionResponse<InstitutionDto> fileResponse, out institution))
+                    {
+                        return fileResponse;
+                    }
+
+                    institution.GoverningCouncil = governingCouncil;
+                    institution.GoverningCouncil.InstitutionId = institution.Id;
+                    if ((await ModifyGoverningCouncil(institution)).IsNotSuccess(out fileResponse, out institution))
                     {
                         return fileResponse;
                     }
@@ -536,7 +545,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<GoverningCouncilMemberDto>.ReturnSuccess(member, "Član upravnog vijeća uspješno ažuriran.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return await ActionResponse<GoverningCouncilMemberDto>.ReturnError("Greška prilikom ažuriranja člana upravnog vijeća.");
             }
