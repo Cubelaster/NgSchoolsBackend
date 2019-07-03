@@ -641,6 +641,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var currentSubjectTeachers = mapper.Map<List<StudentGroupSubjectTeachers>, List<StudentGroupSubjectTeachersDto>>(entity.SubjectTeachers.ToList());
 
                 var newSubjectTeachers = studentGroup.SubjectTeachers != null ? studentGroup.SubjectTeachers : new List<StudentGroupSubjectTeachersDto>();
+                newSubjectTeachers = newSubjectTeachers.Where(st => st.TeacherId != null && st.TeacherId != Guid.Empty).ToList();
 
                 var teachersToRemove = currentSubjectTeachers
                     .Where(cet => newSubjectTeachers
