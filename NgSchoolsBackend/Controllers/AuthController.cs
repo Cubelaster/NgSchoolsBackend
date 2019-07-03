@@ -7,7 +7,6 @@ using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Responses;
 using NgSchoolsBusinessLayer.Security.Jwt.Contracts;
 using NgSchoolsBusinessLayer.Services.Contracts;
-using System.Security.Principal;
 using System.Threading.Tasks;
 
 namespace NgSchoolsWebApi.Controllers

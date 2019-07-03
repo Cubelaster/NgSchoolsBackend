@@ -57,6 +57,7 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<InstitutionFile> InstitutionFiles { get; set; }
         public DbSet<TeacherFile> TeacherFiles { get; set; }
         public DbSet<EducationProgramFile> EducationProgramFiles { get; set; }
+        public DbSet<StudentGroupSubjectTeachers> StudentGroupSubjectTeachers { get; set; }
 
         #endregion Db Sets
 

@@ -9,5 +9,6 @@ namespace NgSchoolsDataLayer.Models
         public int StudentGroupId { get; set; }
         public int SubjectId { get; set; }
         public Guid TeacherId { get; set; }
+        public virtual User Teacher { get; set; }
     }
 }

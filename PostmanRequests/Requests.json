@@ -839,7 +839,9 @@
 	"StudentIds": [1],
 	"SubjectTeachers": [
 		{
-			"SubjectName": "fsdfs", "SubjectId": 4029, "TeacherId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb"}
+			"SubjectName": "fsdfs", 
+			"SubjectId": 4029, 
+			"TeacherId": "1a1bfa81-53ee-4cd3-c039-08d652b91ccb"}
 		]
 }
 
@@ -1325,4 +1327,9 @@
 //StudentGroup/DeleteCombined
 {
 	"Id": 7
+}
+
+//Print/GetTeacherClassesByStudentGroupId
+{
+	"Id": 10
 }

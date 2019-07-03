@@ -4,7 +4,9 @@ using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Services.Contracts;
+using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
@@ -343,7 +345,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var studentsToRemove = currentStudents.Where(cet => !newStudents.Select(ns => ns.Id).Contains(cet.Id)).ToList();
 
-                var studentsToModify = newStudents.Where(ns => currentStudents.Select(cs => cs.StudentId).Contains(ns.StudentId)).ToList();
+                var studentsToModify = newStudents.Where(ns => currentStudents.Select(cs => cs.Id).Contains(ns.Id)).ToList();
 
                 var studentsToAdd = newStudents
                     .Where(nt => !currentStudents.Select(uec => uec.Id).Contains(nt.Id))
@@ -1424,5 +1426,128 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #endregion Writers
 
         #endregion CombinedGroups
+
+        #region Print
+
+        public async Task<ActionResponse<List<TeacherSubjectByDatesPrintModel>>> GetTeacherClasses(int id)
+        {
+            var context = unitOfWork.GetContext();
+
+            var groupQuery = from studentGroup in context.StudentGroups
+                             where studentGroup.Id == id
+                             select studentGroup;
+
+            var teachQuery = from sg in groupQuery
+                             join teach in context.StudentGroupSubjectTeachers
+                             on sg.Id equals teach.StudentGroupId
+                             join user in context.Users
+                             on teach.TeacherId equals user.Id
+                             join userDetails in context.UserDetails
+                             on user.Id equals userDetails.UserId
+                             where sg.Id == id
+                             && sg.Status == DatabaseEntityStatusEnum.Active
+                             && user.Status == DatabaseEntityStatusEnum.Active
+                             && teach.Status == DatabaseEntityStatusEnum.Active
+                             && userDetails.Status == DatabaseEntityStatusEnum.Active
+                             select new { userDetails, teach };
+
+            var daysQuery = from sg in groupQuery
+                            join eduProgram in context.EducationPrograms
+                            on sg.ProgramId equals eduProgram.Id
+                            join plan in context.Plans
+                            on eduProgram.Id equals plan.EducationProgramId
+                            join day in context.PlanDays
+                            on plan.Id equals day.PlanId
+                            where eduProgram.Status == DatabaseEntityStatusEnum.Active
+                            && plan.Status == DatabaseEntityStatusEnum.Active
+                            && day.Status == DatabaseEntityStatusEnum.Active
+                            select day;
+
+            var datesQuery = from sg in groupQuery
+                             join dates in context.StudentGroupClassAttendances
+                             on sg.Id equals dates.StudentGroupId
+                             where dates.Status == DatabaseEntityStatusEnum.Active
+                             select dates;
+
+            var days = daysQuery.ToList();
+            var dayDates = datesQuery.ToList();
+
+            var daysDates = new List<PlanDayDatesDto>();
+
+            for (var i = 0; i < dayDates.Count; i++)
+            {
+                var dayDate = new PlanDayDatesDto
+                {
+                    DayId = days[i].Id,
+                    Date = dayDates[i].Date
+                };
+
+                daysDates.Add(dayDate);
+            }
+
+            var subjectThemesQuery = from daySubjects in context.PlanDaySubjects
+                                     join dayTheme in context.PlanDaySubjectThemes
+                                     on daySubjects.Id equals dayTheme.PlanDaySubjectId
+                                     join subject in context.Subjects
+                                     on daySubjects.SubjectId equals subject.Id
+                                     join theme in context.Themes
+                                     on dayTheme.ThemeId equals theme.Id
+                                     where !subject.IsPracticalType
+                                     group daySubjects by daySubjects into g
+                                     select new
+                                     {
+                                         DayId = g.Key.PlanDayId,
+                                         Subject = new SubjectDto
+                                         {
+                                             Id = g.Select(gs => gs.Subject).FirstOrDefault().Id,
+                                             Name = g.Select(gs => gs.Subject).FirstOrDefault().Name,
+                                             Themes = g.SelectMany(gt => gt.PlanDaySubjectThemes
+                                                .Select(pdst => new ThemeDto
+                                                    {
+                                                        Id = pdst.ThemeId,
+                                                        HoursNumber = (int)pdst.HoursNumber,
+                                                        Name = pdst.Theme.Name
+                                                    })
+                                                ).ToList()
+                                         }
+                                     };
+
+            var subjectsByDays = from daysQ in daysDates.AsQueryable()
+                                 join subjectDays in subjectThemesQuery
+                                 on daysQ.DayId equals subjectDays.DayId
+                                 select new
+                                 {
+                                     DayId = daysQ.DayId,
+                                     Date = daysQ.Date,
+                                     Subject = subjectDays.Subject
+                                 };
+
+            var subjectData = subjectsByDays.ToList();
+
+            var teachl = teachQuery.ToList();
+
+            var teachersSubjects = from teach in teachl
+                                   join subject in subjectData
+                                   on teach.teach.SubjectId equals subject.Subject.Id
+                                   select new TeacherSubjectByDatesPrintModel
+                                   {
+                                       Teacher = new UserDetailsDto
+                                       {
+                                           UserId = teach.userDetails.UserId,
+                                           Profession = teach.userDetails.Profession,
+                                           Title = teach.userDetails.Title,
+                                           FirstName = teach.userDetails.FirstName,
+                                           LastName = teach.userDetails.LastName
+                                       },
+                                       Date = subject.Date,
+                                       Subject = subject.Subject
+                                   };
+
+            var teachersDatesAndSubjects = teachersSubjects.ToList();
+
+            return await ActionResponse<List<TeacherSubjectByDatesPrintModel>>.ReturnSuccess(teachersDatesAndSubjects, "Podaci dohvaćeni.");
+        }
+
+        #endregion Print
     }
 }
