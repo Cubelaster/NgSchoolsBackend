@@ -8,8 +8,10 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public UserExamCommissionMapper()
         {
-            CreateMap<UserExamCommission, UserExamCommissionDto>();
-            CreateMap<UserExamCommissionDto, UserExamCommission>();
+            CreateMap<UserExamCommission, UserExamCommissionDto>()
+                .ForMember(dest => dest.UserDetails, opt => opt.MapFrom(src => src.User.UserDetails));
+            CreateMap<UserExamCommissionDto, UserExamCommission>()
+                .ForMember(dest => dest.User, opt => opt.Ignore());
         }
     }
 }

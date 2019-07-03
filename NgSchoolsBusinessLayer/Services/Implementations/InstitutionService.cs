@@ -545,7 +545,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 return await ActionResponse<GoverningCouncilMemberDto>.ReturnSuccess(member, "Član upravnog vijeća uspješno ažuriran.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return await ActionResponse<GoverningCouncilMemberDto>.ReturnError("Greška prilikom ažuriranja člana upravnog vijeća.");
             }

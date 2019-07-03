@@ -100,13 +100,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<Guid> teachers = entityDto.TeacherIds != null ? new List<Guid>(entityDto.TeacherIds) : new List<Guid>();
                 List<UserExamCommissionDto> commissionMembers = new List<UserExamCommissionDto>(entityDto.CommissionMembers);
                 var entityToAdd = mapper.Map<ExamCommissionDto, ExamCommission>(entityDto);
                 unitOfWork.GetGenericRepository<ExamCommission>().Add(entityToAdd);
                 unitOfWork.Save();
                 mapper.Map(entityToAdd, entityDto);
-                entityDto.TeacherIds = new List<Guid>(teachers);
                 entityDto.CommissionMembers = new List<UserExamCommissionDto>(commissionMembers);
                 if ((await ModifyExamTeachers(entityDto)).IsNotSuccess(out ActionResponse<ExamCommissionDto> actionResponse, out entityDto))
                 {
