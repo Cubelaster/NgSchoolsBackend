@@ -27,7 +27,7 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
-        public async Task<ActionResponse<List<TeacherSubjectByDatesPrintModel>>> GetTeacherClassesByStudentGroupId(SimpleRequestBase request)
+        public async Task<ActionResponse<List<TeacherSubjectByDatesPrintModelData>>> GetTeacherClassesByStudentGroupId(SimpleRequestBase request)
         {
             return await studentGroupService.GetTeacherClasses(request.Id);
         }

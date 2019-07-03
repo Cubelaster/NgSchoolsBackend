@@ -1430,7 +1430,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         #region Print
 
-        public async Task<ActionResponse<List<TeacherSubjectByDatesPrintModel>>> GetTeacherClasses(int id)
+        public async Task<ActionResponse<List<TeacherSubjectByDatesPrintModelData>>> GetTeacherClasses(int id)
         {
             var context = unitOfWork.GetContext();
 
@@ -1546,7 +1546,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
             var teachersDatesAndSubjects = teachersSubjects.ToList();
 
-            return await ActionResponse<List<TeacherSubjectByDatesPrintModel>>.ReturnSuccess(teachersDatesAndSubjects, "Podaci dohvaćeni.");
+            var teachersMax = from data in teachersSubjects
+                              group data by data.Teacher.UserId into g
+                              select new TeacherSubjectByDatesPrintModelData
+                              {
+                                  Teacher = g.Select(t => t.Teacher).FirstOrDefault(),
+                                  Subject = g.Select(t => t.Subject).FirstOrDefault(),
+                                  MinDate = g.Select(t => t.Date).Min(),
+                                  MaxDate = g.Select(t => t.Date).Max()
+                              };
+
+            var printData = teachersMax.ToList();
+
+
+            return await ActionResponse<List<TeacherSubjectByDatesPrintModelData>>.ReturnSuccess(printData, "Podaci dohvaćeni.");
         }
 
         #endregion Print
