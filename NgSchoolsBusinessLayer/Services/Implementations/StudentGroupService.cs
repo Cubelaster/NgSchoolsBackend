@@ -1487,12 +1487,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
 
             var subjectThemesQuery = from daySubjects in context.PlanDaySubjects
-                                     join dayTheme in context.PlanDaySubjectThemes
-                                     on daySubjects.Id equals dayTheme.PlanDaySubjectId
                                      join subject in context.Subjects
                                      on daySubjects.SubjectId equals subject.Id
-                                     join theme in context.Themes
-                                     on dayTheme.ThemeId equals theme.Id
                                      where !subject.IsPracticalType
                                      group daySubjects by daySubjects into g
                                      select new
@@ -1503,12 +1499,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                              Id = g.Select(gs => gs.Subject).FirstOrDefault().Id,
                                              Name = g.Select(gs => gs.Subject).FirstOrDefault().Name,
                                              Themes = g.SelectMany(gt => gt.PlanDaySubjectThemes
+                                                .Where(st => st.Status == DatabaseEntityStatusEnum.Active)
                                                 .Select(pdst => new ThemeDto
-                                                    {
-                                                        Id = pdst.ThemeId,
-                                                        HoursNumber = (int)pdst.HoursNumber,
-                                                        Name = pdst.Theme.Name
-                                                    })
+                                                {
+                                                    Id = pdst.ThemeId,
+                                                    HoursNumber = (int)pdst.HoursNumber,
+                                                    Name = pdst.Theme.Name
+                                                })
                                                 ).ToList()
                                          }
                                      };
@@ -1516,50 +1513,36 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             var subjectsByDays = from daysQ in daysDates.AsQueryable()
                                  join subjectDays in subjectThemesQuery
                                  on daysQ.DayId equals subjectDays.DayId
+                                 group subjectDays by subjectDays.Subject.Id into g
                                  select new
                                  {
-                                     DayId = daysQ.DayId,
-                                     Date = daysQ.Date,
-                                     Subject = subjectDays.Subject
+                                     SubjectId = g.Key,
+                                     Subject = g.Select(d => d.Subject).FirstOrDefault(),
+                                     MinDate = daysDates.Select(d => d.Date).Min(),
+                                     MaxDate = daysDates.Select(d => d.Date).Max()
                                  };
 
-            var subjectData = subjectsByDays.ToList();
+            var teacherAndSubjects = from teacher in teachQuery
+                                     join subject in subjectsByDays
+                                     on teacher.teach.SubjectId equals subject.SubjectId
+                                     select new TeacherSubjectByDatesPrintModelData
+                                     {
+                                         Teacher = new UserDetailsDto
+                                         {
+                                             UserId = teacher.userDetails.UserId,
+                                             Profession = teacher.userDetails.Profession,
+                                             Title = teacher.userDetails.Title,
+                                             FirstName = teacher.userDetails.FirstName,
+                                             LastName = teacher.userDetails.LastName
+                                         },
+                                         Subject = subject.Subject,
+                                         MinDate = subject.MinDate,
+                                         MaxDate = subject.MaxDate
+                                     };
 
-            var teachl = teachQuery.ToList();
+            var groupedList = teacherAndSubjects.ToList();
 
-            var teachersSubjects = from teach in teachl
-                                   join subject in subjectData
-                                   on teach.teach.SubjectId equals subject.Subject.Id
-                                   select new TeacherSubjectByDatesPrintModel
-                                   {
-                                       Teacher = new UserDetailsDto
-                                       {
-                                           UserId = teach.userDetails.UserId,
-                                           Profession = teach.userDetails.Profession,
-                                           Title = teach.userDetails.Title,
-                                           FirstName = teach.userDetails.FirstName,
-                                           LastName = teach.userDetails.LastName
-                                       },
-                                       Date = subject.Date,
-                                       Subject = subject.Subject
-                                   };
-
-            var teachersDatesAndSubjects = teachersSubjects.ToList();
-
-            var teachersMax = from data in teachersSubjects
-                              group data by data.Teacher.UserId into g
-                              select new TeacherSubjectByDatesPrintModelData
-                              {
-                                  Teacher = g.Select(t => t.Teacher).FirstOrDefault(),
-                                  Subject = g.Select(t => t.Subject).FirstOrDefault(),
-                                  MinDate = g.Select(t => t.Date).Min(),
-                                  MaxDate = g.Select(t => t.Date).Max()
-                              };
-
-            var printData = teachersMax.ToList();
-
-
-            return await ActionResponse<List<TeacherSubjectByDatesPrintModelData>>.ReturnSuccess(printData, "Podaci dohvaćeni.");
+            return await ActionResponse<List<TeacherSubjectByDatesPrintModelData>>.ReturnSuccess(groupedList, "Podaci dohvaćeni.");
         }
 
         #endregion Print
