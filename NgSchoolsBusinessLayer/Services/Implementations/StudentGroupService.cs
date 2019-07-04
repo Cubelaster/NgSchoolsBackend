@@ -1486,32 +1486,50 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 daysDates.Add(dayDate);
             }
 
-            var subjectThemesQuery = from daySubjects in context.PlanDaySubjects
-                                     join subject in context.Subjects
-                                     on daySubjects.SubjectId equals subject.Id
-                                     where !subject.IsPracticalType
-                                     group daySubjects by daySubjects into g
-                                     select new
-                                     {
-                                         DayId = g.Key.PlanDayId,
-                                         Subject = new SubjectDto
-                                         {
-                                             Id = g.Select(gs => gs.Subject).FirstOrDefault().Id,
-                                             Name = g.Select(gs => gs.Subject).FirstOrDefault().Name,
-                                             Themes = g.SelectMany(gt => gt.PlanDaySubjectThemes
-                                                .Where(st => st.Status == DatabaseEntityStatusEnum.Active)
-                                                .Select(pdst => new ThemeDto
-                                                {
-                                                    Id = pdst.ThemeId,
-                                                    HoursNumber = (int)pdst.HoursNumber,
-                                                    Name = pdst.Theme.Name
-                                                })
-                                                ).ToList()
-                                         }
-                                     };
+            var subjectsQuery = from daySubjects in context.PlanDaySubjects
+                                join subject in context.Subjects
+                                on daySubjects.SubjectId equals subject.Id
+                                where !subject.IsPracticalType
+                                group daySubjects by daySubjects into g
+                                select new
+                                {
+                                    DayId = g.Key.PlanDayId,
+                                    Subject = new SubjectDto
+                                    {
+                                        Id = g.Select(gs => gs.Subject).FirstOrDefault().Id,
+                                        Name = g.Select(gs => gs.Subject).FirstOrDefault().Name
+                                    }
+                                };
+
+            var themesQuery = from daySubjects in context.PlanDaySubjects
+                              join dayThemes in context.PlanDaySubjectThemes
+                              on daySubjects.Id equals dayThemes.PlanDaySubjectId
+                              where dayThemes.Status == DatabaseEntityStatusEnum.Active
+                              select new
+                              {
+                                  SubjectId = daySubjects.SubjectId,
+                                  Theme = new ThemeDto
+                                  {
+                                      Id = dayThemes.Theme.Id,
+                                      Name = dayThemes.Theme.Name,
+                                      HoursNumber = (int)dayThemes.HoursNumber
+                                  }
+                              };
+
+            var themesBySubject = from themes in themesQuery
+                                  group themes by themes.SubjectId into g
+                                  select new
+                                  {
+                                      SubjectId = g.Key,
+                                      Themes = g.Select(t => t.Theme)
+                                        .GroupBy(t => t.Id)
+                                        .Select(x => x.First())
+                                        .ToList()
+                                  };
+
 
             var subjectsByDays = from daysQ in daysDates.AsQueryable()
-                                 join subjectDays in subjectThemesQuery
+                                 join subjectDays in subjectsQuery
                                  on daysQ.DayId equals subjectDays.DayId
                                  group subjectDays by subjectDays.Subject.Id into g
                                  select new
@@ -1525,6 +1543,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             var teacherAndSubjects = from teacher in teachQuery
                                      join subject in subjectsByDays
                                      on teacher.teach.SubjectId equals subject.SubjectId
+                                     join themes in themesBySubject 
+                                     on subject.Subject.Id equals themes.SubjectId
                                      select new TeacherSubjectByDatesPrintModelData
                                      {
                                          Teacher = new UserDetailsDto
@@ -1536,6 +1556,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                              LastName = teacher.userDetails.LastName
                                          },
                                          Subject = subject.Subject,
+                                         Themes = themes.Themes,
                                          MinDate = subject.MinDate,
                                          MaxDate = subject.MaxDate
                                      };
