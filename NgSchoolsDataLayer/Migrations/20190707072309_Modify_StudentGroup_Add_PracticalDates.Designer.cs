@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190707072309_Modify_StudentGroup_Add_PracticalDates")]
+    partial class Modify_StudentGroup_Add_PracticalDates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1383,6 +1385,8 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<int?>("InstConsultations");
 
+                    b.Property<bool>("IsPracticalType");
+
                     b.Property<string>("Literature");
 
                     b.Property<string>("MaterialConditions");
@@ -1448,8 +1452,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<DateTime?>("DateModified");
 
                     b.Property<int?>("HoursNumber");
-
-                    b.Property<bool>("IsPracticalType");
 
                     b.Property<string>("LearningOutcomes");
 

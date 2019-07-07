@@ -46,6 +46,8 @@
     <Compile Remove="Migrations\20190630143931_Modify_Institution_Location.cs" />
     <Compile Remove="Migrations\20190630144311_Modify_Institution_LocationV2.cs" />
     <Compile Remove="Migrations\20190630151747_Modify_GoverningCouncilMembers_DbEntityV2.cs" />
+    <Compile Remove="Migrations\20190707072217_Modify_StudentGroup_Add_PracticalDates.cs" />
+    <Compile Remove="Migrations\20190707082535_Modify_Theme_Add_IsPracticalType.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1489,7 +1489,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             var subjectsQuery = from daySubjects in context.PlanDaySubjects
                                 join subject in context.Subjects
                                 on daySubjects.SubjectId equals subject.Id
-                                where !subject.IsPracticalType
                                 group daySubjects by daySubjects into g
                                 select new
                                 {
