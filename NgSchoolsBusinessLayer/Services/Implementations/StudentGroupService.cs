@@ -1474,9 +1474,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     daysDates.Add(dayDate);
                 }
 
-                return await ActionResponse<List<PlanDayDatesDto>>.ReturnSuccess(dayDates);
+                return await ActionResponse<List<PlanDayDatesDto>>.ReturnSuccess(daysDates);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return await ActionResponse<List<PlanDayDatesDto>>.ReturnError("Greška prilikom mapiranja dana za ispis.");
             }
