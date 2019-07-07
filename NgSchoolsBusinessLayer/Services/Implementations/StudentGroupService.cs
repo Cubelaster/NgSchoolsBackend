@@ -1736,16 +1736,38 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                  on teach.TeacherId equals user.Id
                                  join userDetails in context.UserDetails
                                  on user.Id equals userDetails.UserId.Value
+                                 join signature in context.UploadedFiles
+                                 on userDetails.SignatureId equals signature.Id into uSig
+                                 from sig in uSig.DefaultIfEmpty()
                                  where sg.Id == groupId
                                  && sg.Status == DatabaseEntityStatusEnum.Active
                                  && user.Status == DatabaseEntityStatusEnum.Active
                                  && teach.Status == DatabaseEntityStatusEnum.Active
                                  && userDetails.Status == DatabaseEntityStatusEnum.Active
-                                 select new { userDetails, teach };
+                                 select new
+                                 {
+                                     SubjectId = teach.SubjectId,
+                                     UserDetails = new UserDetailsDto
+                                     {
+                                         Id = userDetails.Id,
+                                         UserId = userDetails.UserId,
+                                         FirstName = userDetails.FirstName,
+                                         LastName = userDetails.LastName,
+                                         SignatureId = userDetails.SignatureId,
+                                         Signature = new FileDto
+                                         {
+                                             Id = sig.Id,
+                                             FileName = sig.FileName
+                                         },
+                                         Profession = userDetails.Profession,
+                                         Title = userDetails.Title,
+                                         Qualifications = userDetails.Qualifications
+                                     }
+                                 };
 
                 var themesInDaysQuery = from themes in themesQuery
                                         join teach in teachQuery
-                                        on themes.Theme.Theme.SubjectId.Value equals teach.teach.SubjectId
+                                        on themes.Theme.Theme.SubjectId.Value equals teach.SubjectId
                                         select new
                                         {
                                             DayId = themes.DayId,
@@ -1753,17 +1775,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                             DayClass = new PlanDayThemeAndTeacherDto
                                             {
                                                 DayTheme = themes.Theme,
-                                                SubjectTeacher = new UserDetailsDto
-                                                {
-                                                    Id = teach.userDetails.Id,
-                                                    UserId = teach.userDetails.UserId,
-                                                    FirstName = teach.userDetails.FirstName,
-                                                    LastName = teach.userDetails.LastName,
-                                                    SignatureId = teach.userDetails.SignatureId,
-                                                    Profession = teach.userDetails.Profession,
-                                                    Title = teach.userDetails.Title,
-                                                    Qualifications = teach.userDetails.Qualifications
-                                                }
+                                                SubjectTeacher = teach.UserDetails
                                             }
                                         };
 
