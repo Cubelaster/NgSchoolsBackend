@@ -12,6 +12,5 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string LearningOutcomes { get; set; }
         public int? HoursNumber { get; set; }
         public string WorkShopClasses { get; set; }
-        public bool IsPracticalType { get; set; }
     }
 }

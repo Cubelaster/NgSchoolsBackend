@@ -1430,6 +1430,58 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         #region Print
 
+        private async Task<ActionResponse<List<PlanDayDatesDto>>> GetGroupDays(int groupId)
+        {
+            try
+            {
+                var context = unitOfWork.GetContext();
+
+                var groupQuery = from studentGroup in context.StudentGroups
+                                 where studentGroup.Id == groupId
+                                 select studentGroup;
+
+                var daysQuery = from sg in groupQuery
+                                join eduProgram in context.EducationPrograms
+                                on sg.ProgramId equals eduProgram.Id
+                                join plan in context.Plans
+                                on eduProgram.Id equals plan.EducationProgramId
+                                join day in context.PlanDays
+                                on plan.Id equals day.PlanId
+                                where eduProgram.Status == DatabaseEntityStatusEnum.Active
+                                && plan.Status == DatabaseEntityStatusEnum.Active
+                                && day.Status == DatabaseEntityStatusEnum.Active
+                                select day;
+
+                var datesQuery = from sg in groupQuery
+                                 join dates in context.StudentGroupClassAttendances
+                                 on sg.Id equals dates.StudentGroupId
+                                 where dates.Status == DatabaseEntityStatusEnum.Active
+                                 select dates;
+
+                var days = daysQuery.ToList();
+                var dayDates = datesQuery.ToList();
+
+                var daysDates = new List<PlanDayDatesDto>();
+
+                for (var i = 0; i < dayDates.Count; i++)
+                {
+                    var dayDate = new PlanDayDatesDto
+                    {
+                        DayId = days[i].Id,
+                        Date = dayDates[i].Date
+                    };
+
+                    daysDates.Add(dayDate);
+                }
+
+                return await ActionResponse<List<PlanDayDatesDto>>.ReturnSuccess(dayDates);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<PlanDayDatesDto>>.ReturnError("Greška prilikom mapiranja dana za ispis.");
+            }
+        }
+
         public async Task<ActionResponse<List<TeacherSubjectByDatesPrintModelData>>> GetTeacherClasses(int id)
         {
             var context = unitOfWork.GetContext();
@@ -1464,26 +1516,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                             && day.Status == DatabaseEntityStatusEnum.Active
                             select day;
 
-            var datesQuery = from sg in groupQuery
-                             join dates in context.StudentGroupClassAttendances
-                             on sg.Id equals dates.StudentGroupId
-                             where dates.Status == DatabaseEntityStatusEnum.Active
-                             select dates;
-
-            var days = daysQuery.ToList();
-            var dayDates = datesQuery.ToList();
-
-            var daysDates = new List<PlanDayDatesDto>();
-
-            for (var i = 0; i < dayDates.Count; i++)
+            if((await GetGroupDays(id))
+                .IsNotSuccess(out ActionResponse<List<PlanDayDatesDto>> daysResponse, out List<PlanDayDatesDto> daysDates))
             {
-                var dayDate = new PlanDayDatesDto
-                {
-                    DayId = days[i].Id,
-                    Date = dayDates[i].Date
-                };
-
-                daysDates.Add(dayDate);
+                return await ActionResponse<List<TeacherSubjectByDatesPrintModelData>>.ReturnError(daysResponse.Message);
             }
 
             var subjectsQuery = from daySubjects in context.PlanDaySubjects

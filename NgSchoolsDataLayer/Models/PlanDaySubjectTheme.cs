@@ -17,5 +17,7 @@ namespace NgSchoolsDataLayer.Models
         public virtual PlanDaySubject PlanDaySubject { get; set; }
 
         public double HoursNumber { get; set; }
+        public string ClassTypes { get; set; }
+        public string PerfomingType { get; set; }
     }
 }

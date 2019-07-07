@@ -19,6 +19,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int? PracticalClasses { get; set; }
         public int? TheoreticalClasses { get; set; }
         public bool SubjectObligatory { get; set; }
+        public bool IsPracticalType { get; set; }
 
         public int? EducationProgramId { get; set; }
         public List<ThemeDto> Themes { get; set; }
