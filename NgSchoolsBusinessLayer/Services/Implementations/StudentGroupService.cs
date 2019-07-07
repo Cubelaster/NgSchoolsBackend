@@ -1620,10 +1620,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var context = unitOfWork.GetContext();
 
-                var groupQuery = from studentGroup in context.StudentGroups
-                                 where studentGroup.Id == groupId
-                                 select studentGroup;
-
                 var themesQuery = from dayThemes in context.PlanDaySubjectThemes
                                   where dayThemes.Status == DatabaseEntityStatusEnum.Active
                                   join theme in context.Themes
@@ -1678,6 +1674,132 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<List<ThemesByWeekPrintModel>>.ReturnError("Neuspješan dohvat podataka o temama iz plana.");
+            }
+        }
+
+        public async Task<ActionResponse<List<ThemesClassesPrintModel>>> GetThemesClasses(int groupId)
+        {
+            try
+            {
+                if ((await GetGroupDays(groupId))
+                    .IsNotSuccess(out ActionResponse<List<PlanDayDatesDto>> daysResponse, out List<PlanDayDatesDto> daysDates))
+                {
+                    return await ActionResponse<List<ThemesClassesPrintModel>>.ReturnError(daysResponse.Message);
+                }
+
+                var context = unitOfWork.GetContext();
+
+                var themesQuery = from dayThemes in context.PlanDaySubjectThemes
+                                  where dayThemes.Status == DatabaseEntityStatusEnum.Active
+                                  join theme in context.Themes
+                                  on dayThemes.ThemeId equals theme.Id
+                                  join daySubject in context.PlanDaySubjects
+                                  on dayThemes.PlanDaySubjectId equals daySubject.Id
+                                  where daySubject.Status == DatabaseEntityStatusEnum.Active
+                                  join subject in context.Subjects
+                                  on daySubject.SubjectId equals subject.Id
+                                  join day in daysDates
+                                  on daySubject.PlanDayId equals day.DayId
+                                  select new
+                                  {
+                                      DayId = day.DayId,
+                                      DayDate = day.Date,
+                                      Theme = new PlanDaySubjectThemeDto
+                                      {
+                                          Id = dayThemes.Id,
+                                          ThemeId = dayThemes.ThemeId,
+                                          HoursNumber = dayThemes.HoursNumber,
+                                          ClassTypes = dayThemes.ClassTypes,
+                                          PerfomingType = dayThemes.PerfomingType,
+                                          Theme = new ThemeDto
+                                          {
+                                              Id = dayThemes.Theme.Id,
+                                              Name = dayThemes.Theme.Name,
+                                              SubjectId = subject.Id,
+                                              Subject = new SubjectDto
+                                              {
+                                                  Id = subject.Id,
+                                                  Name = subject.Name
+                                              }
+                                          }
+                                      }
+                                  };
+
+                var groupQuery = from studentGroup in context.StudentGroups
+                                 where studentGroup.Id == groupId
+                                 select studentGroup;
+
+                var teachQuery = from sg in groupQuery
+                                 join teach in context.StudentGroupSubjectTeachers
+                                 on sg.Id equals teach.StudentGroupId
+                                 join user in context.Users
+                                 on teach.TeacherId equals user.Id
+                                 join userDetails in context.UserDetails
+                                 on user.Id equals userDetails.UserId.Value
+                                 where sg.Id == groupId
+                                 && sg.Status == DatabaseEntityStatusEnum.Active
+                                 && user.Status == DatabaseEntityStatusEnum.Active
+                                 && teach.Status == DatabaseEntityStatusEnum.Active
+                                 && userDetails.Status == DatabaseEntityStatusEnum.Active
+                                 select new { userDetails, teach };
+
+                var themesInDaysQuery = from themes in themesQuery
+                                        join teach in teachQuery
+                                        on themes.Theme.Theme.SubjectId.Value equals teach.teach.SubjectId
+                                        select new
+                                        {
+                                            DayId = themes.DayId,
+                                            Date = themes.DayDate,
+                                            DayClass = new PlanDayThemeAndTeacherDto
+                                            {
+                                                DayTheme = themes.Theme,
+                                                SubjectTeacher = new UserDetailsDto
+                                                {
+                                                    Id = teach.userDetails.Id,
+                                                    UserId = teach.userDetails.UserId,
+                                                    FirstName = teach.userDetails.FirstName,
+                                                    LastName = teach.userDetails.LastName,
+                                                    SignatureId = teach.userDetails.SignatureId,
+                                                    Profession = teach.userDetails.Profession,
+                                                    Title = teach.userDetails.Title,
+                                                    Qualifications = teach.userDetails.Qualifications
+                                                }
+                                            }
+                                        };
+
+                var dayClasses = (from themes in themesInDaysQuery
+                                  group themes by themes.DayId into g
+                                  select new ThemesClassesPrintModel
+                                  {
+                                      Date = g.Select(q => q.Date).FirstOrDefault(),
+                                      DayClasses = g
+                                         .Select(q => q.DayClass)
+                                         .ToList()
+                                  }).ToList();
+
+                var dayClassesList = dayClasses.ToList();
+
+                dayClassesList.ForEach(dayClass =>
+                    {
+                        var newDayThemeList = new List<PlanDayThemeAndTeacherDto>();
+
+                        dayClass.DayClasses.ForEach(dc =>
+                        {
+                            for (var i = 0; i < dc.DayTheme.HoursNumber; i++)
+                            {
+                                newDayThemeList.Add(dc);
+                            }
+                        });
+
+                        dayClass.DayClasses = newDayThemeList;
+                    }
+                );
+
+                return await ActionResponse<List<ThemesClassesPrintModel>>.ReturnSuccess(dayClassesList);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<ThemesClassesPrintModel>>.ReturnError("Neuspješan dohvat podataka za ispis.");
             }
         }
 

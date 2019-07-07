@@ -38,5 +38,12 @@ namespace NgSchoolsWebApi.Controllers
         {
             return await studentGroupService.GetThemesByWeeks(request.Id);
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<ThemesClassesPrintModel>>> GetThemesClasses(SimpleRequestBase request)
+        {
+            return await studentGroupService.GetThemesClasses(request.Id);
+        }
     }
 }
