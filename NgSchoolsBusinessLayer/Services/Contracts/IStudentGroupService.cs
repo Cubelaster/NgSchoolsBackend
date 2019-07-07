@@ -14,6 +14,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
 
         Task<ActionResponse<List<StudentGroupDto>>> GetAll();
         Task<ActionResponse<List<TeacherSubjectByDatesPrintModelData>>> GetTeacherClasses(int id);
+        Task<ActionResponse<List<ThemesByWeekPrintModel>>> GetThemesByWeeks(int groupId);
         Task<ActionResponse<int>> GetTotalNumber();
         Task<ActionResponse<PagedResult<StudentGroupDto>>> GetAllPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<StudentGroupDto>> Delete(int id);
