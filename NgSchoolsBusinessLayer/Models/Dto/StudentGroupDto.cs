@@ -12,8 +12,6 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public string SchoolYear { get; set; }
         public string StartDate { get; set; }
         public string EndDate { get; set; }
-        public string PracticalStartDate { get; set; }
-        public string PracticalEndDate { get; set; }
         public string CredentialDate { get; set; }
         public string FirstExamDate { get; set; }
         public string SecondExamDate { get; set; }

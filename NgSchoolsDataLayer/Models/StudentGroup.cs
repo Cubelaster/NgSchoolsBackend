@@ -13,8 +13,6 @@ namespace NgSchoolsDataLayer.Models
         public string SchoolYear { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public DateTime? PracticalStartDate { get; set; }
-        public DateTime? PracticalEndDate { get; set; }
         public DateTime CredentialDate { get; set; }
         public DateTime FirstExamDate { get; set; }
         public DateTime SecondExamDate { get; set; }

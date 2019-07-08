@@ -8,5 +8,8 @@
         public bool CompletedPractice { get; set; }
         public int? EmployerId { get; set; }
         public BusinessPartnerDto Employer { get; set; }
+
+        public string PracticalStartDate { get; set; }
+        public string PracticalEndDate { get; set; }
     }
 }

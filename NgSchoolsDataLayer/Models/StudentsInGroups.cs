@@ -1,4 +1,5 @@
 ﻿using NgSchoolsDataLayer.Models.BaseTypes;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
@@ -17,5 +18,8 @@ namespace NgSchoolsDataLayer.Models
         public int? EmployerId { get; set; }
         public BusinessPartner Employer { get; set; }
         public virtual StudentRegisterEntry StudentRegisterEntry { get; set; }
+
+        public DateTime? PracticalStartDate { get; set; }
+        public DateTime? PracticalEndDate { get; set; }
     }
 }
