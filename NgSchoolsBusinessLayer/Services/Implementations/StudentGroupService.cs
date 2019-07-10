@@ -25,8 +25,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IUnitOfWork unitOfWork;
         private readonly IExamCommissionService examCommissionService;
         private readonly IStudentService studentService;
-        private readonly string includeProperties = "ClassLocation,StudentsInGroups.Student,StudentsInGroups.Student.StudentsInGroups.StudentRegisterEntry,StudentsInGroups.Employer,SubjectTeachers,EducationLeader.UserDetails.Signature,Director.UserDetails.Signature,ExamCommission.UserExamCommissions.User.UserDetails,PracticalExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances";
-        private readonly string includeCombinedProperties = "StudentGroups.ClassLocation,StudentGroups.StudentsInGroups.Student,StudentGroups.StudentsInGroups.Employer,StudentGroups.SubjectTeachers,StudentGroups.EducationLeader.UserDetails.Signature,StudentGroups.Director.UserDetails.Signature,StudentGroups.ExamCommission.UserExamCommissions.User.UserDetails,StudentGroups.PracticalExamCommission.UserExamCommissions.User.UserDetails,StudentGroups.StudentGroupClassAttendances.StudentClassAttendances,StudentGroups.Program.EducationGroup";
+        private readonly string includeProperties = "ClassLocation,StudentsInGroups.Student,StudentsInGroups.Student.StudentsInGroups.StudentRegisterEntry," +
+            "StudentsInGroups.Employer,SubjectTeachers,EducationLeader.UserDetails.Signature,Director.UserDetails.Signature,ExamCommission.UserExamCommissions.User.UserDetails," +
+            "PracticalExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances," +
+            "StudentsInGroups.Student.AddressCity,StudentsInGroups.Student.AddressCountry,StudentsInGroups.Student.AddressRegion," +
+            "StudentsInGroups.Student.CountryOfBirth,StudentsInGroups.Student.RegionOfBirth,StudentsInGroups.Student.CityOfBirth," +
+            "StudentsInGroups.Student.MunicipalityOfBirth,StudentsInGroups.Student.AddressMunicipality";
+        private readonly string includeCombinedProperties = "StudentGroups.ClassLocation,StudentGroups.StudentsInGroups.Student," +
+            "StudentGroups.StudentsInGroups.Employer,StudentGroups.SubjectTeachers,StudentGroups.EducationLeader.UserDetails.Signature," +
+            "StudentGroups.Director.UserDetails.Signature,StudentGroups.ExamCommission.UserExamCommissions.User.UserDetails," +
+            "StudentGroups.PracticalExamCommission.UserExamCommissions.User.UserDetails,StudentGroups.StudentGroupClassAttendances.StudentClassAttendances," +
+            "StudentGroups.Program.EducationGroup,StudentGroups.StudentsInGroups.Student.AddressCity,StudentGroups.StudentsInGroups.Student.AddressCountry," +
+            "StudentGroups.StudentsInGroups.Student.AddressRegion,StudentGroups.StudentsInGroups.Student.CountryOfBirth," +
+            "StudentGroups.StudentsInGroups.Student.RegionOfBirth,StudentGroups.StudentsInGroups.Student.CityOfBirth," +
+            "StudentGroups.StudentsInGroups.Student.MunicipalityOfBirth,StudentGroups.StudentsInGroups.Student.AddressMunicipality";
 
         public StudentGroupService(IMapper mapper,
             IUnitOfWork unitOfWork, IExamCommissionService examCommissionService,

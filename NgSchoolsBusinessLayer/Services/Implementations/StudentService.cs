@@ -23,7 +23,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
-        private readonly string includeProperties = "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,Employer,Employer.Country,Employer.Region,Employer.City,CountryOfBirth,RegionOfBirth,CityOfBirth,StudentsInGroups.StudentRegisterEntry.StudentRegister";
+        private readonly string includeProperties = "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,Employer,Employer.Country,Employer.Region,Employer.City,CountryOfBirth,RegionOfBirth,CityOfBirth,StudentsInGroups.StudentRegisterEntry.StudentRegister,MunicipalityOfBirth,AddressMunicipality";
 
         public StudentService(IMapper mapper,
             IUnitOfWork unitOfWork, ICacheService cacheService)
