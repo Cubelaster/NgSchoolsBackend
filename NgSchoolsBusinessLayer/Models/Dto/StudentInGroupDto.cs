@@ -11,5 +11,6 @@
 
         public string PracticalStartDate { get; set; }
         public string PracticalEndDate { get; set; }
+        public int? StudentRegisterNumber { get; set; }
     }
 }

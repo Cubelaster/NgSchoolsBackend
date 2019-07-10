@@ -30,7 +30,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             "PracticalExamCommission.UserExamCommissions.User.UserDetails,StudentGroupClassAttendances.StudentClassAttendances," +
             "StudentsInGroups.Student.AddressCity,StudentsInGroups.Student.AddressCountry,StudentsInGroups.Student.AddressRegion," +
             "StudentsInGroups.Student.CountryOfBirth,StudentsInGroups.Student.RegionOfBirth,StudentsInGroups.Student.CityOfBirth," +
-            "StudentsInGroups.Student.MunicipalityOfBirth,StudentsInGroups.Student.AddressMunicipality";
+            "StudentsInGroups.Student.MunicipalityOfBirth,StudentsInGroups.Student.AddressMunicipality," +
+            "StudentsInGroups.StudentRegisterEntry";
         private readonly string includeCombinedProperties = "StudentGroups.ClassLocation,StudentGroups.StudentsInGroups.Student," +
             "StudentGroups.StudentsInGroups.Employer,StudentGroups.SubjectTeachers,StudentGroups.EducationLeader.UserDetails.Signature," +
             "StudentGroups.Director.UserDetails.Signature,StudentGroups.ExamCommission.UserExamCommissions.User.UserDetails," +
@@ -38,7 +39,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             "StudentGroups.Program.EducationGroup,StudentGroups.StudentsInGroups.Student.AddressCity,StudentGroups.StudentsInGroups.Student.AddressCountry," +
             "StudentGroups.StudentsInGroups.Student.AddressRegion,StudentGroups.StudentsInGroups.Student.CountryOfBirth," +
             "StudentGroups.StudentsInGroups.Student.RegionOfBirth,StudentGroups.StudentsInGroups.Student.CityOfBirth," +
-            "StudentGroups.StudentsInGroups.Student.MunicipalityOfBirth,StudentGroups.StudentsInGroups.Student.AddressMunicipality";
+            "StudentGroups.StudentsInGroups.Student.MunicipalityOfBirth,StudentGroups.StudentsInGroups.Student.AddressMunicipality," +
+            "StudentGroups.StudentsInGroups.StudentRegisterEntry";
 
         public StudentGroupService(IMapper mapper,
             IUnitOfWork unitOfWork, IExamCommissionService examCommissionService,
