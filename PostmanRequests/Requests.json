@@ -308,7 +308,14 @@
             "GroupId": 2,
             "CompletedPractice": false,
             "EmployerId": null,
-            "Employer": null
+			"Employer": null,
+			"StudentExamEvidences": [
+				{
+					"ExamDate": "16.01.2019. 00:00:00",
+					"ExamEvidence": "",
+					"StudentsInGroupsId": 1 --Jednak Id-u od StudentsInGroup, nije nužan, bitan je Id, ako je redak postojeći
+				}
+			]
         },
         {
             "Id": 3,

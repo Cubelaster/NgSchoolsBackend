@@ -48,6 +48,11 @@
     <Compile Remove="Migrations\20190630151747_Modify_GoverningCouncilMembers_DbEntityV2.cs" />
     <Compile Remove="Migrations\20190707072217_Modify_StudentGroup_Add_PracticalDates.cs" />
     <Compile Remove="Migrations\20190707082535_Modify_Theme_Add_IsPracticalType.cs" />
+    <Compile Remove="Migrations\20190711150820_Add_ExamEvidence.cs" />
+    <Compile Remove="Migrations\20190711151334_Add_ExamEvidence.cs" />
+    <Compile Remove="Migrations\20190711163119_Add_ExamEvidence.cs" />
+    <Compile Remove="Migrations\20190711163146_Add_ExamEvidence.cs" />
+    <Compile Remove="Migrations\20190711163402_Add_ExamEvidence.cs" />
   </ItemGroup>
 
   <ItemGroup>

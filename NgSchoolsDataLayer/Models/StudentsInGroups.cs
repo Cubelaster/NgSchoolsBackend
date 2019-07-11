@@ -1,5 +1,6 @@
 ﻿using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace NgSchoolsDataLayer.Models
@@ -21,5 +22,7 @@ namespace NgSchoolsDataLayer.Models
 
         public DateTime? PracticalStartDate { get; set; }
         public DateTime? PracticalEndDate { get; set; }
+
+        public virtual ICollection<StudentExamEvidence> StudentExamEvidences { get; set; }
     }
 }

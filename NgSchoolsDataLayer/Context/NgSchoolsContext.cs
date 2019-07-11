@@ -59,6 +59,7 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<TeacherFile> TeacherFiles { get; set; }
         public DbSet<EducationProgramFile> EducationProgramFiles { get; set; }
         public DbSet<StudentGroupSubjectTeachers> StudentGroupSubjectTeachers { get; set; }
+        public DbSet<StudentExamEvidence> StudentExamEvidences { get; set; }
 
         #endregion Db Sets
 
@@ -198,6 +199,11 @@ namespace NgSchoolsDataLayer.Context
             builder.Entity<EducationProgramSubject>()
                 .HasOne(s => s.EducationProgram)
                 .WithMany()
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<StudentsInGroups>()
+                .HasMany(e => e.StudentExamEvidences)
+                .WithOne(e => e.StudentsInGroups)
                 .OnDelete(DeleteBehavior.Restrict);
         }
 

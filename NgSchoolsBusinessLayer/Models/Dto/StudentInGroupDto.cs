@@ -1,4 +1,6 @@
-﻿namespace NgSchoolsBusinessLayer.Models.Dto
+﻿using System.Collections.Generic;
+
+namespace NgSchoolsBusinessLayer.Models.Dto
 {
     public class StudentInGroupDto
     {
@@ -12,5 +14,7 @@
         public string PracticalStartDate { get; set; }
         public string PracticalEndDate { get; set; }
         public int? StudentRegisterNumber { get; set; }
+
+        public List<StudentExamEvidenceDto> StudentExamEvidences { get; set; }
     }
 }

@@ -31,7 +31,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             "StudentsInGroups.Student.AddressCity,StudentsInGroups.Student.AddressCountry,StudentsInGroups.Student.AddressRegion," +
             "StudentsInGroups.Student.CountryOfBirth,StudentsInGroups.Student.RegionOfBirth,StudentsInGroups.Student.CityOfBirth," +
             "StudentsInGroups.Student.MunicipalityOfBirth,StudentsInGroups.Student.AddressMunicipality," +
-            "StudentsInGroups.StudentRegisterEntry";
+            "StudentsInGroups.StudentRegisterEntry,StudentsInGroups.StudentExamEvidences";
         private readonly string includeCombinedProperties = "StudentGroups.ClassLocation,StudentGroups.StudentsInGroups.Student," +
             "StudentGroups.StudentsInGroups.Employer,StudentGroups.SubjectTeachers,StudentGroups.EducationLeader.UserDetails.Signature," +
             "StudentGroups.Director.UserDetails.Signature,StudentGroups.ExamCommission.UserExamCommissions.User.UserDetails," +
@@ -40,7 +40,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             "StudentGroups.StudentsInGroups.Student.AddressRegion,StudentGroups.StudentsInGroups.Student.CountryOfBirth," +
             "StudentGroups.StudentsInGroups.Student.RegionOfBirth,StudentGroups.StudentsInGroups.Student.CityOfBirth," +
             "StudentGroups.StudentsInGroups.Student.MunicipalityOfBirth,StudentGroups.StudentsInGroups.Student.AddressMunicipality," +
-            "StudentGroups.StudentsInGroups.StudentRegisterEntry";
+            "StudentGroups.StudentsInGroups.StudentRegisterEntry,StudentGroups.StudentsInGroups.StudentExamEvidences";
 
         public StudentGroupService(IMapper mapper,
             IUnitOfWork unitOfWork, IExamCommissionService examCommissionService,
@@ -347,7 +347,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<StudentGroupDto>> ModifyStudentsInGroup(StudentGroupDto studentGroup)
+        private async Task<ActionResponse<StudentGroupDto>> ModifyStudentsInGroup(StudentGroupDto studentGroup)
         {
             try
             {
@@ -394,7 +394,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<List<StudentInGroupDto>>> RemoveStudentsFromGroup(List<StudentInGroupDto> studentsInGroup)
+        private async Task<ActionResponse<List<StudentInGroupDto>>> RemoveStudentsFromGroup(List<StudentInGroupDto> studentsInGroup)
         {
             try
             {
@@ -416,7 +416,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<StudentInGroupDto>> RemoveStudentFromGroup(StudentInGroupDto studentInGroup)
+        private async Task<ActionResponse<StudentInGroupDto>> RemoveStudentFromGroup(StudentInGroupDto studentInGroup)
         {
             try
             {
@@ -443,7 +443,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<List<StudentInGroupDto>>> AddStudentsInGroup(List<StudentInGroupDto> students)
+        private async Task<ActionResponse<List<StudentInGroupDto>>> AddStudentsInGroup(List<StudentInGroupDto> students)
         {
             try
             {
@@ -465,7 +465,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<StudentInGroupDto>> AddStudentInGroup(StudentInGroupDto student)
+        private async Task<ActionResponse<StudentInGroupDto>> AddStudentInGroup(StudentInGroupDto student)
         {
             try
             {
@@ -481,7 +481,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<List<StudentInGroupDto>>> ModifyStudentsInGroup(List<StudentInGroupDto> students)
+        private async Task<ActionResponse<List<StudentInGroupDto>>> ModifyStudentsInGroup(List<StudentInGroupDto> students)
         {
             try
             {
@@ -507,11 +507,24 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                List<StudentExamEvidenceDto> studentExamEvidences = entityDto.StudentExamEvidences != null
+                    ? new List<StudentExamEvidenceDto>(entityDto.StudentExamEvidences) : new List<StudentExamEvidenceDto>();
+
                 var entityToUpdate = unitOfWork.GetGenericRepository<StudentsInGroups>().FindSingle(entityDto.Id.Value);
                 mapper.Map(entityDto, entityToUpdate);
                 unitOfWork.GetGenericRepository<StudentsInGroups>().Update(entityToUpdate);
                 unitOfWork.Save();
+
                 mapper.Map(entityToUpdate, entityDto);
+
+                entityDto.StudentExamEvidences = studentExamEvidences;
+                 
+                if ((await ModifyStudentExamEvidences(entityDto))
+                    .IsNotSuccess(out ActionResponse<StudentInGroupDto> examEvidencesResponse, out entityDto))
+                {
+                    return await ActionResponse<StudentInGroupDto>.ReturnError(examEvidencesResponse.Message);
+                }
+
                 return await ActionResponse<StudentInGroupDto>.ReturnSuccess(entityDto, "Podaci o studentu unutar grupe ažurirani.");
             }
             catch (Exception)
@@ -519,6 +532,177 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<StudentInGroupDto>.ReturnError("Greška prilikom izmjene podataka o studentu unutar grupe.");
             }
         }
+
+        #region Student Exam Evidence
+
+        private async Task<ActionResponse<StudentInGroupDto>> ModifyStudentExamEvidences(StudentInGroupDto entityDto)
+        {
+            try
+            {
+                var response = await ActionResponse<StudentInGroupDto>.ReturnSuccess(entityDto, "Uspješno ažuriran zapisnik ispita za studenta u grupi.");
+
+                var entity = unitOfWork.GetGenericRepository<StudentsInGroups>()
+                    .FindBy(e => e.Id == entityDto.Id.Value, includeProperties: "StudentExamEvidences");
+                var currentEvidences = mapper.Map<List<StudentExamEvidence>, List<StudentExamEvidenceDto>>(entity.StudentExamEvidences.ToList());
+
+                var newEvidences = entityDto.StudentExamEvidences;
+
+                var evidencesToRemove = currentEvidences.Where(cet => !newEvidences.Select(ns => ns.Id).Contains(cet.Id)).ToList();
+
+                var evidencesToModify = newEvidences.Where(ns => currentEvidences.Select(cs => cs.Id).Contains(ns.Id)).ToList();
+
+                var evidencesToAdd = newEvidences
+                    .Where(nt => !currentEvidences.Select(uec => uec.Id).Contains(nt.Id))
+                    .Select(nt =>
+                    {
+                        nt.StudentsInGroupsId = entityDto.Id;
+                        return nt;
+                    }).ToList();
+
+                if ((await RemoveStudentExamEvidences(evidencesToRemove))
+                    .IsNotSuccess(out ActionResponse<List<StudentExamEvidenceDto>> actionResponse))
+                {
+                    response.Message = actionResponse.Message;
+                    return response;
+                }
+
+                if ((await ModifyStudentExamEvidences(evidencesToModify))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    response.Message = actionResponse.Message;
+                    return response;
+                }
+
+                if ((await AddStudentExamEvidences(evidencesToAdd))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    response.Message = actionResponse.Message;
+                    return response;
+                }
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentInGroupDto>.ReturnError("Greška prilikom ažuriranja zapisnika ispita za studenta u grupi.");
+            }
+        }
+
+        private async Task<ActionResponse<List<StudentExamEvidenceDto>>> RemoveStudentExamEvidences(List<StudentExamEvidenceDto> examEvidences)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentExamEvidenceDto>>.ReturnSuccess(null, "Unosi zapisnika ispita uspješno izbrisani.");
+                examEvidences.ForEach(async sig =>
+                {
+                    if ((await RemoveStudentExamEvidence(sig))
+                    .IsNotSuccess(out ActionResponse<StudentExamEvidenceDto> actionResponse))
+                    {
+                        response = await ActionResponse<List<StudentExamEvidenceDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentExamEvidenceDto>>.ReturnError("Greška prilikom micanja unosa zapisnika ispita.");
+            }
+        }
+
+        private async Task<ActionResponse<StudentExamEvidenceDto>> RemoveStudentExamEvidence(StudentExamEvidenceDto examEvidence)
+        {
+            try
+            {
+                unitOfWork.GetGenericRepository<StudentExamEvidence>().Delete(examEvidence.Id.Value);
+                unitOfWork.Save();
+
+                return await ActionResponse<StudentExamEvidenceDto>.ReturnSuccess(null, "Unosi iz zapisnika ispita za studenta uspješno maknuti.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentExamEvidenceDto>.ReturnError("Greška prilikom micanja unosa u zapisnik ispita za studenta.");
+            }
+        }
+
+        private async Task<ActionResponse<List<StudentExamEvidenceDto>>> AddStudentExamEvidences(List<StudentExamEvidenceDto> examEvidences)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentExamEvidenceDto>>.ReturnSuccess(examEvidences, "Unos u zapisnik ispita za studenta uspješan.");
+                examEvidences.ForEach(async s =>
+                {
+                    if ((await AddStudentExamEvidence(s))
+                    .IsNotSuccess(out ActionResponse<StudentExamEvidenceDto> actionResponse, out s))
+                    {
+                        response = await ActionResponse<List<StudentExamEvidenceDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentExamEvidenceDto>>.ReturnError("Greška prilikom dodavanja u zapisnik ispita za studenta.");
+            }
+        }
+
+        private async Task<ActionResponse<StudentExamEvidenceDto>> AddStudentExamEvidence(StudentExamEvidenceDto examEvidence)
+        {
+            try
+            {
+                var entityToAdd = mapper.Map<StudentExamEvidenceDto, StudentExamEvidence>(examEvidence);
+                unitOfWork.GetGenericRepository<StudentExamEvidence>().Add(entityToAdd);
+                unitOfWork.Save();
+                mapper.Map(entityToAdd, examEvidence);
+                return await ActionResponse<StudentExamEvidenceDto>.ReturnSuccess(examEvidence, "Uspješno dodan zapis u zapisnik ispita za studenta.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentExamEvidenceDto>.ReturnError("Greška prilikom dodavanja zapisa u zapsnik ispita za studenta.");
+            }
+        }
+
+        private async Task<ActionResponse<List<StudentExamEvidenceDto>>> ModifyStudentExamEvidences(List<StudentExamEvidenceDto> examEvidences)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentExamEvidenceDto>>.ReturnSuccess(examEvidences, "Zapisi u zapisniku ispita za studenta uspješno ažurirani.");
+                examEvidences.ForEach(async s =>
+                {
+                    if ((await ModifyStudentExamEvidence(s))
+                    .IsNotSuccess(out ActionResponse<StudentExamEvidenceDto> actionResponse, out s))
+                    {
+                        response = await ActionResponse<List<StudentExamEvidenceDto>>.ReturnError(actionResponse.Message);
+                        return;
+                    }
+                });
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentExamEvidenceDto>>.ReturnError("Greška prilikom ažuriranja zapisa u zapisniku ispita za studenta.");
+            }
+        }
+
+        private async Task<ActionResponse<StudentExamEvidenceDto>> ModifyStudentExamEvidence(StudentExamEvidenceDto entityDto)
+        {
+            try
+            {
+                var entityToUpdate = unitOfWork.GetGenericRepository<StudentExamEvidence>().FindSingle(entityDto.Id.Value);
+                mapper.Map(entityDto, entityToUpdate);
+                unitOfWork.GetGenericRepository<StudentExamEvidence>().Update(entityToUpdate);
+                unitOfWork.Save();
+                mapper.Map(entityToUpdate, entityDto);
+
+                return await ActionResponse<StudentExamEvidenceDto>.ReturnSuccess(entityDto, "Zapis u zapisniku ispita za studenta uspješno izmijenjen.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentExamEvidenceDto>.ReturnError("Greška prilikom izmjene zapisa u zapisniku ispita za studenta.");
+            }
+        }
+
+        #endregion Student Exam Evidence
 
         #endregion Students in Group
 
