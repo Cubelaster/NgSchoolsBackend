@@ -19,7 +19,7 @@ namespace NgSchoolsBackend
                 DbInitializer.Initialize(services);
             }
 
-            Environment.SetEnvironmentVariable("Version", new Version("1.4.0.3").ToString());
+            Environment.SetEnvironmentVariable("Version", new Version("2.0.0.0").ToString());
 
             host.Run();
         }
