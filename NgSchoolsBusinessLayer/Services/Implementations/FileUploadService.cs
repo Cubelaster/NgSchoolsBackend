@@ -45,7 +45,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     {
                         iteration++;
                         var extension = filePath.Substring(filePath.LastIndexOf("."));
-                        filePathNew = filePath.Substring(0, filePath.LastIndexOf(".")) + $"({iteration})" + extension;
+                        filePathNew = filePath.Substring(0, filePath.LastIndexOf(".")) + "_" + Guid.NewGuid().ToString() + extension;
                         continue;
                     }
                     filePath = filePathNew;
