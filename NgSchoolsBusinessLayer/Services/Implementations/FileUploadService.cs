@@ -35,6 +35,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 string directoryPath = ottResources;
                 string filePath = Path.Combine(directoryPath, fileUploadRequest.FileName);
 
+                bool fileExists = true;
+                int iteration = 0;
+                string filePathNew = filePath;
+
+                while (fileExists)
+                {
+                    if (File.Exists(filePathNew))
+                    {
+                        iteration++;
+                        var extension = filePath.Substring(filePath.LastIndexOf("."));
+                        filePathNew = filePath.Substring(0, filePath.LastIndexOf(".")) + $"({iteration})" + extension;
+                        continue;
+                    }
+                    filePath = filePathNew;
+                    fileExists = false;
+                }
+
                 var bytes = Convert.FromBase64String(fileUploadRequest.FileString);
 
                 using (var file = new FileStream(filePath, FileMode.Create))
