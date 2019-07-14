@@ -14,7 +14,7 @@ namespace NgSchoolsWebApi.Controllers
         public async Task<ActionResponse<ApplicationDto>> Get()
         {
             var result = ActionResponse<ApplicationDto>.ReturnSuccess(new ApplicationDto {
-                Version = Environment.Version,
+                Version = new Version(Environment.GetEnvironmentVariable("Version")),
                 Environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
             });
             return await result;

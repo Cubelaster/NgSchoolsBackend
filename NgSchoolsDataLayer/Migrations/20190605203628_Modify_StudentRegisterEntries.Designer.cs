@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NgSchoolsDataLayer.Context;
 
 namespace NgSchoolsDataLayer.Migrations
 {
     [DbContext(typeof(NgSchoolsContext))]
-    partial class NgSchoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190605203628_Modify_StudentRegisterEntries")]
+    partial class Modify_StudentRegisterEntries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -162,8 +164,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<string>("Name");
 
                     b.Property<string>("NameDomestic");
-
-                    b.Property<string>("PoBoxNumber");
 
                     b.Property<int?>("RegionId");
 
@@ -525,8 +525,6 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<string>("UrNumber");
 
-                    b.Property<string>("Version");
-
                     b.Property<string>("WorkingEnvironment");
 
                     b.HasKey("Id");
@@ -630,57 +628,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.ToTable("ExamCommissions");
                 });
 
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.GoverningCouncil", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateCreated");
-
-                    b.Property<DateTime?>("DateModified");
-
-                    b.Property<int>("InstitutionId");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("Status");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InstitutionId")
-                        .IsUnique();
-
-                    b.ToTable("GoverningCouncil");
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.GoverningCouncilMember", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("DateCreated");
-
-                    b.Property<DateTime?>("DateModified");
-
-                    b.Property<int>("GoverningCouncilId");
-
-                    b.Property<string>("Role");
-
-                    b.Property<int>("Status");
-
-                    b.Property<Guid>("UserId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GoverningCouncilId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("GoverningCouncilMember");
-                });
-
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Institution", b =>
                 {
                     b.Property<int>("Id")
@@ -728,7 +675,8 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.HasIndex("CityId");
 
-                    b.HasIndex("CountryId");
+                    b.HasIndex("CountryId")
+                        .IsUnique();
 
                     b.HasIndex("LogoId");
 
@@ -736,7 +684,9 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.HasIndex("PrincipalId");
 
-                    b.HasIndex("RegionId");
+                    b.HasIndex("RegionId")
+                        .IsUnique()
+                        .HasFilter("[RegionId] IS NOT NULL");
 
                     b.ToTable("Institution");
                 });
@@ -872,15 +822,11 @@ namespace NgSchoolsDataLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("ClassTypes");
-
                     b.Property<DateTime>("DateCreated");
 
                     b.Property<DateTime?>("DateModified");
 
                     b.Property<double>("HoursNumber");
-
-                    b.Property<string>("PerfomingType");
 
                     b.Property<int>("PlanDaySubjectId");
 
@@ -1106,25 +1052,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.ToTable("StudentClassAttendances");
                 });
 
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.StudentExamEvidence", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("ExamDate");
-
-                    b.Property<string>("ExamEvidence");
-
-                    b.Property<int>("StudentsInGroupsId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StudentsInGroupsId");
-
-                    b.ToTable("StudentExamEvidences");
-                });
-
             modelBuilder.Entity("NgSchoolsDataLayer.Models.StudentFiles", b =>
                 {
                     b.Property<int>("Id")
@@ -1168,8 +1095,6 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<Guid?>("DirectorId");
 
-                    b.Property<string>("EducationGroupMark");
-
                     b.Property<Guid?>("EducationLeaderId");
 
                     b.Property<DateTime>("EndDate");
@@ -1183,12 +1108,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<string>("Name");
 
                     b.Property<string>("Notes");
-
-                    b.Property<int?>("PracticalExamCommissionId");
-
-                    b.Property<DateTime?>("PracticalExamFirstDate");
-
-                    b.Property<DateTime?>("PracticalExamSecondDate");
 
                     b.Property<int>("ProgramId");
 
@@ -1211,8 +1130,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasIndex("EducationLeaderId");
 
                     b.HasIndex("ExamCommissionId");
-
-                    b.HasIndex("PracticalExamCommissionId");
 
                     b.HasIndex("ProgramId");
 
@@ -1263,8 +1180,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("StudentGroupId");
-
-                    b.HasIndex("TeacherId");
 
                     b.ToTable("StudentGroupSubjectTeachers");
                 });
@@ -1366,10 +1281,6 @@ namespace NgSchoolsDataLayer.Migrations
 
                     b.Property<int?>("EmployerId");
 
-                    b.Property<DateTime?>("PracticalEndDate");
-
-                    b.Property<DateTime?>("PracticalStartDate");
-
                     b.Property<int>("Status");
 
                     b.Property<int>("StudentGroupId");
@@ -1404,8 +1315,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.Property<int?>("IndividualConsultations");
 
                     b.Property<int?>("InstConsultations");
-
-                    b.Property<bool>("IsPracticalType");
 
                     b.Property<string>("Literature");
 
@@ -1662,8 +1571,6 @@ namespace NgSchoolsDataLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("CommissionRole");
-
                     b.Property<DateTime>("DateCreated");
 
                     b.Property<DateTime?>("DateModified");
@@ -1877,27 +1784,6 @@ namespace NgSchoolsDataLayer.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.GoverningCouncil", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.Institution")
-                        .WithOne("GoverningCouncil")
-                        .HasForeignKey("NgSchoolsDataLayer.Models.GoverningCouncil", "InstitutionId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.GoverningCouncilMember", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.GoverningCouncil")
-                        .WithMany("GoverningCouncilMembers")
-                        .HasForeignKey("GoverningCouncilId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("NgSchoolsDataLayer.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("NgSchoolsDataLayer.Models.Institution", b =>
                 {
                     b.HasOne("NgSchoolsDataLayer.Models.City", "City")
@@ -2061,14 +1947,6 @@ namespace NgSchoolsDataLayer.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("NgSchoolsDataLayer.Models.StudentExamEvidence", b =>
-                {
-                    b.HasOne("NgSchoolsDataLayer.Models.StudentsInGroups", "StudentsInGroups")
-                        .WithMany("StudentExamEvidences")
-                        .HasForeignKey("StudentsInGroupsId")
-                        .OnDelete(DeleteBehavior.Restrict);
-                });
-
             modelBuilder.Entity("NgSchoolsDataLayer.Models.StudentFiles", b =>
                 {
                     b.HasOne("NgSchoolsDataLayer.Models.UploadedFile", "File")
@@ -2104,10 +1982,6 @@ namespace NgSchoolsDataLayer.Migrations
                         .WithMany()
                         .HasForeignKey("ExamCommissionId");
 
-                    b.HasOne("NgSchoolsDataLayer.Models.ExamCommission", "PracticalExamCommission")
-                        .WithMany()
-                        .HasForeignKey("PracticalExamCommissionId");
-
                     b.HasOne("NgSchoolsDataLayer.Models.EducationProgram", "Program")
                         .WithMany()
                         .HasForeignKey("ProgramId")
@@ -2127,11 +2001,6 @@ namespace NgSchoolsDataLayer.Migrations
                     b.HasOne("NgSchoolsDataLayer.Models.StudentGroup")
                         .WithMany("SubjectTeachers")
                         .HasForeignKey("StudentGroupId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("NgSchoolsDataLayer.Models.User", "Teacher")
-                        .WithMany()
-                        .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
