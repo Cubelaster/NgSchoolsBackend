@@ -5,6 +5,7 @@ using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -90,6 +91,13 @@ namespace NgSchoolsWebApi.Controllers
         public async Task<ActionResponse<List<StudentDto>>> GetTenNewest()
         {
             return await studentService.GetTenNewest();
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<StudentEducationProgramsPrintModel>> GetStudentsEducationPrograms(SimpleRequestBase request)
+        {
+            return await studentService.GetStudentsEducationPrograms(request.Id);
         }
     }
 }

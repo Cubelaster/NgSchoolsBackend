@@ -5,8 +5,10 @@ using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
+using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;
@@ -389,5 +391,46 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<StudentDto>.ReturnError($"Greška prilikom ažuriranja datuma upisa za studenta.");
             }
         }
+
+        #region Print
+
+        public async Task<ActionResponse<StudentEducationProgramsPrintModel>> GetStudentsEducationPrograms(int studentId)
+        {
+            try
+            {
+                var context = unitOfWork.GetContext();
+
+                var studentQuery = from student in context.Students
+                                   where student.Id == studentId
+                                   select student;
+
+                var programQuery = from stuGroups in context.StudentsInGroups
+                                         join student in studentQuery
+                                         on stuGroups.StudentId equals student.Id
+                                         join registerEntry in context.StudentRegisterEntries
+                                         on stuGroups.Id equals registerEntry.StudentsInGroupsId
+                                         join program in context.EducationPrograms
+                                         on registerEntry.EducationProgramId equals program.Id
+                                         where stuGroups.Status == DatabaseEntityStatusEnum.Active
+                                         && registerEntry.Status == DatabaseEntityStatusEnum.Active
+                                         && program.Status == DatabaseEntityStatusEnum.Active
+                                         select new EducationProgramDto
+                                         {
+                                             Id = program.Id,
+                                             Name = program.Name
+                                         };
+
+                var printData = mapper.Map<StudentEducationProgramsPrintModel>(studentQuery.FirstOrDefault());
+                printData.EducationPrograms = mapper.Map<List<EducationProgramDto>>(programQuery.ToList());
+
+                return await ActionResponse<StudentEducationProgramsPrintModel>.ReturnSuccess(printData, "Podaci o edukacijskim programima za studenta uspješno dohvaćeni.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentEducationProgramsPrintModel>.ReturnError("Greška prilikom dohvata podata o edukacijskim programima za studenta.");
+            }
+        }
+
+        #endregion Print
     }
 }

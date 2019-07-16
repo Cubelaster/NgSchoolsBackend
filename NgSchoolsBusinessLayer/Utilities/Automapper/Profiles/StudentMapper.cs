@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using System.Linq;
@@ -32,6 +33,11 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.DateCreated, opt => opt.Ignore());
 
             CreateMap<StudentFiles, StudentFileDto>().ReverseMap();
+
+            CreateMap<StudentDto, StudentEducationProgramsPrintModel>().ReverseMap();
+
+            CreateMap<Student, StudentEducationProgramsPrintModel>()
+                .IncludeBase<Student, StudentDto>();
         }
     }
 }

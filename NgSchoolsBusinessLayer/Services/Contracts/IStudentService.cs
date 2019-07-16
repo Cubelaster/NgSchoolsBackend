@@ -2,6 +2,7 @@
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.ViewModels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -21,5 +22,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<StudentDto>> Update(StudentDto entityDto);
         Task<ActionResponse<StudentDto>> Delete(int id);
         Task<ActionResponse<StudentDto>> UpdateEnrollmentDate(StudentDto student);
+        Task<ActionResponse<StudentEducationProgramsPrintModel>> GetStudentsEducationPrograms(int studentId);
     }
 }
