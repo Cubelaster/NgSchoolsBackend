@@ -17,10 +17,12 @@ namespace NgSchoolsWebApi.Controllers
         #region Ctors and Members
 
         private readonly IStudentGroupService studentGroupService;
+        private readonly IStudentService studentService;
 
-        public PrintController(IStudentGroupService studentGroupService)
+        public PrintController(IStudentGroupService studentGroupService, IStudentService studentService)
         {
             this.studentGroupService = studentGroupService;
+            this.studentService = studentService;
         }
 
         #endregion Ctors and Members
@@ -44,6 +46,13 @@ namespace NgSchoolsWebApi.Controllers
         public async Task<ActionResponse<List<ThemesClassesPrintModel>>> GetThemesClasses(SimpleRequestBase request)
         {
             return await studentGroupService.GetThemesClasses(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<StudentEducationProgramsPrintModel>> GetStudentsEducationPrograms(SimpleRequestBase request)
+        {
+            return await studentService.GetStudentsEducationPrograms(request.Id);
         }
     }
 }

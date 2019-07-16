@@ -92,12 +92,5 @@ namespace NgSchoolsWebApi.Controllers
         {
             return await studentService.GetTenNewest();
         }
-
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost]
-        public async Task<ActionResponse<StudentEducationProgramsPrintModel>> GetStudentsEducationPrograms(SimpleRequestBase request)
-        {
-            return await studentService.GetStudentsEducationPrograms(request.Id);
-        }
     }
 }
