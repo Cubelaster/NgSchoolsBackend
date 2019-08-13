@@ -1350,3 +1350,10 @@
 {
 	"Id": 7
 }
+
+// Print/GetPrintDataByBookAndRegisterRange
+{
+	"BookNumber": 5,
+	"StudentRegisterNumberRangeFrom": 800,
+	"StudentRegisterNumberRangeTo": 900
+}

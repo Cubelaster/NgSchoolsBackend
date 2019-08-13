@@ -25,5 +25,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<StudentRegisterEntryDto>> UpdateEntry(StudentRegisterEntryInsertRequest request);
         Task<ActionResponse<StudentRegisterEntryDto>> DeleteEntry(int id);
         Task<ActionResponse<int>> GetTotalNumber();
+        Task<ActionResponse<List<StudentRegisterPrintDataAggregatedDto>>> GetPrintDataForBookAndEntriesRange(StudentRegisterPrintForRangeRequest request);
     }
 }
