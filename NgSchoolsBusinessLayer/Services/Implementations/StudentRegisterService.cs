@@ -463,7 +463,26 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var insertedStudent = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
                     .GetAll(sre => sre.StudentRegisterNumber == request.StudentRegisterNumber
                         && sre.StudentRegister.BookNumber == request.BookNumber
-                        && sre.Status == DatabaseEntityStatusEnum.Active, includeProperties: "StudentsInGroups.Student")
+                        && sre.Status == DatabaseEntityStatusEnum.Active)
+                        .FirstOrDefault();
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntryDto>(insertedStudent));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom dohvata zapisa po knjizi i broju studenta.");
+            }
+        }
+
+        private async Task<ActionResponse<StudentRegisterEntryDto>> GetEntryForStudentNumberAndBookNumberDetailed(StudentRegisterEntryInsertRequest request)
+        {
+            try
+            {
+                var insertedStudent = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
+                    .GetAll(sre => sre.StudentRegisterNumber == request.StudentRegisterNumber
+                        && sre.StudentRegister.BookNumber == request.BookNumber
+                        && sre.Status == DatabaseEntityStatusEnum.Active, includeProperties: "StudentsInGroups.Student,StudentsInGroups.StudentGroup," +
+                        "StudentsInGroups.StudentGroup.ClassLocation.Country, StudentsInGroups.StudentGroup.ClassLocation.Region," +
+                        "StudentsInGroups.StudentGroup.ClassLocation.Municipality, StudentsInGroups.StudentGroup.ClassLocation.City")
                         .FirstOrDefault();
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntryDto>(insertedStudent));
             }
@@ -647,7 +666,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 await Task.WhenAll(range.Select(async number =>
                  {
-                     if ((await GetEntryForStudentNumberAndBookNumber(new StudentRegisterEntryInsertRequest
+                     if ((await GetEntryForStudentNumberAndBookNumberDetailed(new StudentRegisterEntryInsertRequest
                      {
                          BookNumber = request.BookNumber,
                          StudentRegisterNumber = number
