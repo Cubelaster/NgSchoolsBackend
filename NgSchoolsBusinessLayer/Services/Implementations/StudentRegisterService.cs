@@ -486,7 +486,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         "StudentsInGroups.Student.AddressCity,StudentsInGroups.Student.AddressRegion,StudentsInGroups.Student.AddressMunicipality," +
                         "StudentsInGroups.StudentGroup," +
                         "StudentsInGroups.StudentGroup.ClassLocation.Country, StudentsInGroups.StudentGroup.ClassLocation.Region," +
-                        "StudentsInGroups.StudentGroup.ClassLocation.Municipality, StudentsInGroups.StudentGroup.ClassLocation.City")
+                        "StudentsInGroups.StudentGroup.ClassLocation.Municipality, StudentsInGroups.StudentGroup.ClassLocation.City," +
+                        "EducationProgram.EducationGroup,EducationProgram.Subjects")
                         .FirstOrDefault();
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntryDto>(insertedStudent));
             }
