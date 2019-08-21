@@ -480,7 +480,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var insertedStudent = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
                     .GetAll(sre => sre.StudentRegisterNumber == request.StudentRegisterNumber
                         && sre.StudentRegister.BookNumber == request.BookNumber
-                        && sre.Status == DatabaseEntityStatusEnum.Active, includeProperties: entryIncludes)
+                        && sre.Status == DatabaseEntityStatusEnum.Active, includeProperties:
+                        "StudentsInGroups.Student," +
+                        "StudentsInGroups.Student.CityOfBirth,StudentsInGroups.Student.CountryOfBirth,StudentsInGroups.Student.RegionOfBirth," +
+                        "StudentsInGroups.Student.MunicipalityOfBirth,StudentsInGroups.Student.AddressCountry," +
+                        "StudentsInGroups.Student.AddressCity,StudentsInGroups.Student.AddressRegion,StudentsInGroups.Student.AddressMunicipality," +
+                        "StudentsInGroups.StudentGroup," +
+                        "StudentsInGroups.StudentGroup.ClassLocation.Country, StudentsInGroups.StudentGroup.ClassLocation.Region," +
+                        "StudentsInGroups.StudentGroup.ClassLocation.Municipality, StudentsInGroups.StudentGroup.ClassLocation.City," +
+                        "EducationProgram.EducationGroup, EducationProgram.Subject," +
+                        "StudentsInGroups.StudentGroup.Director.UserDetails, StudentsInGroups.StudentGroup.EducationLeader.UserDetails")
                         .FirstOrDefault();
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntryDto>(insertedStudent));
             }
