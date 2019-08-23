@@ -1357,3 +1357,9 @@
 	"StudentRegisterNumberRangeFrom": 800,
 	"StudentRegisterNumberRangeTo": 900
 }
+
+// User/ChangePassword
+{
+	"Email": "tinaduvnjak9@gmail.com",
+	"NewPassword": "Pasword11__22!!"
+}

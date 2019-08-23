@@ -602,5 +602,49 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         }
 
         #endregion Roles
+
+        #region User Management
+
+        public async Task<ActionResponse<object>> ChangePassword(UserChangePasswordDto passwordDto)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(passwordDto.Email) || string.IsNullOrWhiteSpace(passwordDto.NewPassword))
+                {
+                    return await ActionResponse<object>.ReturnError("Dio obaveznih parametara nedostaje. Izmjena nije moguća.");
+                }
+
+                var user = await userManager.FindByEmailAsync(passwordDto.Email);
+
+                if (user == null)
+                {
+                    return await ActionResponse<object>.ReturnError("Korisnik sa odabranom email adresom ne postoji u sustavu.");
+                }
+
+                var validator = userManager.PasswordValidators.First();
+                var isValid = await validator.ValidateAsync(userManager, user, passwordDto.NewPassword);
+                if (!isValid.Succeeded)
+                {
+                    return await ActionResponse<object>
+                        .ReturnError("Odabrana lozinka ne odgovara standardima. Lozinka mora imati barem jedan poseban znak, jedan broj i kombinaciju malih i velikih slova.");
+                }
+
+                var resetToken = await userManager.GeneratePasswordResetTokenAsync(user);
+
+                var result = await userManager.ResetPasswordAsync(user, resetToken, passwordDto.NewPassword);
+                if (!result.Succeeded)
+                {
+                    return await ActionResponse<object>.ReturnError("Greška prilikom izmjene lozinke. Molimo pokušajte ponovno ili kontaktirajte administratore.");
+                }
+
+                return await ActionResponse<object>.ReturnSuccess(null, "Lozinka uspješno izmijenjena.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<object>.ReturnError("Nepredviđena greška prilikom izmjene lozinke. Molimo pokušajte ponovno ili kontaktirajte administratore.");
+            }
+        }
+
+        #endregion User Management
     }
 }
