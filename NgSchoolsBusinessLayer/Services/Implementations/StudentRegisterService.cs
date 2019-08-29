@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using NgSchoolsBusinessLayer.Enums.Common;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Enums;
@@ -27,13 +29,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             ",StudentsInGroups.Student.AddressCity,StudentsInGroups.Student.AddressCountry,StudentsInGroups.Student.AddressRegion" +
             ",StudentsInGroups.Student.CountryOfBirth,StudentsInGroups.Student.RegionOfBirth,StudentsInGroups.Student.CityOfBirth" +
             ",StudentsInGroups.StudentGroup.Director.UserDetails,StudentsInGroups.StudentGroup.EducationLeader.UserDetails,StudentsInGroups.Student.StudentsInGroups.StudentRegisterEntry";
+
+        private readonly IStudentService studentService;
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
 
-        public StudentRegisterService(IMapper mapper,
+        public StudentRegisterService(IStudentService studentService, IMapper mapper,
             IUnitOfWork unitOfWork, ICacheService cacheService)
         {
+            this.studentService = studentService;
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
@@ -451,20 +456,45 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        private async Task<ActionResponse<List<StudentRegisterEntryDto>>> GetEntriesForStudentNumberAndBookNumber(StudentRegisterEntryInsertRequest request)
+        private async Task<ActionResponse<StudentRegisterEntryDto>> GetEntryForStudentNumberAndBookNumber(StudentRegisterEntryInsertRequest request)
         {
             try
             {
-                var insertedStudents = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
+                var insertedStudent = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
                     .GetAll(sre => sre.StudentRegisterNumber == request.StudentRegisterNumber
                         && sre.StudentRegister.BookNumber == request.BookNumber
                         && sre.Status == DatabaseEntityStatusEnum.Active)
-                        .ToList();
-                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterEntryDto>>(insertedStudents));
+                        .FirstOrDefault();
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntryDto>(insertedStudent));
             }
             catch (Exception)
             {
-                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata zapisa koji sadrže traženi program i studenta.");
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom dohvata zapisa po knjizi i broju studenta.");
+            }
+        }
+
+        private async Task<ActionResponse<StudentRegisterEntryDto>> GetEntryForStudentNumberAndBookNumberDetailed(StudentRegisterEntryInsertRequest request)
+        {
+            try
+            {
+                var insertedStudent = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
+                    .GetAll(sre => sre.StudentRegisterNumber == request.StudentRegisterNumber
+                        && sre.StudentRegister.BookNumber == request.BookNumber
+                        && sre.Status == DatabaseEntityStatusEnum.Active, includeProperties: "StudentsInGroups.Student," +
+                        "StudentsInGroups.Student.CityOfBirth,StudentsInGroups.Student.CountryOfBirth,StudentsInGroups.Student.RegionOfBirth," +
+                        "StudentsInGroups.Student.MunicipalityOfBirth,StudentsInGroups.Student.AddressCountry," +
+                        "StudentsInGroups.Student.AddressCity,StudentsInGroups.Student.AddressRegion,StudentsInGroups.Student.AddressMunicipality," +
+                        "StudentsInGroups.StudentGroup," +
+                        "StudentsInGroups.StudentGroup.ClassLocation.Country, StudentsInGroups.StudentGroup.ClassLocation.Region," +
+                        "StudentsInGroups.StudentGroup.ClassLocation.Municipality, StudentsInGroups.StudentGroup.ClassLocation.City," +
+                        "EducationProgram.EducationGroup, EducationProgram.Subjects," +
+                        "StudentsInGroups.StudentGroup.Director.UserDetails, StudentsInGroups.StudentGroup.EducationLeader.UserDetails")
+                        .FirstOrDefault();
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntryDto>(insertedStudent));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom dohvata zapisa po knjizi i broju studenta.");
             }
         }
 
@@ -489,10 +519,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Nemoguće unjeti novi zapis za kombinaciju studenta i edukacijskog programa, takav zapis već postoji.");
                     }
 
-                    if ((await GetEntriesForStudentNumberAndBookNumber(request))
-                        .IsNotSuccess(out checkResponse, out alreadyExisting))
+                    if ((await GetEntryForStudentNumberAndBookNumber(request))
+                        .IsNotSuccess(out ActionResponse<StudentRegisterEntryDto> registerEntryResponse, out StudentRegisterEntryDto existingEntry))
                     {
-                        return await ActionResponse<StudentRegisterEntryDto>.ReturnError(checkResponse.Message);
+                        return await ActionResponse<StudentRegisterEntryDto>.ReturnError(registerEntryResponse.Message);
                     }
 
                     if (alreadyExisting.Any())
@@ -627,5 +657,71 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #endregion Writers
 
         #endregion StudentRegisterEntry
+
+        #region Print
+
+        public async Task<ActionResponse<List<StudentRegisterPrintDataAggregatedDto>>> GetPrintDataForBookAndEntriesRange(StudentRegisterPrintForRangeRequest request)
+        {
+            try
+            {
+                var studentRegisterEntryFailResponses = new List<ActionResponse<StudentRegisterEntryDto>>();
+                var educationProgramsFailResponses = new List<ActionResponse<StudentEducationProgramsPrintModel>>();
+                var printData = new List<StudentRegisterPrintDataAggregatedDto>();
+
+                var range = Enumerable.Range(request.StudentRegisterNumberRangeFrom, request.StudentRegisterNumberRangeTo - request.StudentRegisterNumberRangeFrom);
+
+                await Task.WhenAll(range.Select(async number =>
+                 {
+                     if ((await GetEntryForStudentNumberAndBookNumberDetailed(new StudentRegisterEntryInsertRequest
+                     {
+                         BookNumber = request.BookNumber,
+                         StudentRegisterNumber = number
+                     })).IsNotSuccess(out ActionResponse<StudentRegisterEntryDto> registerEntryResponse, out StudentRegisterEntryDto studentRegisterEntry))
+                     {
+                         studentRegisterEntryFailResponses.Add(registerEntryResponse);
+                     }
+                     else if (studentRegisterEntry != null)
+                     {
+                         if ((await studentService.GetStudentsEducationPrograms(studentRegisterEntry.Student.Id))
+                         .IsNotSuccess(out ActionResponse<StudentEducationProgramsPrintModel> studentEducationProgramsResponse, out StudentEducationProgramsPrintModel studentEducationPrograms))
+                         {
+                             educationProgramsFailResponses.Add(studentEducationProgramsResponse);
+                         }
+                         else
+                         {
+                             printData.Add(new StudentRegisterPrintDataAggregatedDto
+                             {
+                                 StudentRegisterEntry = studentRegisterEntry,
+                                 StudentEducationPrograms = studentEducationPrograms
+                             });
+                         }
+                     }
+                 }));
+
+                var anyRegisterFails = studentRegisterEntryFailResponses.Any();
+                var anyEduProgramsFails = educationProgramsFailResponses.Any();
+
+                if (!anyRegisterFails && !anyEduProgramsFails)
+                {
+                    return await ActionResponse<List<StudentRegisterPrintDataAggregatedDto>>.ReturnSuccess(printData);
+                }
+                else
+                {
+                    if ((anyRegisterFails && studentRegisterEntryFailResponses.All(r => r.ActionResponseType != ActionResponseTypeEnum.Success))
+                    || (anyEduProgramsFails && educationProgramsFailResponses.All(r => r.ActionResponseType != ActionResponseTypeEnum.Success)))
+                    {
+                        return await ActionResponse<List<StudentRegisterPrintDataAggregatedDto>>.ReturnError("Greška prilikom dohvata podataka.", printData);
+                    }
+
+                    return await ActionResponse<List<StudentRegisterPrintDataAggregatedDto>>.ReturnWarning("Postoje greške prilikom dohvata zapisa matične knjige.", printData);
+                }
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentRegisterPrintDataAggregatedDto>>.ReturnError("Greška prilikom dohvata zapisa.");
+            }
+        }
+
+        #endregion Print
     }
 }

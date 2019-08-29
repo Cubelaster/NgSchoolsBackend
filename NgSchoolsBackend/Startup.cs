@@ -51,7 +51,7 @@ namespace NgSchoolsBackend
                 options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"),
                 opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
 
-            LoadDinkDll(services);
+            //LoadDinkDll(services);
 
             ConfigureServicesDI(services);
 

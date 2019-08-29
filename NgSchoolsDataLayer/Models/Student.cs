@@ -49,7 +49,7 @@ namespace NgSchoolsDataLayer.Models
         public string Email { get; set; }
         public bool Employed { get; set; }
         public string EmployerName { get; set; }
-        public bool EmployerApplicationAttendant { get; set; }       
+        public bool EmployerApplicationAttendant { get; set; }
         public string EmployerOib { get; set; }
         public bool EducationContract { get; set; }
         public bool FinalExam { get; set; }

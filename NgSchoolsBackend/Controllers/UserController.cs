@@ -121,5 +121,12 @@ namespace NgSchoolsBackend.Controllers
         {
             return await userService.GetTotalNumberOfTeachers();
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin, Super Admin")]
+        [HttpPost]
+        public async Task<ActionResponse<object>> ChangePassword([FromBody] UserChangePasswordDto passwordDto)
+        {
+            return await userService.ChangePassword(passwordDto);
+        }
     }
 }

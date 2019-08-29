@@ -63,6 +63,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public bool Gdpr { get; set; }
         public string Notes { get; set; }
         public DateTime? DateCreated { get; set; }
+        public bool? EmployerApplicationAttendant { get; set; }
 
         public int? EmployerId { get; set; }
         public BusinessPartnerDto Employer { get; set; }

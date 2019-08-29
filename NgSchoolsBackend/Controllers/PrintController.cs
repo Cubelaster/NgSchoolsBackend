@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
+using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Services.Contracts;
@@ -18,11 +20,14 @@ namespace NgSchoolsWebApi.Controllers
 
         private readonly IStudentGroupService studentGroupService;
         private readonly IStudentService studentService;
+        private readonly IStudentRegisterService studentRegisterService;
 
-        public PrintController(IStudentGroupService studentGroupService, IStudentService studentService)
+        public PrintController(IStudentGroupService studentGroupService, 
+            IStudentService studentService, IStudentRegisterService studentRegisterService)
         {
             this.studentGroupService = studentGroupService;
             this.studentService = studentService;
+            this.studentRegisterService = studentRegisterService;
         }
 
         #endregion Ctors and Members
@@ -53,6 +58,13 @@ namespace NgSchoolsWebApi.Controllers
         public async Task<ActionResponse<StudentEducationProgramsPrintModel>> GetStudentsEducationPrograms(SimpleRequestBase request)
         {
             return await studentService.GetStudentsEducationPrograms(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<List<StudentRegisterPrintDataAggregatedDto>>> GetPrintDataByBookAndRegisterRange(StudentRegisterPrintForRangeRequest request)
+        {
+            return await studentRegisterService.GetPrintDataForBookAndEntriesRange(request);
         }
     }
 }
