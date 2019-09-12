@@ -31,6 +31,7 @@ namespace NgSchoolsDataLayer.Models
         public string CIClassesGroup { get; set; }
         public string CIClassesIndividual { get; set; }
         public string CIClassesPractical { get; set; }
+        public string CIClassesTheoretical { get; set; }
         public string ProgramType { get; set; }
         public string RegularClassesWorkShop { get; set; }
         public string CIClassesWorkShop { get; set; }
