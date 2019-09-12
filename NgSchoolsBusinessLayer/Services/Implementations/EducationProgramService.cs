@@ -439,20 +439,21 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entity = unitOfWork.GetGenericRepository<EducationProgram>()
                     .FindBy(e => e.Id == entityDto.Id, includeProperties: "EducationProgramClassTypes.ClassType");
 
-                var currentClassTypes = entity.EducationProgramClassTypes.Select(edct => edct.ClassTypeId).ToList();
+                var currentClassTypes = entity.EducationProgramClassTypes.ToList();
 
                 var newClassTypes = entityDto.ClassTypeIds;
 
                 var classTypesToRemove = currentClassTypes
-                    .Where(cet => !newClassTypes.Contains(cet))
+                    .Where(cet => !newClassTypes.Contains(cet.Id))
                     .Select(sf => new EducationProgramClassTypeDto
                     {
-                        ClassTypeId = sf,
+                        Id = sf.Id,
+                        ClassTypeId = sf.ClassTypeId,
                         EducationProgramId = entityDto.Id
                     }).ToList();
 
                 var classTypesToAdd = newClassTypes
-                    .Where(nt => !currentClassTypes.Contains(nt))
+                    .Where(nt => !currentClassTypes.Select(cct => cct.Id).Contains(nt))
                     .Select(sf => new EducationProgramClassTypeDto
                     {
                         ClassTypeId = sf,
