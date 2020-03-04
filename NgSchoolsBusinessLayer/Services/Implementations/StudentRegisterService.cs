@@ -24,7 +24,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
     {
         #region Ctors and Members
 
-        private const string registerIncludes = "StudentRegisterEntries";
+        private const string registerIncludes = "StudentRegisterEntries,StudentRegisterEntries.EducationProgram";
         private const string entryIncludes = "EducationProgram.EducationGroup,EducationProgram.Subjects" +
             ",StudentsInGroups.Student.AddressCity,StudentsInGroups.Student.AddressCountry,StudentsInGroups.Student.AddressRegion" +
             ",StudentsInGroups.Student.CountryOfBirth,StudentsInGroups.Student.RegionOfBirth,StudentsInGroups.Student.CityOfBirth" +
