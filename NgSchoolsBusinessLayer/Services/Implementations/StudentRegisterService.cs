@@ -28,7 +28,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private const string entryIncludes = "EducationProgram.EducationGroup,EducationProgram.Subjects" +
             ",StudentsInGroups.Student.AddressCity,StudentsInGroups.Student.AddressCountry,StudentsInGroups.Student.AddressRegion" +
             ",StudentsInGroups.Student.CountryOfBirth,StudentsInGroups.Student.RegionOfBirth,StudentsInGroups.Student.CityOfBirth" +
-            ",StudentsInGroups.StudentGroup.Director.UserDetails,StudentsInGroups.StudentGroup.EducationLeader.UserDetails,StudentsInGroups.Student.StudentsInGroups.StudentRegisterEntry";
+            ",StudentsInGroups.StudentGroup.Director.UserDetails,StudentsInGroups.StudentGroup.Director.UserDetails.Signature" +
+            ",StudentsInGroups.StudentGroup.EducationLeader.UserDetails,StudentsInGroups.StudentGroup.EducationLeader.UserDetails.Signature" +
+            ",StudentsInGroups.Student.StudentsInGroups.StudentRegisterEntry";
 
         private readonly IStudentService studentService;
         private readonly IMapper mapper;

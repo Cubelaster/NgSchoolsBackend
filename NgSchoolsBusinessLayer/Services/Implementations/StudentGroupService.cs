@@ -1699,6 +1699,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                  on teach.TeacherId equals user.Id
                                  join userDetails in context.UserDetails
                                  on user.Id equals userDetails.UserId
+                                 join signature in context.UploadedFiles
+                                 on userDetails.SignatureId equals signature.Id
                                  where sg.Id == groupId
                                  && sg.Status == DatabaseEntityStatusEnum.Active
                                  && user.Status == DatabaseEntityStatusEnum.Active
@@ -1790,7 +1792,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                                  Profession = teacher.userDetails.Profession,
                                                  Title = teacher.userDetails.Title,
                                                  FirstName = teacher.userDetails.FirstName,
-                                                 LastName = teacher.userDetails.LastName
+                                                 LastName = teacher.userDetails.LastName,
+                                                 SignatureId = teacher.userDetails.Signature.Id,
+                                                 Signature = new FileDto
+                                                 {
+                                                     Id = teacher.userDetails.Signature.Id,
+                                                     FileName = teacher.userDetails.Signature.FileName
+                                                 }
                                              },
                                              Subject = subject.Subject,
                                              Themes = themes.Themes,
