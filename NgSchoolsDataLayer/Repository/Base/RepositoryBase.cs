@@ -77,6 +77,31 @@ namespace NgSchoolsDataLayer.Repository.Base
             return query;
         }
 
+        public virtual IQueryable<T> ReadAll(Expression<Func<T, bool>> filter = null,
+            Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null)
+        {
+            IQueryable<T> query = context.Set<T>().AsNoTracking();
+
+            Type typeParameterType = typeof(T);
+
+            if (typeof(DatabaseEntity).IsAssignableFrom(typeof(T)))
+            {
+                query = query.Where(q => (q as DatabaseEntity).Status == Enums.DatabaseEntityStatusEnum.Active);
+            }
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (orderBy != null)
+            {
+                return orderBy(query).AsQueryable();
+            }
+
+            return query;
+        }
+
         public virtual T FindSingle(Guid id)
         {
             return context.Set<T>().Find(id);

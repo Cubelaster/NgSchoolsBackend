@@ -18,6 +18,7 @@ using NgSchoolsBusinessLayer.Security.Jwt.Implementations;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Services.Implementations;
 using NgSchoolsBusinessLayer.Services.Implementations.Common;
+using NgSchoolsBusinessLayer.Utilities.Automapper.Profiles;
 using NgSchoolsDataLayer.Context;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
@@ -62,7 +63,7 @@ namespace NgSchoolsBackend
                 .AddRoles<IdentityRole<Guid>>()
                 .AddDefaultTokenProviders();
 
-            services.AddAutoMapper();
+            services.AddAutoMapper(typeof(UserMapper));
 
             services.AddMvc()
                 .AddJsonOptions(options =>

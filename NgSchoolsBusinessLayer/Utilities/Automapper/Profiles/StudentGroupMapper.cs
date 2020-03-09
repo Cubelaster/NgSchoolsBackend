@@ -20,6 +20,9 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active).Select(sig => sig.Student)))
                 .ForMember(dest => dest.StudentsInGroup, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active)));
 
+            CreateMap<StudentGroup, StudentGroupBaseDto>()
+                .ForMember(dest => dest.EducationProgram, opt => opt.MapFrom(src => src.Program));
+
             CreateMap<StudentGroupDto, StudentGroup>()
                 .ForMember(dest => dest.ClassLocation, opt => opt.Ignore())
                 .ForMember(dest => dest.EducationLeader, opt => opt.Ignore())
@@ -34,7 +37,9 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
             CreateMap<StudentsInGroups, StudentInGroupDto>()
                 .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.StudentGroupId))
                 .ForMember(dest => dest.StudentId, opt => opt.MapFrom(src => src.StudentId))
-                .ForMember(dest => dest.StudentRegisterNumber, opt => opt.MapFrom(src => src.StudentRegisterEntry != null ? src.StudentRegisterEntry.StudentRegisterNumber : (int?)null));
+                .ForMember(dest => dest.StudentRegisterNumber, opt => opt.MapFrom(src => src.StudentRegisterEntry != null ? src.StudentRegisterEntry.StudentRegisterNumber : (int?)null))
+                .MaxDepth(2)
+                .PreserveReferences();
 
             CreateMap<StudentInGroupDto, StudentsInGroups>()
                 .ForMember(dest => dest.StudentGroupId, opt => opt.MapFrom(src => src.GroupId))

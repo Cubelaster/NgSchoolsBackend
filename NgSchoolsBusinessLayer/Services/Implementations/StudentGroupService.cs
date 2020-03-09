@@ -68,7 +68,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<StudentGroupDto>
                     .ReturnSuccess(mapper.Map<StudentGroupDto>(entity));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom dohvata grupe studenata.");
             }
@@ -221,7 +221,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                var transactionOptions = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TransactionManager.MaximumTimeout
+                };
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     entityDto.StudentNames = null;
 

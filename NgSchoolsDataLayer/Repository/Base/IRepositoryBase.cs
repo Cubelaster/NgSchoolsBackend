@@ -1,5 +1,4 @@
-﻿using NgSchoolsDataLayer.Models.BaseTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -15,6 +14,16 @@ namespace NgSchoolsDataLayer.Repository.Base
         IQueryable<T> GetAllAsQueryable(Expression<Func<T, bool>> filter = null,
             Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null,
             string includeProperties = "");
+
+        /// <summary>
+        /// Adds a AsNoTracking to Query
+        /// Use it for reading
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <param name="orderBy"></param>
+        /// <returns></returns>
+        IQueryable<T> ReadAll(Expression<Func<T, bool>> filter = null,
+            Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null);
 
         T FindSingle(Guid id);
 
