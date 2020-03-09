@@ -43,17 +43,5 @@ namespace NgSchoolsWebApi.Controllers
         {
             return await ActionResponse<object>.ReturnSuccess();
         }
-
-        [AllowAnonymous]
-        [HttpPost]
-        public async Task<ActionResponse<FileDto>> GeneratePdf()
-        {
-            if ((await pdfGeneratorService.GeneratePdf("Test.pdf"))
-                .IsNotSuccess(out ActionResponse<FileDto> actionResponse, out FileDto file))
-            {
-                return await ActionResponse<FileDto>.ReturnError("Greška prilikom generiranja PDF-a");
-            }
-            return actionResponse;
-        }
     }
 }

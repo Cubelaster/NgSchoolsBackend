@@ -159,7 +159,7 @@ namespace NgSchoolsBackend
             services.AddScoped<IDiaryService, DiaryService>();
             services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IStudentRegisterService, StudentRegisterService>();
-            services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
+            //services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
         }
 
         private void ConfigureJWT(IServiceCollection services)
