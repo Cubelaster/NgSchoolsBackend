@@ -15,32 +15,25 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
             CreateMap<CountryDto, Country>()
                 .ForMember(dest => dest.Alpha2Code, opt => opt.MapFrom(src => src.Code))
                 .ForMember(dest => dest.Cities, opt => opt.Ignore())
-                .ForMember(dest => dest.Regions, opt => opt.Ignore())
-                .PreserveReferences();
+                .ForMember(dest => dest.Regions, opt => opt.Ignore());
 
             CreateMap<Region, RegionDto>()
-                .ForMember(dest => dest.Region, opt => opt.MapFrom(src => src.Name))
-                .PreserveReferences();
+                .ForMember(dest => dest.Region, opt => opt.MapFrom(src => src.Name));
 
             CreateMap<RegionDto, Region>()
                 .ForMember(dest => dest.Cities, opt => opt.Ignore())
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Region))
-                .PreserveReferences();
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Region));
 
             CreateMap<City, CityDto>()
-                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Name))
-                .PreserveReferences();
+                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.Name));
 
             CreateMap<CityDto, City>()
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.City))
-                .PreserveReferences();
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.City));
 
             CreateMap<MunicipalityDto, Municipality>()
-                .ForMember(dest => dest.Cities, opt => opt.Ignore())
-                .PreserveReferences();
+                .ForMember(dest => dest.Cities, opt => opt.Ignore());
 
-            CreateMap<Municipality, MunicipalityDto>()
-                .PreserveReferences();
+            CreateMap<Municipality, MunicipalityDto>();
         }
     }
 }

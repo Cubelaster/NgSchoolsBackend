@@ -68,7 +68,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 return await ActionResponse<StudentGroupDto>
                     .ReturnSuccess(mapper.Map<StudentGroupDto>(entity));
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom dohvata grupe studenata.");
             }

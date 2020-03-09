@@ -37,9 +37,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
             CreateMap<StudentsInGroups, StudentInGroupDto>()
                 .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.StudentGroupId))
                 .ForMember(dest => dest.StudentId, opt => opt.MapFrom(src => src.StudentId))
-                .ForMember(dest => dest.StudentRegisterNumber, opt => opt.MapFrom(src => src.StudentRegisterEntry != null ? src.StudentRegisterEntry.StudentRegisterNumber : (int?)null))
-                .MaxDepth(2)
-                .PreserveReferences();
+                .ForMember(dest => dest.StudentRegisterNumber, opt => opt.MapFrom(src => src.StudentRegisterEntry != null ? src.StudentRegisterEntry.StudentRegisterNumber : (int?)null));
 
             CreateMap<StudentInGroupDto, StudentsInGroups>()
                 .ForMember(dest => dest.StudentGroupId, opt => opt.MapFrom(src => src.GroupId))
