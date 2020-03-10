@@ -58,11 +58,11 @@ namespace NgSchoolsBackend
             ConfigureJWT(services);
 
             services.AddIdentity<User, Role>()
+                .AddRoles<Role>()
                 .AddEntityFrameworkStores<NgSchoolsContext>()
-                .AddRoles<IdentityRole<Guid>>()
                 .AddDefaultTokenProviders();
 
-            services.AddAutoMapper();
+            services.AddAutoMapper(typeof(NgSchoolsBusinessLayer.Utilities.Automapper.Profiles.UserMapper));
 
             services.AddMvc()
                 .AddJsonOptions(options =>

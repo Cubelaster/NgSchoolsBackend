@@ -19,13 +19,11 @@ namespace NgSchoolsWebApi.Controllers
 
         private readonly IAuthService authService;
         private readonly IJwtFactory jwtFactory;
-        private readonly IPdfGeneratorService pdfGeneratorService;
 
-        public AuthController(IAuthService authService, IJwtFactory jwtFactory, IPdfGeneratorService pdfGeneratorService)
+        public AuthController(IAuthService authService, IJwtFactory jwtFactory)
         {
             this.authService = authService;
             this.jwtFactory = jwtFactory;
-            this.pdfGeneratorService = pdfGeneratorService;
         }
 
         #endregion Ctors and Members
