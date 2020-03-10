@@ -51,16 +51,16 @@ namespace NgSchoolsBackend
                 options.UseSqlServer(Configuration.GetConnectionString("NgSchoolsConnection"),
                 opts => opts.MigrationsAssembly("NgSchoolsDataLayer")));
 
+            services.AddIdentity<User, Role>()
+                .AddRoles<Role>()
+                .AddEntityFrameworkStores<NgSchoolsContext>()
+                .AddDefaultTokenProviders();
+
             //LoadDinkDll(services);
 
             ConfigureServicesDI(services);
 
             ConfigureJWT(services);
-
-            services.AddIdentity<User, Role>()
-                .AddRoles<Role>()
-                .AddEntityFrameworkStores<NgSchoolsContext>()
-                .AddDefaultTokenProviders();
 
             services.AddAutoMapper(typeof(NgSchoolsBusinessLayer.Utilities.Automapper.Profiles.UserMapper));
 
