@@ -3,6 +3,7 @@ using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Models.ViewModels;
+using NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -17,7 +18,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<List<ThemesByWeekPrintModel>>> GetThemesByWeeks(int groupId);
         Task<ActionResponse<List<ThemesClassesPrintModel>>> GetThemesClasses(int groupId);
         Task<ActionResponse<int>> GetTotalNumber();
-        Task<ActionResponse<PagedResult<StudentGroupDto>>> GetAllPaged(BasePagedRequest pagedRequest);
+        Task<ActionResponse<PagedResult<StudentGroupGridViewModel>>> GetAllPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<StudentGroupDto>> Delete(int id);
         Task<ActionResponse<StudentGroupDto>> Insert(StudentGroupDto entityDto);
         Task<ActionResponse<StudentGroupDto>> Update(StudentGroupDto entityDto);

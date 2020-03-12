@@ -13,7 +13,7 @@ namespace NgSchoolsBusinessLayer.Extensions
 {
     public static class IQueryableExtensions
     {
-        public static async Task<PagedResult<T>> GetPaged<T>(this IQueryable<T> query, BasePagedRequest pagedRequest) where T : class
+        public static async Task<PagedResult<T>> GetPaged<T>(this IQueryable<T> query, BasePagedRequest pagedRequest, bool onlyQueryable = false) where T : class
         {
             Type objectType = query.FirstOrDefault()?.GetType();
 
@@ -74,6 +74,15 @@ namespace NgSchoolsBusinessLayer.Extensions
 
                 result.RowCount = query.Count();
                 result.PageCount = (int)Math.Ceiling((double)result.RowCount / pagedRequest.PageSize);
+
+                result.ResultQuery = query
+                    .Skip(skip)
+                    .Take(pagedRequest.PageSize);
+
+                if (onlyQueryable)
+                {
+                    return result;
+                }
 
                 result.Results = await Task.FromResult(
                     query

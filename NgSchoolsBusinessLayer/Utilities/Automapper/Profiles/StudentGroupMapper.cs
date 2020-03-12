@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using System.Collections.Generic;
@@ -61,6 +62,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<CombinedGroupDto, CombinedGroup>()
                 .ForMember(dest => dest.StudentGroups, opt => opt.Ignore());
+
+            CreateMap<StudentGroup, StudentGroupGridViewModel>();
         }
     }
 }

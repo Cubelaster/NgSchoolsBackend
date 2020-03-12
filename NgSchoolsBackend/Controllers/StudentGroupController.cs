@@ -5,6 +5,7 @@ using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
-        public async Task<ActionResponse<PagedResult<StudentGroupDto>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
+        public async Task<ActionResponse<PagedResult<StudentGroupGridViewModel>>> GetAllPaged([FromBody] BasePagedRequest pagedRequest)
         {
             return await studentGroupService.GetAllPaged(pagedRequest);
         }

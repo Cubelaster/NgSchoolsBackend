@@ -5,6 +5,7 @@ using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Models.ViewModels;
+using NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
@@ -101,28 +102,28 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<PagedResult<StudentGroupDto>>> GetAllPaged(BasePagedRequest pagedRequest)
+        public async Task<ActionResponse<PagedResult<StudentGroupGridViewModel>>> GetAllPaged(BasePagedRequest pagedRequest)
         {
             try
             {
                 var pagedEntityResult = await unitOfWork.GetGenericRepository<StudentGroup>()
-                    .GetAllAsQueryable(includeProperties: includeProperties)
-                    .GetPaged(pagedRequest);
+                    .ReadAll()
+                    .GetPaged(pagedRequest, true);
 
-                var pagedResult = new PagedResult<StudentGroupDto>
+                var pagedResult = new PagedResult<StudentGroupGridViewModel>
                 {
                     CurrentPage = pagedEntityResult.CurrentPage,
                     PageSize = pagedEntityResult.PageSize,
                     PageCount = pagedEntityResult.PageCount,
                     RowCount = pagedEntityResult.RowCount,
-                    Results = mapper.Map<List<StudentGroup>, List<StudentGroupDto>>(pagedEntityResult.Results)
+                    Results = mapper.ProjectTo<StudentGroupGridViewModel>(pagedEntityResult.ResultQuery).ToList()
                 };
 
-                return await ActionResponse<PagedResult<StudentGroupDto>>.ReturnSuccess(pagedResult);
+                return await ActionResponse<PagedResult<StudentGroupGridViewModel>>.ReturnSuccess(pagedResult);
             }
             catch (Exception)
             {
-                return await ActionResponse<PagedResult<StudentGroupDto>>.ReturnError("Greška prilikom dohvata straničnih podataka grupe studenata.");
+                return await ActionResponse<PagedResult<StudentGroupGridViewModel>>.ReturnError("Greška prilikom dohvata straničnih podataka grupe studenata.");
             }
         }
 
