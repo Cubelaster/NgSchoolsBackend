@@ -1,5 +1,8 @@
-﻿using NgSchoolsBusinessLayer.Utilities.Attributes;
+﻿using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
+using NgSchoolsBusinessLayer.Models.ViewModels.Students;
+using NgSchoolsBusinessLayer.Utilities.Attributes;
 using System;
+using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup
 {
@@ -30,5 +33,8 @@ namespace NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup
         public Guid? DirectorId { get; set; }
 
         public int? CombinedGroupId { get; set; }
+
+        public List<StudentBaseViewModel> Students { get; set; } = new List<StudentBaseViewModel>();
+        public List<StudentInGroupBaseDto> StudentsInGroup { get; set; } = new List<StudentInGroupBaseDto>();
     }
 }

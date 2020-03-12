@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
 using NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
@@ -35,10 +36,13 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Director, opt => opt.Ignore())
                 .ForMember(dest => dest.StudentGroupClassAttendances, opt => opt.Ignore());
 
-            CreateMap<StudentsInGroups, StudentInGroupDto>()
+            CreateMap<StudentsInGroups, StudentInGroupBaseDto>()
                 .ForMember(dest => dest.GroupId, opt => opt.MapFrom(src => src.StudentGroupId))
                 .ForMember(dest => dest.StudentId, opt => opt.MapFrom(src => src.StudentId))
                 .ForMember(dest => dest.StudentRegisterNumber, opt => opt.MapFrom(src => src.StudentRegisterEntry != null ? src.StudentRegisterEntry.StudentRegisterNumber : (int?)null));
+
+            CreateMap<StudentsInGroups, StudentInGroupDto>()
+                .IncludeBase<StudentsInGroups, StudentInGroupBaseDto>();
 
             CreateMap<StudentInGroupDto, StudentsInGroups>()
                 .ForMember(dest => dest.StudentGroupId, opt => opt.MapFrom(src => src.GroupId))
@@ -65,7 +69,9 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<StudentGroup, StudentGroupGridViewModel>();
 
-            CreateMap<StudentGroup, StudentGroupDetailsViewModel>();
+            CreateMap<StudentGroup, StudentGroupDetailsViewModel>()
+                .ForMember(dest => dest.StudentsInGroup, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active)))
+                .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active).Select(sig => sig.Student)));
         }
     }
 }

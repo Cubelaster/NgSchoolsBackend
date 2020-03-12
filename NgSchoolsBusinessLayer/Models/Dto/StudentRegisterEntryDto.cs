@@ -1,4 +1,5 @@
 ﻿using NgSchoolsBusinessLayer.Enums;
+using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
 using System;
 
