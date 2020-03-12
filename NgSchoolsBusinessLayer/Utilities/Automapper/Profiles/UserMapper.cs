@@ -71,6 +71,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(r => r.Id)))
                 .ForMember(dest => dest.Files, opt => opt.MapFrom(src => src.UserDetails.TeacherFiles));
 
+            CreateMap<Role, RoleDto>();
+
             CreateMap<TeacherViewModel, UserViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserId));
         }
