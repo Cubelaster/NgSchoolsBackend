@@ -45,6 +45,13 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
+        public async Task<ActionResponse<StudentGroupDetailsViewModel>> Details(SimpleRequestBase request)
+        {
+            return await studentGroupService.Details(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
         public async Task<ActionResponse<StudentGroupDto>> Insert([FromBody]StudentGroupDto request)
         {
             return await studentGroupService.Insert(request);

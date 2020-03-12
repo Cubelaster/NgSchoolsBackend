@@ -28,5 +28,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<CombinedGroupDto>> InsertCombined(CombinedGroupDto request);
         Task<ActionResponse<CombinedGroupDto>> UpdateCombined(CombinedGroupDto request);
         Task<ActionResponse<CombinedGroupDto>> DeleteCombined(int id);
+        Task<ActionResponse<StudentGroupDetailsViewModel>> Details(int id);
     }
 }

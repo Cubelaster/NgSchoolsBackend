@@ -59,6 +59,25 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         #region Readers
 
+        public async Task<ActionResponse<StudentGroupDetailsViewModel>> Details(int id)
+        {
+            try
+            {
+                var query = unitOfWork.GetGenericRepository<StudentGroup>()
+                    .ReadAll()
+                    .Where(e => e.Id == id);
+
+                var entity = mapper.ProjectTo<StudentGroupDetailsViewModel>(query).Single();
+
+                return await ActionResponse<StudentGroupDetailsViewModel>
+                    .ReturnSuccess(mapper.ProjectTo<StudentGroupDetailsViewModel>(query).Single());
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentGroupDetailsViewModel>.ReturnError("Greška prilikom dohvata grupe studenata.");
+            }
+        }
+
         public async Task<ActionResponse<StudentGroupDto>> GetById(int id)
         {
             try
