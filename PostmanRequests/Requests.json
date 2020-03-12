@@ -144,7 +144,6 @@
 }
 
 // StudentGroup/Update
-
 {
     "Id": 2,
     "Name": "Ime",
@@ -364,6 +363,11 @@
     "DirectorId": null,
     "Director": null,
     "StudentGroupClassAttendances": []
+}
+
+// StudentGroup/Details
+{
+	"Id": 71
 }
 
 // EducationProgram/Insert

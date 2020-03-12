@@ -64,6 +64,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.StudentGroups, opt => opt.Ignore());
 
             CreateMap<StudentGroup, StudentGroupGridViewModel>();
+
+            CreateMap<StudentGroup, StudentGroupDetailsViewModel>();
         }
     }
 }
