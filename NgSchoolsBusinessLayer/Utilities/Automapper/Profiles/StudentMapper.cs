@@ -33,6 +33,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Employer, opt => opt.Ignore())
                 .ForMember(dest => dest.DateCreated, opt => opt.Ignore());
 
+            CreateMap<StudentDto, StudentBaseViewModel>();
+
             CreateMap<Student, StudentBaseViewModel>();
 
             CreateMap<StudentFiles, StudentFileDto>().ReverseMap();

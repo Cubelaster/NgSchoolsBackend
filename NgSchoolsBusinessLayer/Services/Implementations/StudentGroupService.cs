@@ -3,10 +3,12 @@ using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
-using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
+using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup;
+using NgSchoolsBusinessLayer.Models.ViewModels.Students;
+using NgSchoolsBusinessLayer.Models.ViewModels.User;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
@@ -27,6 +29,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IUnitOfWork unitOfWork;
         private readonly IExamCommissionService examCommissionService;
         private readonly IStudentService studentService;
+        private readonly ICacheService cacheService;
         private readonly string includeProperties = "ClassLocation.Country,ClassLocation.Region,ClassLocation.Municipality,ClassLocation.City," +
             "StudentsInGroups.Student,StudentsInGroups.Student.StudentsInGroups.StudentRegisterEntry," +
             "StudentsInGroups.Employer,SubjectTeachers,EducationLeader.UserDetails.Signature,Director.UserDetails.Signature,ExamCommission.UserExamCommissions.User.UserDetails," +
@@ -48,12 +51,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         public StudentGroupService(IMapper mapper,
             IUnitOfWork unitOfWork, IExamCommissionService examCommissionService,
-            IStudentService studentService)
+            IStudentService studentService, ICacheService cacheService)
         {
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
             this.examCommissionService = examCommissionService;
             this.studentService = studentService;
+            this.cacheService = cacheService;
         }
 
         #endregion Ctors and Members
@@ -70,13 +74,37 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var entity = mapper.ProjectTo<StudentGroupDetailsViewModel>(query).Single();
 
-                return await ActionResponse<StudentGroupDetailsViewModel>
-                    .ReturnSuccess(mapper.ProjectTo<StudentGroupDetailsViewModel>(query).Single());
+                var usersTask = cacheService.GetFromCache<List<UserDto>>();
+                var studentsTask = cacheService.GetFromCache<List<StudentDto>>();
+
+                await Task.WhenAll(usersTask, studentsTask);
+
+                if (!(await usersTask).IsSuccessAndHasData(out List<UserDto> users))
+                {
+                    return await ActionResponse<StudentGroupDetailsViewModel>.ReturnError("Greška prilikom dohvata korisničkih podataka grupe studenata.");
+                }
+
+                if (!(await studentsTask).IsSuccessAndHasData(out List<StudentDto> students))
+                {
+                    return await ActionResponse<StudentGroupDetailsViewModel>.ReturnError("Greška prilikom dohvata studentskih podataka grupe studenata.");
+                }
+
+                entity.Director = mapper.Map<UserBaseViewModel>(users.Single(u => u.Id == entity.DirectorId));
+                entity.EducationLeader = mapper.Map<UserBaseViewModel>(users.Single(u => u.Id == entity.EducationLeaderId));
+                entity.Students = mapper.Map<List<StudentBaseViewModel>>(students
+                    .Where(s => entity.StudentsInGroup.Select(sig => sig.StudentId).Contains(s.Id)));
+
+                return await ActionResponse<StudentGroupDetailsViewModel>.ReturnSuccess(entity);
             }
             catch (Exception)
             {
                 return await ActionResponse<StudentGroupDetailsViewModel>.ReturnError("Greška prilikom dohvata grupe studenata.");
             }
+        }
+
+        private int UserBaseViewModel(Func<object, bool> p)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<ActionResponse<StudentGroupDto>> GetById(int id)
@@ -546,7 +574,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 mapper.Map(entityToUpdate, entityDto);
 
                 entityDto.StudentExamEvidences = studentExamEvidences;
-                 
+
                 if ((await ModifyStudentExamEvidences(entityDto))
                     .IsNotSuccess(out ActionResponse<StudentInGroupDto> examEvidencesResponse, out entityDto))
                 {

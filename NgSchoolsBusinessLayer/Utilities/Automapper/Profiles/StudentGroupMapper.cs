@@ -72,8 +72,9 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
             CreateMap<StudentGroup, StudentGroupGridViewModel>();
 
             CreateMap<StudentGroup, StudentGroupDetailsViewModel>()
-                .ForMember(dest => dest.StudentsInGroup, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active)))
-                .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active).Select(sig => sig.Student)));
+                .ForMember(dest => dest.EducationLeader, opt => opt.Ignore())
+                .ForMember(dest => dest.Director, opt => opt.Ignore())
+                .ForMember(dest => dest.StudentsInGroup, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active)));
 
             #endregion View Models
         }

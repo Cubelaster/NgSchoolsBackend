@@ -1,5 +1,6 @@
 ﻿using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
 using NgSchoolsBusinessLayer.Models.ViewModels.Students;
+using NgSchoolsBusinessLayer.Models.ViewModels.User;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
 using System;
 using System.Collections.Generic;
@@ -27,10 +28,13 @@ namespace NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup
         public int? ClassLocationId { get; set; }
 
         public Guid? EducationLeaderId { get; set; }
+        public UserBaseViewModel EducationLeader { get; set; }
+
         public int? ExamCommissionId { get; set; }
         public int? PracticalExamCommissionId { get; set; }
 
         public Guid? DirectorId { get; set; }
+        public UserBaseViewModel Director { get; set; }
 
         public int? CombinedGroupId { get; set; }
 

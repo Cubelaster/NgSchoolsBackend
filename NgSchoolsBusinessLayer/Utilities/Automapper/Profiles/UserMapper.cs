@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.ViewModels;
+using NgSchoolsBusinessLayer.Models.ViewModels.User;
 using NgSchoolsDataLayer.Models;
 using System.Linq;
 
@@ -41,6 +42,11 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(r => r.Id)))
                 .ForMember(dest => dest.Signature, opt => opt.MapFrom(src => src.UserDetails.Signature))
                 .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.UserDetails.Title));
+
+            CreateMap<UserDto, UserBaseViewModel>()
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.UserDetails.FirstName))
+                .ForMember(dest => dest.MiddleName, opt => opt.MapFrom(src => src.UserDetails.MiddleName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.UserDetails.LastName));
 
             CreateMap<UserDto, TeacherViewModel>()
                 .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.UserDetails.FirstName))
