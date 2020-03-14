@@ -67,11 +67,15 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
             CreateMap<CombinedGroupDto, CombinedGroup>()
                 .ForMember(dest => dest.StudentGroups, opt => opt.Ignore());
 
+            #region View Models
+
             CreateMap<StudentGroup, StudentGroupGridViewModel>();
 
             CreateMap<StudentGroup, StudentGroupDetailsViewModel>()
                 .ForMember(dest => dest.StudentsInGroup, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active)))
                 .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active).Select(sig => sig.Student)));
+
+            #endregion View Models
         }
     }
 }

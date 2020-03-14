@@ -78,6 +78,10 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
 
         #endregion Municipality
 
+        Task<ActionResponse<(List<CountryDto> Countries, List<RegionDto> Regions, List<MunicipalityDto> Municipalities, List<CityDto> Cities)>> GetAllFromCache();
+
+        Task<ActionResponse<T>> AttachLocations<T>(List<T> locationsHolders) where T : LocationsHolder;
+
         Task<ActionResponse<List<CountryDto>>> SeedLocationData();
     }
 }

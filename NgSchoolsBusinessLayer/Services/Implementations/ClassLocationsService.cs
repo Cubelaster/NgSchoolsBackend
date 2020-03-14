@@ -4,6 +4,7 @@ using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.ViewModels.Locations;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
@@ -22,12 +23,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
+        private readonly ILocationService locationService;
 
-        public ClassLocationsService(IMapper mapper, IUnitOfWork unitOfWork, ICacheService cacheService)
+        public ClassLocationsService(IMapper mapper, IUnitOfWork unitOfWork,
+            ICacheService cacheService, ILocationService locationService)
         {
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
+            this.locationService = locationService;
         }
 
         #endregion Ctors and Members
@@ -36,10 +40,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<ClassLocations>()
-                    .FindBy(c => c.Id == id, includeProperties: "Country, Region, City");
-                return await ActionResponse<ClassLocationsDto>
-                    .ReturnSuccess(mapper.Map<ClassLocations, ClassLocationsDto>(entity));
+                var query = unitOfWork.GetGenericRepository<ClassLocations>()
+                    .ReadAll()
+                    .Where(e => e.Id == id);
+
+                var entities = mapper.ProjectTo<ClassLocationsDto>(query).ToList();
+
+                await locationService.AttachLocations(entities);
+
+                return await ActionResponse<ClassLocationsDto>.ReturnSuccess(entities.Single());
             }
             catch (Exception)
             {
@@ -51,10 +60,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entities = unitOfWork.GetGenericRepository<ClassLocations>()
-                    .GetAll(includeProperties: "Country, Region, City");
-                return await ActionResponse<List<ClassLocationsDto>>
-                    .ReturnSuccess(mapper.Map<List<ClassLocations>, List<ClassLocationsDto>>(entities));
+                var allOfThem = new List<ClassLocationsDto>();
+                var cachedResponse = await cacheService.GetFromCache<List<ClassLocationsDto>>();
+                if (cachedResponse.IsSuccessAndHasData(out allOfThem))
+                {
+                    return await ActionResponse<List<ClassLocationsDto>>.ReturnSuccess(allOfThem);
+                }
+
+                var query = unitOfWork.GetGenericRepository<ClassLocations>().ReadAll();
+
+                var classLocations = mapper.ProjectTo<ClassLocationsDto>(query).ToList();
+
+                await locationService.AttachLocations(classLocations);
+
+                return await ActionResponse<List<ClassLocationsDto>>.ReturnSuccess(classLocations);
             }
             catch (Exception)
             {
@@ -79,10 +98,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var allClassLocations = unitOfWork.GetGenericRepository<ClassLocations>()
-                    .GetAll(includeProperties: "Country, Region, City");
-                return await ActionResponse<List<ClassLocationsDto>>.ReturnSuccess(
-                    mapper.Map<List<ClassLocations>, List<ClassLocationsDto>>(allClassLocations));
+                var query = unitOfWork.GetGenericRepository<ClassLocations>()
+                    .ReadAll();
+
+                var classLocations = mapper.ProjectTo<ClassLocationsDto>(query).ToList();
+
+                await locationService.AttachLocations(classLocations);
+
+                return await ActionResponse<List<ClassLocationsDto>>.ReturnSuccess(classLocations);
             }
             catch (Exception)
             {
@@ -125,6 +148,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom upisa mjesta izvođenja.");
             }
+            finally
+            {
+                await cacheService.RefreshCache<List<ClassLocationsDto>>();
+            }
         }
 
         public async Task<ActionResponse<ClassLocationsDto>> Update(ClassLocationsDto entityDto)
@@ -142,6 +169,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom ažuriranja mjesta izvođenja.");
             }
+            finally
+            {
+                await cacheService.RefreshCache<List<ClassLocationsDto>>();
+            }
         }
 
         public async Task<ActionResponse<ClassLocationsDto>> Delete(int id)
@@ -156,6 +187,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<ClassLocationsDto>.ReturnError("Greška prilikom brisanja mjesta izvođenja!");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<ClassLocationsDto>>();
             }
         }
     }

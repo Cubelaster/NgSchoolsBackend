@@ -4,6 +4,7 @@ using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.ViewModels.Locations;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
@@ -52,6 +53,43 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         #endregion Ctors and Members
 
+        #region Cache Getter
+
+        public async Task<ActionResponse<(List<CountryDto> Countries, List<RegionDto> Regions, List<MunicipalityDto> Municipalities, List<CityDto> Cities)>> GetAllFromCache()
+        {
+            try
+            {
+                var countryTask = cacheService.GetFromCache<List<CountryDto>>();
+                var municipalityTask = cacheService.GetFromCache<List<MunicipalityDto>>();
+                var regionTask = cacheService.GetFromCache<List<RegionDto>>();
+                var cityTask = cacheService.GetFromCache<List<CityDto>>();
+
+                await Task.WhenAll(countryTask, municipalityTask, regionTask, cityTask);
+
+                var countryResult = await countryTask;
+                var municipalityResult = await municipalityTask;
+                var regionResult = await regionTask;
+                var cityResult = await cityTask;
+
+                if (countryResult.IsNotSuccess() || municipalityResult.IsNotSuccess() || regionResult.IsNotSuccess() || cityResult.IsNotSuccess())
+                {
+                    return await ActionResponse<(List<CountryDto>, List<RegionDto>, List<MunicipalityDto>, List<CityDto>)>
+                        .ReturnError("Greška prilikom dohvata lokacijskih podataka iz brze memorije.");
+                }
+
+                var data = (Countries: countryResult.Data, Regions: regionResult.Data, Municipalities: municipalityResult.Data, Cities: cityResult.Data);
+                return await ActionResponse<(List<CountryDto>, List<RegionDto>, List<MunicipalityDto>, List<CityDto>)>
+                    .ReturnSuccess(data);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<(List<CountryDto>, List<RegionDto>, List<MunicipalityDto>, List<CityDto>)>
+                    .ReturnError("Greška prilikom dohvata lokacijskih podataka.");
+            }
+        }
+
+        #endregion Cache Getter
+
         #region Country
 
         public async Task<ActionResponse<CountryDto>> DeleteCountry(int id)
@@ -71,6 +109,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var countryTask = cacheService.RefreshCache<List<CountryDto>>();
                 var regionTask = cacheService.RefreshCache<List<RegionDto>>();
                 var cityTask = cacheService.RefreshCache<List<CityDto>>();
+                var municipalityTask = cacheService.RefreshCache<List<MunicipalityDto>>();
 
                 await Task.WhenAll(countryTask, regionTask, cityTask);
             }
@@ -1090,6 +1129,36 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         }
 
         #endregion Municipality
+
+        #region Helpers
+
+        public async Task<ActionResponse<T>> AttachLocations<T>(List<T> locationsHolders) where T : LocationsHolder
+        {
+            try
+            {
+                var locationResponse = await GetAllFromCache();
+                if (!locationResponse.IsSuccessAndHasData(out (List<CountryDto> Countries, List<RegionDto> Regions, List<MunicipalityDto> Municipalities, List<CityDto> Cities) locationResult))
+                {
+                    return await ActionResponse<T>.ReturnError(locationResponse.Message);
+                }
+
+                locationsHolders.ForEach(entity =>
+                {
+                    entity.City = mapper.Map<CityViewModel>(locationResult.Cities.FirstOrDefault(e => e.Id == entity.CityId));
+                    entity.Country = mapper.Map<CountryViewModel>(locationResult.Countries.FirstOrDefault(e => e.Id == entity.CountryId));
+                    entity.Municipality = mapper.Map<MunicipalityViewModel>(locationResult.Municipalities.FirstOrDefault(e => e.Id == entity.MunicipalityId));
+                    entity.Region = mapper.Map<RegionViewModel>(locationResult.Regions.FirstOrDefault(e => e.Id == entity.RegionId));
+                });
+
+                return await ActionResponse<T>.ReturnSuccess(locationsHolders);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<T>.ReturnError("Greška prilikom dodjeljivanja lokacijskih podataka.");
+            }
+        }
+
+        #endregion Helpers
 
         #region BattutaClient
 

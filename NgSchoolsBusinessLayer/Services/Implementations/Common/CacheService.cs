@@ -98,10 +98,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
             {
                 var attribute = typeof(T).GenericTypeArguments[0]
                     .GetCustomAttributes(typeof(Cached), true).FirstOrDefault() as Cached;
+
                 if (memoryCache.TryGetValue<T>(attribute.Key, out T cachedValue))
                 {
                     return await ActionResponse<T>.ReturnSuccess(cachedValue);
                 }
+
                 var result = await RefreshCache<T>();
                 if (result.ActionResponseType != ActionResponseTypeEnum.Success)
                 {
@@ -110,7 +112,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations.Common
 
                 return await GetFromCache<T>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return await ActionResponse<T>.ReturnError("Greška prilikom dohvata podataka iz cachea.");
             }

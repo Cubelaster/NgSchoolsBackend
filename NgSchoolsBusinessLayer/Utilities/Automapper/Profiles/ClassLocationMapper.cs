@@ -8,7 +8,11 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public ClassLocationMapper()
         {
-            CreateMap<ClassLocations, ClassLocationsDto>();
+            CreateMap<ClassLocations, ClassLocationsDto>()
+                .ForMember(dest => dest.City, opt => opt.Ignore())
+                .ForMember(dest => dest.Country, opt => opt.Ignore())
+                .ForMember(dest => dest.Municipality, opt => opt.Ignore())
+                .ForMember(dest => dest.Region, opt => opt.Ignore());
 
             CreateMap<ClassLocationsDto, ClassLocations>()
                 .ForMember(dest => dest.City, opt => opt.Ignore())
