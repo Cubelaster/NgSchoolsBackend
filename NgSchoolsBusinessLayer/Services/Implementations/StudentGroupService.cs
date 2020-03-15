@@ -102,11 +102,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        private int UserBaseViewModel(Func<object, bool> p)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<ActionResponse<StudentGroupDto>> GetById(int id)
         {
             try
@@ -1008,6 +1003,24 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #endregion SubjectTeachers
 
         #region Class Attendance
+
+        public async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> GetClassAttendancesByGroupId(int id)
+        {
+            try
+            {
+                var query = unitOfWork.GetGenericRepository<StudentGroupClassAttendance>()
+                    .ReadAll()
+                    .Where(e => e.StudentGroupId == id);
+
+                var result = mapper.ProjectTo<StudentGroupClassAttendanceDto>(query).ToList();
+
+                return await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnSuccess(result);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError("Greška prilikom dohvata evidencije nastave.");
+            }
+        }
 
         public async Task<ActionResponse<StudentGroupDto>> ModifyClassAttendance(StudentGroupDto entityDto)
         {

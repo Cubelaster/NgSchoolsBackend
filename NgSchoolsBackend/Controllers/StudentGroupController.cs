@@ -73,6 +73,13 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
+        public async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> GetClassAttendancesByGroupId([FromBody] SimpleRequestBase request)
+        {
+            return await studentGroupService.GetClassAttendancesByGroupId(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
         public async Task<ActionResponse<int>> GetTotalNumber()
         {
             return await studentGroupService.GetTotalNumber();

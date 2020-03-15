@@ -34,10 +34,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<ExamCommission>()
-                    .FindBy(c => c.Id == id, includeProperties: "UserExamCommissions.User.UserDetails");
-                return await ActionResponse<ExamCommissionDto>
-                    .ReturnSuccess(mapper.Map<ExamCommission, ExamCommissionDto>(entity));
+                var query = unitOfWork.GetGenericRepository<ExamCommission>()
+                    .ReadAll()
+                    .Where(e => e.Id == id);
+
+                var entity = mapper.ProjectTo<ExamCommissionDto>(query).Single();
+
+                return await ActionResponse<ExamCommissionDto>.ReturnSuccess(entity);
             }
             catch (Exception)
             {

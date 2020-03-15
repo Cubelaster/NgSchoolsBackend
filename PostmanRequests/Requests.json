@@ -1367,3 +1367,13 @@
 	"Email": "tinaduvnjak9@gmail.com",
 	"NewPassword": "Pasword11__22!!"
 }
+
+// StudentGroup/GetClassAttendancesByGroupId
+{
+	"Id": 71
+}
+
+// ExamCommission/GetById
+{
+	"Id": 1
+}

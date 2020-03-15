@@ -1,4 +1,5 @@
-﻿using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
+﻿using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
 using NgSchoolsBusinessLayer.Models.ViewModels.Students;
 using NgSchoolsBusinessLayer.Models.ViewModels.User;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
@@ -40,5 +41,7 @@ namespace NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup
 
         public List<StudentBaseViewModel> Students { get; set; } = new List<StudentBaseViewModel>();
         public List<StudentInGroupBaseDto> StudentsInGroup { get; set; } = new List<StudentInGroupBaseDto>();
+
+        public List<StudentGroupSubjectTeachersDto> SubjectTeachers { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using NgSchoolsBusinessLayer.Utilities.Attributes;
-using System;
 using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
