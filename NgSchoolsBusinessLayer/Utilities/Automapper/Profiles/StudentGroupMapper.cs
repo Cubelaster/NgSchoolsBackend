@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
+using NgSchoolsBusinessLayer.Models.Requests.StudentGroup;
 using NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
@@ -77,6 +78,12 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.StudentsInGroup, opt => opt.MapFrom(src => src.StudentsInGroups.Where(sig => sig.Status == DatabaseEntityStatusEnum.Active)));
 
             #endregion View Models
+
+            #region Requests
+
+            CreateMap<StudentGroupUpdateRequest, StudentGroup>();
+
+            #endregion Requests
         }
     }
 }

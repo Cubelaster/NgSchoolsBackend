@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
+using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.Requests.StudentGroup;
 using NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup;
 using NgSchoolsBusinessLayer.Services.Contracts;
 using System.Collections.Generic;
@@ -62,6 +64,20 @@ namespace NgSchoolsWebApi.Controllers
         public async Task<ActionResponse<StudentGroupDto>> Update([FromBody]StudentGroupDto request)
         {
             return await studentGroupService.Update(request);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<StudentGroupDetailsViewModel>> UpdateDetails([FromBody]StudentGroupUpdateRequest request)
+        {
+            return await studentGroupService.UpdateDetails(request);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<StudentGroupDto>> ModifyStudentsInGroup([FromBody]StudentGroupDto request)
+        {
+            return await studentGroupService.ModifyStudentsInGroup(request);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

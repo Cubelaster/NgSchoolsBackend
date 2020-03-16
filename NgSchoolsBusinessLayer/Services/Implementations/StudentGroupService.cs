@@ -5,6 +5,7 @@ using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.Requests.StudentGroup;
 using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup;
 using NgSchoolsBusinessLayer.Models.ViewModels.Students;
@@ -270,6 +271,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     IsolationLevel = IsolationLevel.ReadCommitted,
                     Timeout = TransactionManager.MaximumTimeout
                 };
+
                 using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     entityDto.StudentNames = null;
@@ -357,6 +359,22 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<StudentGroupDetailsViewModel>> UpdateDetails(StudentGroupUpdateRequest request)
+        {
+            try
+            {
+                var entityToUpdate = mapper.Map<StudentGroup>(request);
+                unitOfWork.GetGenericRepository<StudentGroup>().Update(entityToUpdate);
+                unitOfWork.Save();
+
+                return await Details(entityToUpdate.Id);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentGroupDetailsViewModel>.ReturnError("Greška prilikom ažuriranja detalja grupe studenata.");
+            }
+        }
+
         public async Task<ActionResponse<StudentGroupDto>> Delete(int id)
         {
             try
@@ -398,12 +416,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        private async Task<ActionResponse<StudentGroupDto>> ModifyStudentsInGroup(StudentGroupDto studentGroup)
+        public async Task<ActionResponse<StudentGroupDto>> ModifyStudentsInGroup(StudentGroupDto studentGroup)
         {
             try
             {
                 var entity = unitOfWork.GetGenericRepository<StudentGroup>()
                     .FindBy(e => e.Id == studentGroup.Id.Value, includeProperties: "StudentsInGroups");
+
                 var currentStudents = mapper.Map<List<StudentsInGroups>, List<StudentInGroupDto>>(entity.StudentsInGroups.ToList());
 
                 var newStudents = studentGroup.StudentsInGroup;

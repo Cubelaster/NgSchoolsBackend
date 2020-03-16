@@ -2,6 +2,7 @@
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Models.Requests.StudentGroup;
 using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Models.ViewModels.StudentGroup;
 using System.Collections.Generic;
@@ -22,6 +23,8 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<StudentGroupDto>> Delete(int id);
         Task<ActionResponse<StudentGroupDto>> Insert(StudentGroupDto entityDto);
         Task<ActionResponse<StudentGroupDto>> Update(StudentGroupDto entityDto);
+        Task<ActionResponse<StudentGroupDetailsViewModel>> UpdateDetails(StudentGroupUpdateRequest request);
+        Task<ActionResponse<StudentGroupDto>> ModifyStudentsInGroup(StudentGroupDto studentGroup);
         Task<ActionResponse<List<CombinedGroupDto>>> GetAllCombined();
         Task<ActionResponse<PagedResult<CombinedGroupDto>>> GetAllCombinedPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<CombinedGroupDto>> GetCombinedById(int id);
