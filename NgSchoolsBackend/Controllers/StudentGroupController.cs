@@ -75,9 +75,23 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
-        public async Task<ActionResponse<StudentGroupDto>> ModifyStudentsInGroup([FromBody]StudentGroupDto request)
+        public async Task<ActionResponse<ModifyStudentsInGroupRequest>> ModifyStudentsInGroup([FromBody]ModifyStudentsInGroupRequest request)
         {
             return await studentGroupService.ModifyStudentsInGroup(request);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<ModifySubjectTeachersRequest>> ModifySubjectTeachers([FromBody]ModifySubjectTeachersRequest request)
+        {
+            return await studentGroupService.ModifySubjectTeachers(request);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
+        public async Task<ActionResponse<ModifyClassAttendanceRequest>> ModifyClassAttendance([FromBody]ModifyClassAttendanceRequest request)
+        {
+            return await studentGroupService.ModifyClassAttendance(request);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]

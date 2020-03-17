@@ -416,7 +416,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<StudentGroupDto>> ModifyStudentsInGroup(StudentGroupDto studentGroup)
+        private async Task<ActionResponse<StudentGroupDto>> ModifyStudentsInGroup(StudentGroupDto studentGroup)
         {
             try
             {
@@ -461,6 +461,54 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom ažuriranja grupe studenata.");
+            }
+        }
+
+        public async Task<ActionResponse<ModifyStudentsInGroupRequest>> ModifyStudentsInGroup(ModifyStudentsInGroupRequest request)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<StudentGroup>()
+                    .FindBy(e => e.Id == request.Id.Value, includeProperties: "StudentsInGroups");
+
+                var currentStudents = mapper.Map<List<StudentsInGroups>, List<StudentInGroupDto>>(entity.StudentsInGroups.ToList());
+
+                var newStudents = request.StudentsInGroup;
+
+                var studentsToRemove = currentStudents.Where(cet => !newStudents.Select(ns => ns.Id).Contains(cet.Id)).ToList();
+
+                var studentsToModify = newStudents.Where(ns => currentStudents.Select(cs => cs.Id).Contains(ns.Id)).ToList();
+
+                var studentsToAdd = newStudents
+                    .Where(nt => !currentStudents.Select(uec => uec.Id).Contains(nt.Id))
+                    .Select(nt =>
+                    {
+                        nt.GroupId = request.Id;
+                        return nt;
+                    }).ToList();
+
+                if ((await RemoveStudentsFromGroup(studentsToRemove))
+                    .IsNotSuccess(out ActionResponse<List<StudentInGroupDto>> actionResponse))
+                {
+                    return await ActionResponse<ModifyStudentsInGroupRequest>.ReturnError("Neuspješna ažuriranje studenata u grupi.");
+                }
+
+                if ((await ModifyStudentsInGroup(studentsToModify))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<ModifyStudentsInGroupRequest>.ReturnError("Neuspješno ažuriranje podataka studenata u grupi.");
+                }
+
+                if ((await AddStudentsInGroup(studentsToAdd))
+                    .IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<ModifyStudentsInGroupRequest>.ReturnError("Neuspješna promjena studenata u grupi.");
+                }
+                return await ActionResponse<ModifyStudentsInGroupRequest>.ReturnSuccess(request, "Uspješno izmijenjeni studenti grupe.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<ModifyStudentsInGroupRequest>.ReturnError("Greška prilikom ažuriranja grupe studenata.");
             }
         }
 
@@ -900,7 +948,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         #region SubjectTeachers
 
-        public async Task<ActionResponse<StudentGroupDto>> ModifySubjectTeachers(StudentGroupDto studentGroup)
+        private async Task<ActionResponse<StudentGroupDto>> ModifySubjectTeachers(StudentGroupDto studentGroup)
         {
             try
             {
@@ -944,7 +992,52 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<List<StudentGroupSubjectTeachersDto>>> RemoveSubjectTeachers(List<StudentGroupSubjectTeachersDto> sTeachers)
+        public async Task<ActionResponse<ModifySubjectTeachersRequest>> ModifySubjectTeachers(ModifySubjectTeachersRequest request)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<StudentGroup>()
+                    .FindBy(e => e.Id == request.Id.Value, includeProperties: "SubjectTeachers");
+
+                var currentSubjectTeachers = mapper.Map<List<StudentGroupSubjectTeachers>, List<StudentGroupSubjectTeachersDto>>(entity.SubjectTeachers.ToList());
+
+                var newSubjectTeachers = request.SubjectTeachers != null ? request.SubjectTeachers : new List<StudentGroupSubjectTeachersDto>();
+                newSubjectTeachers = newSubjectTeachers.Where(st => st.TeacherId != null && st.TeacherId != Guid.Empty).ToList();
+
+                var teachersToRemove = currentSubjectTeachers
+                    .Where(cet => newSubjectTeachers
+                        .All(nst => nst.SubjectId != cet.SubjectId || nst.TeacherId != cet.TeacherId)).ToList();
+
+                var teachersToAdd = newSubjectTeachers
+                    .Where(nt => currentSubjectTeachers
+                    .All(nst => nst.SubjectId != nt.SubjectId || nst.TeacherId != nt.TeacherId))
+                    .Select(nst => new StudentGroupSubjectTeachersDto
+                    {
+                        StudentGroupId = entity.Id,
+                        SubjectId = nst.SubjectId,
+                        TeacherId = nst.TeacherId
+                    })
+                    .ToList();
+
+                if ((await RemoveSubjectTeachers(teachersToRemove))
+                    .IsNotSuccess(out ActionResponse<List<StudentGroupSubjectTeachersDto>> actionResponse))
+                {
+                    return await ActionResponse<ModifySubjectTeachersRequest>.ReturnError("Neuspješno ažuriranje učitelja predmeta u grupi.");
+                }
+
+                if ((await AddSubjectTeachers(teachersToAdd)).IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<ModifySubjectTeachersRequest>.ReturnError("Neuspješno ažuriranje učitelja predmeta u grupi.");
+                }
+                return await ActionResponse<ModifySubjectTeachersRequest>.ReturnSuccess(request, "Ažuriranje učitelja predmeta u grupi uspješno.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<ModifySubjectTeachersRequest>.ReturnError("Greška prilikom ažuriranja učitelja predmeta.");
+            }
+        }
+
+        private async Task<ActionResponse<List<StudentGroupSubjectTeachersDto>>> RemoveSubjectTeachers(List<StudentGroupSubjectTeachersDto> sTeachers)
         {
             try
             {
@@ -966,7 +1059,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<StudentGroupSubjectTeachersDto>> RemoveSubjectTeacher(StudentGroupSubjectTeachersDto subjectTeacher)
+        private async Task<ActionResponse<StudentGroupSubjectTeachersDto>> RemoveSubjectTeacher(StudentGroupSubjectTeachersDto subjectTeacher)
         {
             try
             {
@@ -980,7 +1073,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<List<StudentGroupSubjectTeachersDto>>> AddSubjectTeachers(List<StudentGroupSubjectTeachersDto> students)
+        private async Task<ActionResponse<List<StudentGroupSubjectTeachersDto>>> AddSubjectTeachers(List<StudentGroupSubjectTeachersDto> students)
         {
             try
             {
@@ -1002,7 +1095,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<StudentGroupSubjectTeachersDto>> AddSubjectTeacher(StudentGroupSubjectTeachersDto student)
+        private async Task<ActionResponse<StudentGroupSubjectTeachersDto>> AddSubjectTeacher(StudentGroupSubjectTeachersDto student)
         {
             try
             {
@@ -1041,7 +1134,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<StudentGroupDto>> ModifyClassAttendance(StudentGroupDto entityDto)
+        private async Task<ActionResponse<StudentGroupDto>> ModifyClassAttendance(StudentGroupDto entityDto)
         {
             try
             {
@@ -1088,6 +1181,56 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<StudentGroupDto>.ReturnError($"Greška prilikom upisa pohađanja nastave.");
+            }
+        }
+
+        public async Task<ActionResponse<ModifyClassAttendanceRequest>> ModifyClassAttendance(ModifyClassAttendanceRequest request)
+        {
+            try
+            {
+                var entity = unitOfWork.GetGenericRepository<StudentGroup>()
+                    .FindBy(p => p.Id == request.Id,
+                    includeProperties: "StudentGroupClassAttendances.StudentClassAttendances");
+
+                var currentDays = mapper.Map<List<StudentGroupClassAttendance>, List<StudentGroupClassAttendanceDto>>(entity.StudentGroupClassAttendances.ToList());
+
+                var newDays = request.StudentGroupClassAttendances;
+
+                var daysToRemove = currentDays
+                    .Where(cd => !newDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
+
+                var daysToAdd = newDays
+                    .Where(nt => !currentDays.Select(cd => cd.Id).Contains(nt.Id))
+                    .Select(nt =>
+                    {
+                        nt.StudentGroupId = request.Id;
+                        return nt;
+                    })
+                    .ToList();
+
+                var daysToModify = newDays.Where(cd => currentDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
+
+                if ((await RemoveDaysFromAttendance(daysToRemove))
+                    .IsNotSuccess(out ActionResponse<List<StudentGroupClassAttendanceDto>> actionResponse))
+                {
+                    return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
+                }
+
+                if ((await AddDaysToAttendance(daysToAdd)).IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
+                }
+
+                if ((await ModifyDaysInAttendance(daysToModify)).IsNotSuccess(out actionResponse))
+                {
+                    return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
+                }
+
+                return await ActionResponse<ModifyClassAttendanceRequest>.ReturnSuccess(request, "Uspješno izmijenjeni dani u praćenju nastave.");
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError($"Greška prilikom upisa pohađanja nastave.");
             }
         }
 

@@ -24,7 +24,9 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<StudentGroupDto>> Insert(StudentGroupDto entityDto);
         Task<ActionResponse<StudentGroupDto>> Update(StudentGroupDto entityDto);
         Task<ActionResponse<StudentGroupDetailsViewModel>> UpdateDetails(StudentGroupUpdateRequest request);
-        Task<ActionResponse<StudentGroupDto>> ModifyStudentsInGroup(StudentGroupDto studentGroup);
+        Task<ActionResponse<ModifyStudentsInGroupRequest>> ModifyStudentsInGroup(ModifyStudentsInGroupRequest request);
+        Task<ActionResponse<ModifySubjectTeachersRequest>> ModifySubjectTeachers(ModifySubjectTeachersRequest request);
+        Task<ActionResponse<ModifyClassAttendanceRequest>> ModifyClassAttendance(ModifyClassAttendanceRequest request);
         Task<ActionResponse<List<CombinedGroupDto>>> GetAllCombined();
         Task<ActionResponse<PagedResult<CombinedGroupDto>>> GetAllCombinedPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<CombinedGroupDto>> GetCombinedById(int id);
