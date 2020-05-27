@@ -90,14 +90,22 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     return await ActionResponse<StudentGroupDetailsViewModel>.ReturnError("Greška prilikom dohvata studentskih podataka grupe studenata.");
                 }
 
-                entity.Director = mapper.Map<UserBaseViewModel>(users.Single(u => u.Id == entity.DirectorId));
-                entity.EducationLeader = mapper.Map<UserBaseViewModel>(users.Single(u => u.Id == entity.EducationLeaderId));
+                if (entity.DirectorId.HasValue)
+                {
+                    entity.Director = mapper.Map<UserBaseViewModel>(users.Single(u => u.Id == entity.DirectorId));
+                }
+
+                if (entity.EducationLeaderId.HasValue)
+                {
+                    entity.EducationLeader = mapper.Map<UserBaseViewModel>(users.Single(u => u.Id == entity.EducationLeaderId));
+                }
+
                 entity.Students = mapper.Map<List<StudentBaseViewModel>>(students
                     .Where(s => entity.StudentsInGroup.Select(sig => sig.StudentId).Contains(s.Id)));
 
                 return await ActionResponse<StudentGroupDetailsViewModel>.ReturnSuccess(entity);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return await ActionResponse<StudentGroupDetailsViewModel>.ReturnError("Greška prilikom dohvata grupe studenata.");
             }
