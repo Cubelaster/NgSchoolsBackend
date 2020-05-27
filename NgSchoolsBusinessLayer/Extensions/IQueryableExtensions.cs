@@ -96,7 +96,8 @@ namespace NgSchoolsBusinessLayer.Extensions
 
             return new PagedResult<T>
             {
-                Results = new List<T>()
+                Results = new List<T>(),
+                ResultQuery = query
             };
         }
 
