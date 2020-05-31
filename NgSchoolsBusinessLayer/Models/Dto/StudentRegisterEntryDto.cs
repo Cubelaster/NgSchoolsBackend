@@ -12,6 +12,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         [Searchable]
         public int? StudentRegisterNumber { get; set; }
         public string Notes { get; set; }
+
+        [Searchable]
         public DateTime EntryDate { get; set; }
         public DateTime? ExamDate { get; set; }
         public int? ExamDateNumber { get; set; }
@@ -19,12 +21,16 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int? StudentRegisterId { get; set; }
 
         public int? EducationProgramId { get; set; }
+        [Searchable]
         public EducationProgramDto EducationProgram { get; set; }
 
         public int? StudentsInGroupsId { get; set; }
         public StudentInGroupDto StudentsInGroups { get; set; }
 
+        [Searchable]
         public StudentDto Student { get; set; }
+
+        [Searchable]
         public StudentGroupDto StudentGroup { get; set; }
     }
 }

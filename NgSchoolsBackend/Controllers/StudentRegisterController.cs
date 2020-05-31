@@ -109,6 +109,13 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
+        public async Task<ActionResponse<StudentRegisterDto>> Delete([FromBody] SimpleRequestBase request)
+        {
+            return await studentRegisterService.Delete(request.Id);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost]
         public async Task<ActionResponse<int>> GetTotalNumber()
         {
             return await studentRegisterService.GetTotalNumber();

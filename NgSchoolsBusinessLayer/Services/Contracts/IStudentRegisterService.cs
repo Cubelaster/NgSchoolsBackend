@@ -10,6 +10,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
 {
     public interface IStudentRegisterService
     {
+        Task<ActionResponse<StudentRegisterDto>> Delete(int id);
         Task<ActionResponse<StudentRegisterDto>> GetById(int id);
         Task<ActionResponse<List<StudentRegisterDto>>> GetAll();
         Task<ActionResponse<List<StudentRegisterDto>>> GetAllNotFull();

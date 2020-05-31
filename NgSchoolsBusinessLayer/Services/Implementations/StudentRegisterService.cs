@@ -228,6 +228,44 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<StudentRegisterDto>> Delete(int id)
+        {
+            try
+            {
+                var response = await ActionResponse<StudentRegisterDto>.ReturnSuccess(null, "Matična knjiga uspješno obrisana");
+
+                unitOfWork.GetGenericRepository<StudentRegister>().Delete(id);
+
+                unitOfWork.GetGenericRepository<StudentRegisterEntry>()
+                    .GetAll(sre => sre.StudentRegisterId == id)
+                    .ForEach(async sre =>
+                    {
+                        if ((await DeleteEntry(sre.Id)).IsNotSuccess(out ActionResponse<StudentRegisterEntryDto> deleteResponse))
+                        {
+                            response = await ActionResponse<StudentRegisterDto>.ReturnError(deleteResponse.Message);
+                        }
+                    });
+
+                if (response.IsNotSuccess())
+                {
+                    return response;
+                }
+
+                unitOfWork.Save();
+
+                return response;
+
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom brisanja matične knjige.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<StudentRegisterDto>>();
+            }
+        }
+
         public async Task<ActionResponse<StudentRegisterEntryInsertRequest>> PrepareForInsert(StudentRegisterEntryInsertRequest request)
         {
             try
