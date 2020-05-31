@@ -19,6 +19,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int? ExamDateNumber { get; set; }
 
         public int? StudentRegisterId { get; set; }
+        [Searchable]
+        public string BookNumber { get; set; }
 
         public int? EducationProgramId { get; set; }
         [Searchable]
