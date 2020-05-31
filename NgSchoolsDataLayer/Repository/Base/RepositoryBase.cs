@@ -102,6 +102,11 @@ namespace NgSchoolsDataLayer.Repository.Base
             return query;
         }
 
+        public virtual IQueryable<T> ReadAllActiveAsQueryable()
+        {
+            return context.Set<T>().AsNoTracking();
+        }
+
         public virtual T FindSingle(Guid id)
         {
             return context.Set<T>().Find(id);

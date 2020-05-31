@@ -25,6 +25,8 @@ namespace NgSchoolsDataLayer.Repository.Base
         IQueryable<T> ReadAll(Expression<Func<T, bool>> filter = null,
             Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null);
 
+        IQueryable<T> ReadAllActiveAsQueryable();
+
         T FindSingle(Guid id);
 
         T FindSingle(int id);
