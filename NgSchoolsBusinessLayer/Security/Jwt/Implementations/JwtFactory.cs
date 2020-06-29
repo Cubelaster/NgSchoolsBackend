@@ -18,8 +18,8 @@ namespace NgSchoolsBusinessLayer.Security.Jwt.Implementations
 
         public JwtFactory(IOptions<JwtIssuerOptions> jwtOptions)
         {
-            this.jwtIssuerOptions = jwtOptions.Value;
-            ThrowIfInvalidOptions(this.jwtIssuerOptions);
+            jwtIssuerOptions = jwtOptions.Value;
+            ThrowIfInvalidOptions(jwtIssuerOptions);
         }
 
         public async Task<GenerateJwtTokenResponse> GenerateSecurityToken(UserDto user, bool rememberMe)

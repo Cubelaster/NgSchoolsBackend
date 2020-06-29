@@ -22,18 +22,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IUserService userService;
         private readonly IMapper mapper;
         private readonly IJwtFactory jwtFactory;
-        private readonly ICacheService cacheService;
 
         public AuthService(UserManager<User> userManager, SignInManager<User> signInManager,
-            IUserService userService, IJwtFactory jwtFactory, IMapper mapper,
-            ICacheService cacheService)
+            IUserService userService, IJwtFactory jwtFactory, IMapper mapper)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.userService = userService;
             this.mapper = mapper;
             this.jwtFactory = jwtFactory;
-            this.cacheService = cacheService;
         }
 
         #endregion Ctors and Members

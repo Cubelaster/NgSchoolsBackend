@@ -22,7 +22,6 @@ using NgSchoolsDataLayer.Context;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using NgSchoolsWebApi.Utilities;
-using System;
 using System.IO;
 using System.Text;
 
@@ -36,7 +35,6 @@ namespace NgSchoolsBackend
             Environment = environment;
         }
 
-        private SymmetricSecurityKey signingKey;
         public IConfiguration Configuration { get; }
         public IHostingEnvironment Environment { get; }
 
@@ -79,7 +77,7 @@ namespace NgSchoolsBackend
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -166,7 +164,7 @@ namespace NgSchoolsBackend
         {
             var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions));
             var secretKey = jwtAppSettingOptions.GetValue<string>("SecretKey");
-            signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
+            var signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
 
             services.AddAuthentication(options =>
             {
