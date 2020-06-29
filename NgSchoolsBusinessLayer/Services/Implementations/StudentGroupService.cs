@@ -1646,7 +1646,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                var transactionOptions = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TransactionManager.MaximumTimeout
+                };
+
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     var studentGroupIds = entityDto.StudentGroupIds != null ?
                         new List<int>(entityDto.StudentGroupIds) : new List<int>();
