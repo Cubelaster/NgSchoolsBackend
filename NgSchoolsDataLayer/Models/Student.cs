@@ -68,6 +68,7 @@ namespace NgSchoolsDataLayer.Models
         public string SchoolLevel { get; set; }
         public bool Gdpr { get; set; }
         public string Notes { get; set; }
+        public string Qualifications { get; set; }
 
         public int? EmployerId { get; set; }
         public virtual BusinessPartner Employer { get; set; }

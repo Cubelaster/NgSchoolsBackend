@@ -7,13 +7,14 @@ namespace NgSchoolsBusinessLayer.Extensions
     {
         public static int GetWeekNumberOfMonth(this DateTime date)
         {
-            DateTime firstMonthDay = new DateTime(date.Year, date.Month, 1);
-            DateTime firstMonthMonday = firstMonthDay.AddDays((DayOfWeek.Monday + 7 - firstMonthDay.DayOfWeek) % 7);
+            DateTime beginningOfMonth = new DateTime(date.Year, date.Month, 1);
 
-            var weekBuffer = firstMonthMonday > firstMonthDay ? 1 : 0;
+            while (date.Date.AddDays(1).DayOfWeek != CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek)
+            {
+                date = date.AddDays(1);
+            }
 
-            var weekNumber = Math.Ceiling((decimal)(date - firstMonthMonday).Days / 7) + weekBuffer;
-            return (int)weekNumber;
+            return (int)Math.Truncate((double)date.Subtract(beginningOfMonth).TotalDays / 7f) + 1;
         }
 
         public static string GetMonthName(this DateTime date)
