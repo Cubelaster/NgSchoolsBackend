@@ -1,4 +1,5 @@
-﻿using NgSchoolsBusinessLayer.Enums.Common;
+﻿using Newtonsoft.Json.Linq;
+using NgSchoolsBusinessLayer.Enums.Common;
 
 namespace NgSchoolsBusinessLayer.Models.Requests.Base
 {
@@ -7,7 +8,7 @@ namespace NgSchoolsBusinessLayer.Models.Requests.Base
         public int PageSize { get; set; }
         public int PageIndex { get; set; }
         public string SearchQuery { get; set; }
-        public object Where { get; set; }
+        public JObject Where { get; set; }
         public string OrderBy { get; set; }
         public SortDirectionEnum SortDirection { get; set; }
         public SimpleRequestBase AdditionalParams { get; set; }
