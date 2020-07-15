@@ -1,8 +1,10 @@
 ﻿using ExpressionPredicateBuilder;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using NgSchoolsBusinessLayer.Enums.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Utilities;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
@@ -16,7 +18,7 @@ namespace NgSchoolsBusinessLayer.Extensions
 {
     public static class IQueryableExtensions
     {
-        public static async Task<PagedResult<T>> GetPaged<T>(this IQueryable<T> query, BasePagedRequest pagedRequest, bool onlyQueryable = false) where T : class
+        public static async Task<PagedResult<T>> GetPaged<T>(this IQueryable<T> query, BasePagedRequest pagedRequest, bool onlyQueryable = false) where T : class, new()
         {
             Type objectType = query.FirstOrDefault()?.GetType();
 
@@ -75,10 +77,9 @@ namespace NgSchoolsBusinessLayer.Extensions
                     }
                 }
 
-                if (pagedRequest.Where != null)
+                if (pagedRequest.Where != null && pagedRequest.Where.Properties().Any())
                 {
-                    var where = pagedRequest.Where.ToObject<T>();
-                    query = query.FilterObject(where);
+                    query = query.FilterObject(pagedRequest.Where);
                 }
 
                 result.RowCount = query.Count();
@@ -110,7 +111,7 @@ namespace NgSchoolsBusinessLayer.Extensions
             };
         }
 
-        public static async Task<PagedResult<T>> GetBySearchQuery<T>(this IQueryable<T> query, BasePagedRequest pagedRequest) where T : class
+        public static async Task<PagedResult<T>> GetBySearchQuery<T>(this IQueryable<T> query, BasePagedRequest pagedRequest) where T : new()
         {
             Type objectType = query.FirstOrDefault()?.GetType();
             if (objectType != null)
@@ -197,7 +198,7 @@ namespace NgSchoolsBusinessLayer.Extensions
             return (IOrderedQueryable<TSource>)result;
         }
 
-        private static IQueryable<T> SortObject<T>(Dictionary<string, SortDirectionEnum> sortPairs, IQueryable<T> query) where T : class
+        private static IQueryable<T> SortObject<T>(Dictionary<string, SortDirectionEnum> sortPairs, IQueryable<T> query) where T : new()
         {
             var sorts = sortPairs.ToList();
 
@@ -222,15 +223,37 @@ namespace NgSchoolsBusinessLayer.Extensions
             return query;
         }
 
-        public static IQueryable<T> FilterObject<T>(this IQueryable<T> query, T filterObject) where T : class
+        public static IQueryable<T> FilterObject<T>(this IQueryable<T> query, T filterObject) where T : new()
         {
             var filterValues = filterObject.GetObjectPropertiesWithValue();
 
-            filterValues.Keys.ToList().ForEach(fv =>
+            if (filterValues.Keys.Any())
             {
-                var predicate = ExpressionBuilder.BuildPredicate<T>(filterValues[fv], OperatorComparer.Equals, fv);
-                query = query.Where(predicate);
-            });
+                filterValues.Keys.ToList().ForEach(fv =>
+                {
+                    var predicate = ExpressionBuilder.BuildPredicate<T>(filterValues[fv], OperatorComparer.Equals, fv);
+                    query = query.Where(predicate);
+                });
+            }
+
+            return query;
+        }
+
+        public static IQueryable<T> FilterObject<T>(this IQueryable<T> query, JObject where) where T : class, new()
+        {
+            var destinationType = FilterHelper.GetMatchingType<T>();
+            var filterObject = where.ToObject(destinationType);
+
+            var filterValues = filterObject.GetObjectPropertiesWithValue();
+
+            if (filterValues.Keys.Any())
+            {
+                filterValues.Keys.ToList().ForEach(fv =>
+                {
+                    var predicate = ExpressionBuilder.BuildPredicate<T>(filterValues[fv], OperatorComparer.Equals, fv);
+                    query = query.Where(predicate);
+                });
+            }
 
             return query;
         }
