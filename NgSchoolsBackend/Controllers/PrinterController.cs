@@ -33,6 +33,12 @@ namespace NgSchoolsWebApi.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResponse<List<PrinterDto>>> GetAll()
+        {
+            return await printerService.GetAll();
+        }
+
+        [HttpPost]
         public async Task<ActionResponse<PrinterDto>> Insert([FromBody] PrinterDto entityDto)
         {
             return await printerService.Insert(entityDto);
@@ -42,12 +48,6 @@ namespace NgSchoolsWebApi.Controllers
         public async Task<ActionResponse<PrinterDto>> Update([FromBody] PrinterDto entityDto)
         {
             return await printerService.Update(entityDto);
-        }
-
-        [HttpPost]
-        public async Task<ActionResponse<List<PrinterDto>>> GetAll()
-        {
-            return await printerService.GetAll();
         }
 
         [HttpPost]
