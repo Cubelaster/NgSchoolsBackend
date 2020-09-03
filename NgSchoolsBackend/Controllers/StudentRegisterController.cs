@@ -14,7 +14,7 @@ namespace NgSchoolsWebApi.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class StudentRegisterController
+    public class StudentRegisterController : ControllerBase
     {
         private readonly IStudentRegisterService studentRegisterService;
 

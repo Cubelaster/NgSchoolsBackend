@@ -13,7 +13,7 @@ namespace NgSchoolsWebApi.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class ClassTypeController
+    public class ClassTypeController : ControllerBase
     {
         private readonly IClassTypeService classTypeService;
 

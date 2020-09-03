@@ -13,7 +13,7 @@ namespace NgSchoolsWebApi.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    public class BusinessPartnerController
+    public class BusinessPartnerController : ControllerBase
     {
         private readonly IBusinessPartnerService businessPartnerService;
 
