@@ -42,6 +42,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     Mobile2 = userDetails.Mobile2,
                     Phone = userDetails.Phone,
                     Title = userDetails.Title,
+                    TitlePrefix = userDetails.TitlePrefix,
                     UserId = userDetails.Id,
                     DateCreated = DateTime.UtcNow
                 };
@@ -134,6 +135,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 userDetailsEntity.Mobile2 = userDetails.Mobile2;
                 userDetailsEntity.Phone = userDetails.Phone;
                 userDetailsEntity.Title = userDetails.Title;
+                userDetailsEntity.TitlePrefix = userDetails.TitlePrefix;
 
                 if (userDetails.Avatar != null)
                 {

@@ -21,6 +21,7 @@ namespace NgSchoolsDataLayer.Models
         public int? SignatureId { get; set; }
         public UploadedFile Signature { get; set; }
         public string Title { get; set; }
+        public string TitlePrefix { get; set; }
         public string Mobile { get; set; }
         public string Mobile2 { get; set; }
         public string Phone { get; set; }
