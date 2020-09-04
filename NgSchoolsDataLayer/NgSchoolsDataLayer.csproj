@@ -57,6 +57,12 @@
     <Compile Remove="Migrations\20190711163146_Add_ExamEvidence.cs" />
     <Compile Remove="Migrations\20190711163402_Add_ExamEvidence.cs" />
     <Compile Remove="Migrations\20190828162518_Create_StoreProcedure_Fill_PracticalExamCommissions.cs" />
+    <Compile Remove="Migrations\20200904153510_IssuedPrints.cs" />
+    <Compile Remove="Migrations\20200904153510_IssuedPrints.Designer.cs" />
+    <Compile Remove="Migrations\20200904172225_IssuedPrints_PrintDate.cs" />
+    <Compile Remove="Migrations\20200904172225_IssuedPrints_PrintDate.Designer.cs" />
+    <Compile Remove="Migrations\20200904172348_IssuedPrints_Ids_Optional.cs" />
+    <Compile Remove="Migrations\20200904172348_IssuedPrints_Ids_Optional.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

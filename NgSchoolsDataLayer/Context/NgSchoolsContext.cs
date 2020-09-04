@@ -61,6 +61,7 @@ namespace NgSchoolsDataLayer.Context
         public DbSet<StudentGroupSubjectTeachers> StudentGroupSubjectTeachers { get; set; }
         public DbSet<StudentExamEvidence> StudentExamEvidences { get; set; }
         public DbSet<Printer> Printers { get; set; }
+        public DbSet<IssuedPrint> IssuedPrints { get; set; }
 
         #endregion Db Sets
 
