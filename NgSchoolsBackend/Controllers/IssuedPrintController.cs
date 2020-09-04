@@ -13,7 +13,7 @@ namespace NgSchoolsWebApi.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class IssuedPrintController : ControllerBase
     {
         #region Ctors and Members
