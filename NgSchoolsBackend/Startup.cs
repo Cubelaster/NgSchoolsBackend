@@ -158,6 +158,7 @@ namespace NgSchoolsBackend
             services.AddScoped<ILocationService, LocationService>();
             services.AddScoped<IStudentRegisterService, StudentRegisterService>();
             services.AddScoped<IPrinterService, PrinterService>();
+            services.AddScoped<IIssuedPrintService, IssuedPrintService>();
             //services.AddScoped<IPdfGeneratorService, PdfGeneratorService>();
         }
 
