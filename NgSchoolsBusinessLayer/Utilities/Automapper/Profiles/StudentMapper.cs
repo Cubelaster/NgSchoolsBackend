@@ -12,6 +12,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public StudentMapper()
         {
+            CreateMap<Student, StudentBaseDto>();
+
             CreateMap<Student, StudentDto>()
                 .ForMember(dest => dest.Files, opt => opt.MapFrom(src => src.Files.Where(a => a.Status == DatabaseEntityStatusEnum.Active).Select(sf => new FileDto { Id = sf.File.Id, FileName = sf.File.FileName })))
                 .ForMember(dest => dest.StudentRegisterEducationProgramIds, opt =>

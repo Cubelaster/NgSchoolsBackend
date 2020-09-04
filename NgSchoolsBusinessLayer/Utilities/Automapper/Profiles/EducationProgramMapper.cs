@@ -11,6 +11,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public EducationProgramMapper()
         {
+            CreateMap<EducationProgram, EducationProgramBaseDto>();
+
             CreateMap<EducationProgramDto, EducationProgramDto>();
 
             CreateMap<EducationProgram, EducationProgramDto>()
