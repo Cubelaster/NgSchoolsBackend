@@ -22,17 +22,25 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
+        private readonly IStudentGroupService studentGroupService;
+        private readonly IStudentRegisterService studentRegisterService;
         private readonly IPlanService planService;
         private readonly ISubjectService subjectService;
         private readonly IThemeService themeService;
         private readonly ICacheService cacheService;
 
         public EducationProgramService(IMapper mapper,
-            IUnitOfWork unitOfWork, IPlanService planService, ISubjectService subjectService,
-            IThemeService themeService, ICacheService cacheService)
+            IUnitOfWork unitOfWork,
+            IStudentGroupService studentGroupService,
+            IStudentRegisterService studentRegisterService,
+            IPlanService planService, ISubjectService subjectService,
+            IThemeService themeService,
+            ICacheService cacheService)
         {
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
+            this.studentGroupService = studentGroupService;
+            this.studentRegisterService = studentRegisterService;
             this.planService = planService;
             this.subjectService = subjectService;
             this.themeService = themeService;
@@ -415,7 +423,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var planEntity = unitOfWork.GetGenericRepository<EducationProgram>().FindBy(p => p.Id == id);
+                var response = await ActionResponse<EducationProgramDto>.ReturnSuccess(null, "Brisanje programa i povezanog plana uspješno.");
+
+                if ((await CheckForDelete(id)).IsNotSuccess(out response))
+                {
+                    return response;
+                }
+
                 unitOfWork.GetGenericRepository<EducationProgram>().Delete(id);
                 unitOfWork.Save();
                 return await ActionResponse<EducationProgramDto>.ReturnSuccess(null, "Brisanje programa i povezanog plana uspješno.");
@@ -427,6 +441,68 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             finally
             {
                 await cacheService.RefreshCache<List<EducationProgramDto>>();
+            }
+        }
+
+        private async Task<ActionResponse<EducationProgramDto>> CheckForDelete(int id)
+        {
+            try
+            {
+                var response = ActionResponse<EducationProgramDto>.ReturnSuccess(null, "Brisanje moguće.");
+
+                if ((await subjectService.GetAllByEducationProgramId(id))
+                    .IsNotSuccess(out ActionResponse<List<SubjectDto>> subjectResponse, out List<SubjectDto> subjects))
+                {
+                    response = ActionResponse<EducationProgramDto>.ReturnError(subjectResponse.Message);
+                    return await response;
+                }
+
+                if (subjects.Any())
+                {
+                    return await ActionResponse<EducationProgramDto>.ReturnWarning(null, "error.delete_linked_data");
+                }
+
+                if ((await planService.GetByEducationProgramId(id))
+                    .IsNotSuccess(out ActionResponse<PlanDto> planResponse, out PlanDto plan))
+                {
+                    response = ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
+                    return await response;
+                }
+
+                if (plan != null)
+                {
+                    return await ActionResponse<EducationProgramDto>.ReturnWarning(null, "error.delete_linked_data");
+                }
+
+                if ((await studentGroupService.GetByEducationProgramId(id))
+                    .IsNotSuccess(out ActionResponse<List<StudentGroupBaseDto>> groupResponse, out List<StudentGroupBaseDto> groups))
+                {
+                    response = ActionResponse<EducationProgramDto>.ReturnError(groupResponse.Message);
+                    return await response;
+                }
+
+                if (groups.Any())
+                {
+                    return await ActionResponse<EducationProgramDto>.ReturnWarning(null, "error.delete_linked_data");
+                }
+
+                if ((await studentRegisterService.GetEntriesByProgramId(id))
+                    .IsNotSuccess(out ActionResponse<List<StudentRegisterEntryDto>> sreResponse, out List<StudentRegisterEntryDto> sres))
+                {
+                    response = ActionResponse<EducationProgramDto>.ReturnError(sreResponse.Message);
+                    return await response;
+                }
+
+                if (sres.Any())
+                {
+                    return await ActionResponse<EducationProgramDto>.ReturnWarning(null, "error.delete_linked_data");
+                }
+
+                return await response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<EducationProgramDto>.ReturnError("Greška prilikom provjere za brisanja programa.");
             }
         }
 

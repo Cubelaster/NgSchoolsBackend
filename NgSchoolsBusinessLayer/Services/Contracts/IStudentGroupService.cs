@@ -13,7 +13,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
     public interface IStudentGroupService
     {
         Task<ActionResponse<StudentGroupDto>> GetById(int id);
-
+        Task<ActionResponse<List<StudentGroupBaseDto>>> GetByEducationProgramId(int id);
         Task<ActionResponse<List<StudentGroupDto>>> GetAll();
         Task<ActionResponse<List<TeacherSubjectByDatesPrintModelData>>> GetTeacherClasses(int id);
         Task<ActionResponse<List<ThemesByWeekPrintModel>>> GetThemesByWeeks(int groupId);
@@ -35,5 +35,6 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<CombinedGroupDto>> DeleteCombined(int id);
         Task<ActionResponse<StudentGroupDetailsViewModel>> Details(int id);
         Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> GetClassAttendancesByGroupId(int id);
+        Task<ActionResponse<List<StudentClassAttendanceDto>>> GetStudentClassAttendancesByStudentId(int id);
     }
 }

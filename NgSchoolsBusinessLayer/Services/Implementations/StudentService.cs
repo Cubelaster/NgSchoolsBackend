@@ -25,14 +25,18 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
+        private readonly IStudentGroupService studentGroupService;
         private readonly string includeProperties = "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,Employer,Employer.Country,Employer.Region,Employer.City,CountryOfBirth,RegionOfBirth,CityOfBirth,StudentsInGroups.StudentRegisterEntry.StudentRegister,MunicipalityOfBirth,AddressMunicipality";
 
         public StudentService(IMapper mapper,
-            IUnitOfWork unitOfWork, ICacheService cacheService)
+            IUnitOfWork unitOfWork, 
+            ICacheService cacheService,
+            IStudentGroupService studentGroupService)
         {
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
+            this.studentGroupService = studentGroupService;
         }
 
         #endregion Ctors and Members
@@ -244,14 +248,51 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                var response = await ActionResponse<StudentDto>.ReturnSuccess(null, "Brisanje studenta uspješno.");
+
+                if ((await CheckForDelete(id)).IsNotSuccess(out response))
+                {
+                    return response;
+                }
+
                 unitOfWork.GetGenericRepository<Student>().Delete(id);
                 unitOfWork.Save();
-                await cacheService.RefreshCache<List<StudentDto>>();
+
                 return await ActionResponse<StudentDto>.ReturnSuccess(null, "Brisanje studenta uspješno.");
             }
             catch (Exception)
             {
                 return await ActionResponse<StudentDto>.ReturnError("Greška prilikom brisanja studenta.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<StudentDto>>();
+            }
+        }
+
+        private async Task<ActionResponse<StudentDto>> CheckForDelete(int id)
+        {
+            try
+            {
+                var response = ActionResponse<StudentDto>.ReturnSuccess(null, "Brisanje moguće.");
+
+                if ((await studentGroupService.GetStudentClassAttendancesByStudentId(id))
+                    .IsNotSuccess(out ActionResponse<List<StudentClassAttendanceDto>> scaResponse, out List<StudentClassAttendanceDto> sca))
+                {
+                    response = ActionResponse<StudentDto>.ReturnError(scaResponse.Message);
+                    return await response;
+                }
+
+                if (sca.Any())
+                {
+                    return await ActionResponse<StudentDto>.ReturnWarning(null, "error.delete_linked_data");
+                }
+
+                return await response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentDto>.ReturnError("Greška prilikom provjere za brisanja studenta.");
             }
         }
 

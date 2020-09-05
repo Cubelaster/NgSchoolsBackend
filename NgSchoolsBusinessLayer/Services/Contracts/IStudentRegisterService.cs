@@ -21,6 +21,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<List<StudentRegisterEntryDto>>> GetAllEntriesForCache();
         Task<ActionResponse<PagedResult<StudentRegisterEntryDto>>> GetAllEntriesPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<List<StudentRegisterEntryDto>>> GetAllEntriesByBookId(int id);
+        Task<ActionResponse<List<StudentRegisterEntryDto>>> GetEntriesByProgramId(int id);
         Task<ActionResponse<PagedResult<StudentRegisterEntryDto>>> GetAllEntriesByBookIdPaged(BasePagedRequest pagedRequest);
         Task<ActionResponse<StudentRegisterEntryDto>> InsertEntry(StudentRegisterEntryInsertRequest request);
         Task<ActionResponse<StudentRegisterEntryDto>> UpdateEntry(StudentRegisterEntryInsertRequest request);

@@ -31,6 +31,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IExamCommissionService examCommissionService;
         private readonly IStudentService studentService;
         private readonly ICacheService cacheService;
+
         private readonly string includeProperties = "ClassLocation.Country,ClassLocation.Region,ClassLocation.Municipality,ClassLocation.City," +
             "StudentsInGroups.Student,StudentsInGroups.Student.StudentsInGroups.StudentRegisterEntry," +
             "StudentsInGroups.Employer,SubjectTeachers,EducationLeader.UserDetails.Signature,Director.UserDetails.Signature,ExamCommission.UserExamCommissions.User.UserDetails," +
@@ -51,8 +52,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             "StudentGroups.StudentsInGroups.StudentRegisterEntry,StudentGroups.StudentsInGroups.StudentExamEvidences";
 
         public StudentGroupService(IMapper mapper,
-            IUnitOfWork unitOfWork, IExamCommissionService examCommissionService,
-            IStudentService studentService, ICacheService cacheService)
+            IUnitOfWork unitOfWork,
+            IExamCommissionService examCommissionService,
+            IStudentService studentService,
+            IStudentRegisterService studentRegisterService,
+            ICacheService cacheService)
         {
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
@@ -124,6 +128,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom dohvata grupe studenata.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentGroupBaseDto>>> GetByEducationProgramId(int id)
+        {
+            try
+            {
+                var querty = unitOfWork.GetGenericRepository<StudentGroup>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(e => e.ProgramId == id);
+
+                return await ActionResponse<List<StudentGroupBaseDto>>
+                    .ReturnSuccess(mapper.ProjectTo<StudentGroupBaseDto>(querty).ToList());
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentGroupBaseDto>>.ReturnError("Greška prilikom dohvata grupe studenata za program.");
             }
         }
 
@@ -387,9 +408,17 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
+                var response = await ActionResponse<StudentGroupDto>.ReturnSuccess(null, "Brisanje grupe studenata uspješno.");
+
+                if ((await CheckForDelete(id)).IsNotSuccess(out response))
+                {
+                    return response;
+                }
+
                 unitOfWork.GetGenericRepository<StudentGroup>().Delete(id);
                 unitOfWork.Save();
-                return await ActionResponse<StudentGroupDto>.ReturnSuccess(null, "Brisanje grupe studenata uspješno.");
+
+                return response;
             }
             catch (Exception)
             {
@@ -397,9 +426,46 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        private async Task<ActionResponse<StudentGroupDto>> CheckForDelete(int id)
+        {
+            try
+            {
+                var response = ActionResponse<StudentGroupDto>.ReturnSuccess(null, "Brisanje moguće.");
+
+                if ((await GetStudentsInGroup(id))
+                    .IsNotSuccess(out ActionResponse<List<StudentInGroupBaseDto>> sigResponse, out List<StudentInGroupBaseDto> sigs))
+                {
+                    response = ActionResponse<StudentGroupDto>.ReturnError(sigResponse.Message);
+                    return await response;
+                }
+
+                if (sigs.Any())
+                {
+                    return await ActionResponse<StudentGroupDto>.ReturnWarning(null, "error.delete_linked_data");
+                }
+
+                return await response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom provjere za brisanja grupe.");
+            }
+        }
+
         #endregion Writers
 
         #region Students in Group
+
+        private async Task<ActionResponse<List<StudentInGroupBaseDto>>> GetStudentsInGroup(int studentGroupId)
+        {
+            var query = unitOfWork.GetGenericRepository<StudentsInGroups>()
+                .ReadAllActiveAsQueryable()
+                .Where(e => e.StudentGroupId == studentGroupId);
+
+            var result = mapper.ProjectTo<StudentInGroupBaseDto>(query).ToList();
+
+            return await ActionResponse<List<StudentInGroupBaseDto>>.ReturnSuccess(result);
+        }
 
         public async Task<ActionResponse<StudentGroupDto>> UpdateEnrolmentDate(StudentGroupDto entityDto)
         {
@@ -1123,6 +1189,24 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #endregion SubjectTeachers
 
         #region Class Attendance
+
+        public async Task<ActionResponse<List<StudentClassAttendanceDto>>> GetStudentClassAttendancesByStudentId(int id)
+        {
+            try
+            {
+                var query = unitOfWork.GetGenericRepository<StudentClassAttendance>()
+                    .ReadAll()
+                    .Where(e => e.StudentId == id);
+
+                var result = mapper.ProjectTo<StudentClassAttendanceDto>(query).ToList();
+
+                return await ActionResponse<List<StudentClassAttendanceDto>>.ReturnSuccess(result);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentClassAttendanceDto>>.ReturnError("Greška prilikom dohvata evidencije nastave za studenta.");
+            }
+        }
 
         public async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> GetClassAttendancesByGroupId(int id)
         {

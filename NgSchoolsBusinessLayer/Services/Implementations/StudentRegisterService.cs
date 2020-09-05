@@ -26,6 +26,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         private const string registerIncludes = "StudentRegisterEntries,StudentRegisterEntries.EducationProgram,StudentRegisterEntries.StudentsInGroups";
         private const string entryIncludes = "StudentRegister,EducationProgram,EducationProgram.EducationGroup,EducationProgram.Subjects" +
+            ",StudentsInGroups.Student,StudentsInGroups.StudentGroup" +
             ",StudentsInGroups.Student.AddressCity,StudentsInGroups.Student.AddressCountry,StudentsInGroups.Student.AddressRegion" +
             ",StudentsInGroups.Student.CountryOfBirth,StudentsInGroups.Student.RegionOfBirth,StudentsInGroups.Student.CityOfBirth" +
             ",StudentsInGroups.StudentGroup.Director.UserDetails,StudentsInGroups.StudentGroup.Director.UserDetails.Signature" +
@@ -452,6 +453,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var pagedResult = await entityDtos
                     .Where(e => e.StudentRegisterId == pagedRequest.AdditionalParams.Id)
                     .AsQueryable().GetPaged(pagedRequest);
+
                 return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnSuccess(pagedResult);
             }
             catch (Exception)
@@ -489,7 +491,33 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         && sre.StudentsInGroups.StudentId == request.StudentId.Value
                         && sre.Status == DatabaseEntityStatusEnum.Active)
                         .ToList();
+
                 return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterEntryDto>>(insertedStudents));
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata zapisa koji sadrže traženi program i studenta.");
+            }
+        }
+
+        public async Task<ActionResponse<List<StudentRegisterEntryDto>>> GetEntriesByProgramId(int id)
+        {
+            try
+            {
+                if ((await cacheService.GetFromCache<List<StudentRegisterEntryDto>>())
+                    .IsNotSuccess(out ActionResponse<List<StudentRegisterEntryDto>> response, out List<StudentRegisterEntryDto> entries))
+                {
+                    var query = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
+                        .ReadAllActiveAsQueryable()
+                        .Where(e => e.EducationProgramId == id);
+
+                    return await ActionResponse<List<StudentRegisterEntryDto>>
+                        .ReturnSuccess(mapper.ProjectTo<StudentRegisterEntryDto>(query).ToList());
+                }
+
+                var result = entries.Where(e => e.EducationProgramId == id).ToList();
+
+                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterEntryDto>>(result));
             }
             catch (Exception)
             {
