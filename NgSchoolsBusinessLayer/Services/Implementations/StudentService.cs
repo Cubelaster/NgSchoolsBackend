@@ -25,18 +25,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
         private readonly ICacheService cacheService;
-        private readonly IStudentGroupService studentGroupService;
         private readonly string includeProperties = "Photo,Files.File,AddressCity,AddressCountry,AddressRegion,Employer,Employer.Country,Employer.Region,Employer.City,CountryOfBirth,RegionOfBirth,CityOfBirth,StudentsInGroups.StudentRegisterEntry.StudentRegister,MunicipalityOfBirth,AddressMunicipality";
 
         public StudentService(IMapper mapper,
-            IUnitOfWork unitOfWork, 
-            ICacheService cacheService,
-            IStudentGroupService studentGroupService)
+            IUnitOfWork unitOfWork,
+            ICacheService cacheService)
         {
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
             this.cacheService = cacheService;
-            this.studentGroupService = studentGroupService;
         }
 
         #endregion Ctors and Members
@@ -214,7 +211,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<FileDto> files = entityDto.Files != null ? 
+                List<FileDto> files = entityDto.Files != null ?
                     new List<FileDto>(entityDto.Files) : new List<FileDto>();
                 entityDto.Files = null;
 
@@ -274,21 +271,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var response = ActionResponse<StudentDto>.ReturnSuccess(null, "Brisanje moguće.");
+                var checkQuery = unitOfWork.GetGenericRepository<StudentClassAttendance>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(e => e.StudentId == id);
 
-                if ((await studentGroupService.GetStudentClassAttendancesByStudentId(id))
-                    .IsNotSuccess(out ActionResponse<List<StudentClassAttendanceDto>> scaResponse, out List<StudentClassAttendanceDto> sca))
-                {
-                    response = ActionResponse<StudentDto>.ReturnError(scaResponse.Message);
-                    return await response;
-                }
-
-                if (sca.Any())
+                if (checkQuery.Any())
                 {
                     return await ActionResponse<StudentDto>.ReturnWarning(null, "error.delete_linked_data");
                 }
 
-                return await response;
+                return await ActionResponse<StudentDto>.ReturnSuccess(null, "Brisanje moguće.");
             }
             catch (Exception)
             {
@@ -446,20 +438,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                                    select student;
 
                 var programQuery = from stuGroups in context.StudentsInGroups
-                                         join student in studentQuery
-                                         on stuGroups.StudentId equals student.Id
-                                         join registerEntry in context.StudentRegisterEntries
-                                         on stuGroups.Id equals registerEntry.StudentsInGroupsId
-                                         join program in context.EducationPrograms
-                                         on registerEntry.EducationProgramId equals program.Id
-                                         where stuGroups.Status == DatabaseEntityStatusEnum.Active
-                                         && registerEntry.Status == DatabaseEntityStatusEnum.Active
-                                         && program.Status == DatabaseEntityStatusEnum.Active
-                                         select new EducationProgramDto
-                                         {
-                                             Id = program.Id,
-                                             Name = program.Name
-                                         };
+                                   join student in studentQuery
+                                   on stuGroups.StudentId equals student.Id
+                                   join registerEntry in context.StudentRegisterEntries
+                                   on stuGroups.Id equals registerEntry.StudentsInGroupsId
+                                   join program in context.EducationPrograms
+                                   on registerEntry.EducationProgramId equals program.Id
+                                   where stuGroups.Status == DatabaseEntityStatusEnum.Active
+                                   && registerEntry.Status == DatabaseEntityStatusEnum.Active
+                                   && program.Status == DatabaseEntityStatusEnum.Active
+                                   select new EducationProgramDto
+                                   {
+                                       Id = program.Id,
+                                       Name = program.Name
+                                   };
 
                 var printData = mapper.Map<StudentEducationProgramsPrintModel>(studentQuery.FirstOrDefault());
                 printData.EducationPrograms = mapper.Map<List<EducationProgramDto>>(programQuery.ToList());

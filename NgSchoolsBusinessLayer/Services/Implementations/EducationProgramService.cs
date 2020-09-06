@@ -22,8 +22,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
-        private readonly IStudentGroupService studentGroupService;
-        private readonly IStudentRegisterService studentRegisterService;
         private readonly IPlanService planService;
         private readonly ISubjectService subjectService;
         private readonly IThemeService themeService;
@@ -31,16 +29,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         public EducationProgramService(IMapper mapper,
             IUnitOfWork unitOfWork,
-            IStudentGroupService studentGroupService,
-            IStudentRegisterService studentRegisterService,
-            IPlanService planService, ISubjectService subjectService,
+            IPlanService planService, 
+            ISubjectService subjectService,
             IThemeService themeService,
             ICacheService cacheService)
         {
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
-            this.studentGroupService = studentGroupService;
-            this.studentRegisterService = studentRegisterService;
             this.planService = planService;
             this.subjectService = subjectService;
             this.themeService = themeService;
@@ -448,57 +443,43 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var response = ActionResponse<EducationProgramDto>.ReturnSuccess(null, "Brisanje moguće.");
+                var subjectCheckQuery = unitOfWork.GetGenericRepository<Subject>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(e => e.EducationProgramId == id);
 
-                if ((await subjectService.GetAllByEducationProgramId(id))
-                    .IsNotSuccess(out ActionResponse<List<SubjectDto>> subjectResponse, out List<SubjectDto> subjects))
-                {
-                    response = ActionResponse<EducationProgramDto>.ReturnError(subjectResponse.Message);
-                    return await response;
-                }
-
-                if (subjects.Any())
+                if (subjectCheckQuery.Any())
                 {
                     return await ActionResponse<EducationProgramDto>.ReturnWarning(null, "error.delete_linked_data");
                 }
 
-                if ((await planService.GetByEducationProgramId(id))
-                    .IsNotSuccess(out ActionResponse<PlanDto> planResponse, out PlanDto plan))
-                {
-                    response = ActionResponse<EducationProgramDto>.ReturnError(planResponse.Message);
-                    return await response;
-                }
+                var planCheckQuery = unitOfWork.GetGenericRepository<Plan>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(e => e.EducationProgramId == id);
 
-                if (plan != null)
+                if (planCheckQuery.Any())
                 {
                     return await ActionResponse<EducationProgramDto>.ReturnWarning(null, "error.delete_linked_data");
                 }
 
-                if ((await studentGroupService.GetByEducationProgramId(id))
-                    .IsNotSuccess(out ActionResponse<List<StudentGroupBaseDto>> groupResponse, out List<StudentGroupBaseDto> groups))
-                {
-                    response = ActionResponse<EducationProgramDto>.ReturnError(groupResponse.Message);
-                    return await response;
-                }
+                var sgCheckQuery = unitOfWork.GetGenericRepository<StudentGroup>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(e => e.ProgramId == id);
 
-                if (groups.Any())
+                if (sgCheckQuery.Any())
                 {
                     return await ActionResponse<EducationProgramDto>.ReturnWarning(null, "error.delete_linked_data");
                 }
 
-                if ((await studentRegisterService.GetEntriesByProgramId(id))
-                    .IsNotSuccess(out ActionResponse<List<StudentRegisterEntryDto>> sreResponse, out List<StudentRegisterEntryDto> sres))
-                {
-                    response = ActionResponse<EducationProgramDto>.ReturnError(sreResponse.Message);
-                    return await response;
-                }
+                var sreCheckQuery = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(e => e.EducationProgramId == id);
 
-                if (sres.Any())
+                if (sreCheckQuery.Any())
                 {
                     return await ActionResponse<EducationProgramDto>.ReturnWarning(null, "error.delete_linked_data");
                 }
 
-                return await response;
+                return await ActionResponse<EducationProgramDto>.ReturnSuccess(null, "Brisanje moguće.");
             }
             catch (Exception)
             {

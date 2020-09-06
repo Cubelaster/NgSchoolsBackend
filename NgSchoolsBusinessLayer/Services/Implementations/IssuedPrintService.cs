@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Configuration;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
@@ -16,11 +17,15 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
     {
         #region Ctors and Members
 
+        private readonly IConfiguration configuration;
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
 
-        public IssuedPrintService(IMapper mapper, IUnitOfWork unitOfWork)
+        public IssuedPrintService(IConfiguration configuration,
+            IMapper mapper,
+            IUnitOfWork unitOfWork)
         {
+            this.configuration = configuration;
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
         }
@@ -95,6 +100,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var data = query
                     .GroupBy(q => new DateTime(q.PrintDate.Year, 1, 1))
                     .ToDictionary(g => g.Key, g => g.Sum(element => element.PrintNumber > 0 ? element.PrintNumber - 1 : 0));
+
+                var initialValues = configuration
+                    .GetSection("IssuedPrintsInitialNumber")
+                    .Get<Dictionary<string, int>>();
+
+                foreach (var entry in initialValues)
+                {
+                    var dateKey = DateTime.Parse(entry.Key);
+                    if (data.ContainsKey(dateKey))
+                    {
+                        data[dateKey] = data[dateKey] + entry.Value;
+                    }
+                    else if(targetYear == dateKey)
+                    {
+                        data.Add(dateKey, entry.Value);
+                    }
+                }
 
                 return await ActionResponse<Dictionary<DateTime, int>>.ReturnSuccess(data);
             }

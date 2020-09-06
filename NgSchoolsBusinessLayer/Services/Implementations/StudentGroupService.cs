@@ -55,7 +55,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             IUnitOfWork unitOfWork,
             IExamCommissionService examCommissionService,
             IStudentService studentService,
-            IStudentRegisterService studentRegisterService,
             ICacheService cacheService)
         {
             this.mapper = mapper;
@@ -430,21 +429,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var response = ActionResponse<StudentGroupDto>.ReturnSuccess(null, "Brisanje moguće.");
+                var checkQuery = unitOfWork.GetGenericRepository<StudentsInGroups>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(e => e.StudentGroupId == id);
 
-                if ((await GetStudentsInGroup(id))
-                    .IsNotSuccess(out ActionResponse<List<StudentInGroupBaseDto>> sigResponse, out List<StudentInGroupBaseDto> sigs))
-                {
-                    response = ActionResponse<StudentGroupDto>.ReturnError(sigResponse.Message);
-                    return await response;
-                }
-
-                if (sigs.Any())
+                if (checkQuery.Any())
                 {
                     return await ActionResponse<StudentGroupDto>.ReturnWarning(null, "error.delete_linked_data");
                 }
 
-                return await response;
+                return await ActionResponse<StudentGroupDto>.ReturnSuccess(null, "Brisanje moguće.");
             }
             catch (Exception)
             {
