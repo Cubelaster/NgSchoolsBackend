@@ -8,8 +8,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
     {
         public IssuedPrintMapper()
         {
-            CreateMap<IssuedPrint, IssuedPrintDto>()
-                .ForMember(dest => dest.PrintDuplicateNumber, opt => opt.MapFrom(src => src.PrintNumber > 0 ? src.PrintNumber - 1 : src.PrintNumber));
+            CreateMap<IssuedPrint, IssuedPrintDto>();
 
             CreateMap<IssuedPrintDto, IssuedPrint>()
                 .ForMember(dest => dest.EducationProgram, opt => opt.Ignore())

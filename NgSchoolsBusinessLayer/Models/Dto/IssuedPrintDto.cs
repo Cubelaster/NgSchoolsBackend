@@ -15,6 +15,5 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public DateTime PrintDate { get; set; }
 
         public int PrintNumber { get; set; }
-        public int PrintDuplicateNumber { get; set; }
     }
 }

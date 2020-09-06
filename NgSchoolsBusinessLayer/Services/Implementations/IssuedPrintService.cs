@@ -94,7 +94,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var result = unitOfWork.GetGenericRepository<IssuedPrint>()
                     .ReadAllActiveAsQueryable()
                     .Where(e => e.StudentId == entityDto.StudentId && e.EducationProgramId == entityDto.EducationProgramId)
-                    .Sum(e => e.PrintNumber - 1);
+                    .Sum(e => e.PrintNumber);
 
                 return await ActionResponse<int>.ReturnSuccess(result);
             }
@@ -116,7 +116,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var data = query
                     .GroupBy(q => new DateTime(q.PrintDate.Year, 1, 1))
-                    .ToDictionary(g => g.Key, g => g.Sum(element => element.PrintNumber > 0 ? element.PrintNumber - 1 : 0));
+                    .ToDictionary(g => g.Key, g => g.Sum(element => element.PrintNumber));
 
                 var initialValues = configuration
                     .GetSection("IssuedPrintsInitialNumber")
