@@ -12,6 +12,7 @@ namespace NgSchoolsBusinessLayer.Services.Contracts
         Task<ActionResponse<IssuedPrintDto>> GetById(int id);
         Task<ActionResponse<List<IssuedPrintDto>>> GetAll();
         Task<ActionResponse<List<IssuedPrintDto>>> GetForStudentAndProgram(IssuedPrintDto entityDto);
+        Task<ActionResponse<int>> GetForStudentAndProgramTotalDuplicates(IssuedPrintDto entityDto);
         Task<ActionResponse<Dictionary<DateTime, int>>> GetForCurrentYear(SimpleRequestBase request);
         Task<ActionResponse<IssuedPrintDto>> Insert(IssuedPrintDto entityDto);
         Task<ActionResponse<IssuedPrintDto>> Update(IssuedPrintDto entityDto);

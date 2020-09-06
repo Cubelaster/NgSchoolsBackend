@@ -34,7 +34,10 @@ namespace NgSchoolsWebApi.Controllers
         public async Task<ActionResponse<List<IssuedPrintDto>>> GetAll() => await issuedPrintService.GetAll();
 
         [HttpPost]
-        public async Task<ActionResponse<List<IssuedPrintDto>>> GetForStudentAndProgram(IssuedPrintDto entityDto) => await issuedPrintService.GetForStudentAndProgram(entityDto);
+        public async Task<ActionResponse<List<IssuedPrintDto>>> GetForStudentAndProgram(IssuedPrintDto request) => await issuedPrintService.GetForStudentAndProgram(request);
+
+        [HttpPost]
+        public async Task<ActionResponse<int>> GetForStudentAndProgramTotalDuplicates(IssuedPrintDto request) => await issuedPrintService.GetForStudentAndProgramTotalDuplicates(request);
 
         [HttpPost]
         public async Task<ActionResponse<Dictionary<DateTime, int>>> GetForCurrentYear(SimpleRequestBase request) => await issuedPrintService.GetForCurrentYear(request);

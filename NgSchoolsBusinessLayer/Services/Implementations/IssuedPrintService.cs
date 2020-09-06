@@ -87,6 +87,23 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
+        public async Task<ActionResponse<int>> GetForStudentAndProgramTotalDuplicates(IssuedPrintDto entityDto)
+        {
+            try
+            {
+                var result = unitOfWork.GetGenericRepository<IssuedPrint>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(e => e.StudentId == entityDto.StudentId && e.EducationProgramId == entityDto.EducationProgramId)
+                    .Sum(e => e.PrintNumber - 1);
+
+                return await ActionResponse<int>.ReturnSuccess(result);
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<int>.ReturnError("Greška prilikom dohvata broja duplikata za polaznika.");
+            }
+        }
+
         public async Task<ActionResponse<Dictionary<DateTime, int>>> GetForCurrentYear(SimpleRequestBase request)
         {
             try
