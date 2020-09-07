@@ -35,16 +35,9 @@ namespace NgSchoolsBusinessLayer.Extensions
 
                 int skip = (currentPage - 1) * pagedRequest.PageSize;
 
-                if (!string.IsNullOrEmpty(pagedRequest.OrderBy) && totalCount > 1)
+                if (pagedRequest.Sorting != null && pagedRequest.Sorting.Keys.Count > 0)
                 {
-                    if (pagedRequest.SortDirection == SortDirectionEnum.ASC)
-                    {
-                        query = query.OrderBy(q => q.GetPropValue(pagedRequest.OrderBy));
-                    }
-                    else
-                    {
-                        query = query.OrderByDescending(q => q.GetPropValue(pagedRequest.OrderBy));
-                    }
+                    query = SortObject(pagedRequest.Sorting, query);
                 }
 
                 query = query.AsNoTracking();
@@ -198,6 +191,22 @@ namespace NgSchoolsBusinessLayer.Extensions
             return (IOrderedQueryable<TSource>)result;
         }
 
+        private static IOrderedQueryable<TSource> ThenOrderBy<TSource>(this IOrderedQueryable<TSource> source,
+            string propertyName, string methodName)
+        {
+            // LAMBDA: x => x.[PropertyName]
+            var parameter = Expression.Parameter(typeof(TSource), "x");
+            Expression property = Expression.Property(parameter, propertyName);
+            var lambda = Expression.Lambda(property, parameter);
+
+            // REFLECTION: source.OrderBy(x => x.Property)
+            var orderByMethod = typeof(Queryable).GetMethods().First(x => x.Name == methodName && x.GetParameters().Length == 2);
+            var orderByGeneric = orderByMethod.MakeGenericMethod(typeof(TSource), property.Type);
+            var result = orderByGeneric.Invoke(null, new object[] { source, lambda });
+
+            return (IOrderedQueryable<TSource>)result;
+        }
+
         private static IQueryable<T> SortObject<T>(Dictionary<string, SortDirectionEnum> sortPairs, IQueryable<T> query) where T : new()
         {
             var sorts = sortPairs.ToList();
@@ -208,13 +217,13 @@ namespace NgSchoolsBusinessLayer.Extensions
 
                 IOrderedQueryable<T> orderedQuery;
 
-                var methodName = firstSort.Value.GetDescription();
+                var methodName = firstSort.Value.GetOrderByNames();
                 orderedQuery = query.OrderBy(firstSort.Key, methodName);
 
                 foreach (var sort in sorts.Skip(1))
                 {
-                    methodName = $"ThenBy{(sort.Value.GetDescription() == SortDirectionEnum.ASC.GetDescription() ? "" : "Descending")}";
-                    orderedQuery = query.OrderBy(firstSort.Key, methodName);
+                    methodName = sort.Value.GetOrderByNames(true);
+                    orderedQuery = orderedQuery.ThenOrderBy(firstSort.Key, methodName);
                 }
 
                 return orderedQuery;
