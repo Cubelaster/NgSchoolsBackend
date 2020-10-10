@@ -1,6 +1,6 @@
-﻿using NgSchoolsBusinessLayer.Enums;
+﻿using System.Collections.Generic;
+using NgSchoolsBusinessLayer.Enums;
 using NgSchoolsBusinessLayer.Utilities.Attributes;
-using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto
 {
@@ -10,6 +10,8 @@ namespace NgSchoolsBusinessLayer.Models.Dto
         public int? Id { get; set; }
         [Searchable]
         public int? BookNumber { get; set; }
+        [Searchable]
+        public int? BookYear { get; set; }
         public int? NumberOfEntries { get; set; }
         public int? MinEntryNumber { get; set; }
         public int? MaxEntryNumber { get; set; }

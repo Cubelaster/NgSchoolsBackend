@@ -7,6 +7,7 @@ namespace NgSchoolsDataLayer.Models
     {
         public int Id { get; set; }
         public int BookNumber { get; set; }
+        public int? BookYear { get; set; }
         public bool Full { get; set; }
 
         public virtual ICollection<StudentRegisterEntry> StudentRegisterEntries { get; set; }
