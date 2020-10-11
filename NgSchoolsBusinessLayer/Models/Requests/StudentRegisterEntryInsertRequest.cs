@@ -9,6 +9,7 @@ namespace NgSchoolsBusinessLayer.Models.Requests
         public int? StudentGroupId { get; set; }
         public int? StudentId { get; set; }
         public int? BookNumber { get; set; }
+        public int? BookYear { get; set; }
         public int? BookId { get; set; }
         public int? StudentRegisterNumber { get; set; }
         public int? StudentInGroupId { get; set; }

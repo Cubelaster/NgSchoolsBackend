@@ -304,10 +304,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError(registerResponse.Message);
                     }
 
-                    if (notFullRegisters.Any())
+                    if (notFullRegisters.Any(sr => sr.BookYear == request.BookYear))
                     {
                         var selectedBook = registers.OrderByDescending(b => b.BookNumber).FirstOrDefault();
                         request.BookNumber = selectedBook.BookNumber;
+                        request.BookYear = selectedBook.BookYear;
                         request.BookId = selectedBook.Id;
                     }
                     else
@@ -327,7 +328,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 else
                 {
                     var chosenBook = unitOfWork.GetGenericRepository<StudentRegister>()
-                        .FindBy(b => b.BookNumber == request.BookNumber);
+                        .FindBy(b => b.BookNumber == request.BookNumber && b.BookYear == request.BookYear);
 
                     if (chosenBook == null)
                     {
@@ -525,13 +526,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        private async Task<ActionResponse<StudentRegisterEntryDto>> GetEntryForStudentNumberAndBookNumber(StudentRegisterEntryInsertRequest request)
+        private async Task<ActionResponse<StudentRegisterEntryDto>> GetEntryForStudentNumberAndBookNumberAndBookYear(StudentRegisterEntryInsertRequest request)
         {
             try
             {
                 var insertedStudent = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
                     .GetAll(sre => sre.StudentRegisterNumber == request.StudentRegisterNumber
                         && sre.StudentRegister.BookNumber == request.BookNumber
+                        && sre.StudentRegister.BookYear == request.BookYear
                         && sre.Status == DatabaseEntityStatusEnum.Active)
                         .FirstOrDefault();
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntryDto>(insertedStudent));
@@ -542,13 +544,14 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        private async Task<ActionResponse<StudentRegisterEntryDto>> GetEntryForStudentNumberAndBookNumberDetailed(StudentRegisterEntryInsertRequest request)
+        private async Task<ActionResponse<StudentRegisterEntryDto>> GetEntryForStudentNumberAndBookNumberAndBookYearDetailed(StudentRegisterEntryInsertRequest request)
         {
             try
             {
                 var insertedStudent = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
                     .GetAll(sre => sre.StudentRegisterNumber == request.StudentRegisterNumber
                         && sre.StudentRegister.BookNumber == request.BookNumber
+                        && sre.StudentRegister.BookYear == request.BookYear
                         && sre.Status == DatabaseEntityStatusEnum.Active, includeProperties: "StudentsInGroups.Student," +
                         "StudentsInGroups.Student.CityOfBirth,StudentsInGroups.Student.CountryOfBirth,StudentsInGroups.Student.RegionOfBirth," +
                         "StudentsInGroups.Student.MunicipalityOfBirth,StudentsInGroups.Student.AddressCountry," +
@@ -589,7 +592,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Nemoguće unjeti novi zapis za kombinaciju studenta i edukacijskog programa, takav zapis već postoji.");
                     }
 
-                    if ((await GetEntryForStudentNumberAndBookNumber(request))
+                    if ((await GetEntryForStudentNumberAndBookNumberAndBookYear(request))
                         .IsNotSuccess(out ActionResponse<StudentRegisterEntryDto> registerEntryResponse, out StudentRegisterEntryDto existingEntry))
                     {
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError(registerEntryResponse.Message);
@@ -610,7 +613,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     {
                         var entityDto = new StudentRegisterDto
                         {
-                            BookNumber = request.BookNumber
+                            BookNumber = request.BookNumber,
+                            BookYear = request.BookYear,
                         };
 
                         if ((await Insert(entityDto)).IsNotSuccess(out ActionResponse<StudentRegisterDto> bookInsertResponse, out entityDto))
@@ -742,9 +746,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 await Task.WhenAll(range.Select(async number =>
                  {
-                     if ((await GetEntryForStudentNumberAndBookNumberDetailed(new StudentRegisterEntryInsertRequest
+                     if ((await GetEntryForStudentNumberAndBookNumberAndBookYearDetailed(new StudentRegisterEntryInsertRequest
                      {
                          BookNumber = request.BookNumber,
+                         BookYear = request.BookYear,
                          StudentRegisterNumber = number
                      })).IsNotSuccess(out ActionResponse<StudentRegisterEntryDto> registerEntryResponse, out StudentRegisterEntryDto studentRegisterEntry))
                      {

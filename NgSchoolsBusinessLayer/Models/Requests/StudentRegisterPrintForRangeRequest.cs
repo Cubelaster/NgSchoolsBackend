@@ -3,6 +3,7 @@
     public class StudentRegisterPrintForRangeRequest
     {
         public int BookNumber { get; set; }
+        public int BookYear { get; set; }
         public int StudentRegisterNumberRangeFrom { get; set; }
         public int StudentRegisterNumberRangeTo { get; set; }
     }
