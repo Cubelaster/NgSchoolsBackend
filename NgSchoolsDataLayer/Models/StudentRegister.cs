@@ -1,5 +1,5 @@
-﻿using NgSchoolsDataLayer.Models.BaseTypes;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using NgSchoolsDataLayer.Models.BaseTypes;
 
 namespace NgSchoolsDataLayer.Models
 {
