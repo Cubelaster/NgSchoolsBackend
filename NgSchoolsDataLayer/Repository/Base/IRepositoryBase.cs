@@ -23,7 +23,8 @@ namespace NgSchoolsDataLayer.Repository.Base
         /// <param name="orderBy"></param>
         /// <returns></returns>
         IQueryable<T> ReadAll(Expression<Func<T, bool>> filter = null,
-            Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null);
+            Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null,
+            string includeProperties = "");
 
         IQueryable<T> ReadAllActiveAsQueryable();
 

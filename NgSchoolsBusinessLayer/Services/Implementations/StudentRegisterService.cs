@@ -421,7 +421,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
-                    .GetAll(includeProperties: entryIncludes);
+                    .ReadAll(includeProperties: entryIncludes)
+                    .ToList();
 
                 return await ActionResponse<List<StudentRegisterEntryDto>>
                     .ReturnSuccess(mapper.Map<List<StudentRegisterEntry>, List<StudentRegisterEntryDto>>(entities));
@@ -732,10 +733,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             //finally
             //{
-                //var registerTask = cacheService.RefreshCache<List<StudentRegisterDto>>();
-                //var entryTask = cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
+            //var registerTask = cacheService.RefreshCache<List<StudentRegisterDto>>();
+            //var entryTask = cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
 
-                //await Task.WhenAll(registerTask, entryTask);
+            //await Task.WhenAll(registerTask, entryTask);
             //}
         }
 

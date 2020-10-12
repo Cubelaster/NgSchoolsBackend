@@ -78,7 +78,8 @@ namespace NgSchoolsDataLayer.Repository.Base
         }
 
         public virtual IQueryable<T> ReadAll(Expression<Func<T, bool>> filter = null,
-            Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null)
+            Func<IQueryable<T>, IOrderedEnumerable<T>> orderBy = null,
+            string includeProperties = "")
         {
             IQueryable<T> query = context.Set<T>().AsNoTracking();
 
@@ -92,6 +93,11 @@ namespace NgSchoolsDataLayer.Repository.Base
             if (filter != null)
             {
                 query = query.Where(filter);
+            }
+
+            foreach (string includeProperty in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(includeProperty.Trim());
             }
 
             if (orderBy != null)
