@@ -231,10 +231,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom upisa matične knjige.");
             }
-            finally
-            {
-                await cacheService.RefreshCache<List<StudentRegisterDto>>();
-            }
+            //finally
+            //{
+            //    await cacheService.RefreshCache<List<StudentRegisterDto>>();
+            //}
         }
 
         public async Task<ActionResponse<StudentRegisterDto>> Update(StudentRegisterDto entityDto)
@@ -256,10 +256,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom upisa matične knjige.");
             }
-            finally
-            {
-                await cacheService.RefreshCache<List<StudentRegisterDto>>();
-            }
+            //finally
+            //{
+            //    await cacheService.RefreshCache<List<StudentRegisterDto>>();
+            //}
         }
 
         public async Task<ActionResponse<StudentRegisterDto>> Delete(int id)
@@ -294,41 +294,28 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom brisanja matične knjige.");
             }
-            finally
-            {
-                await cacheService.RefreshCache<List<StudentRegisterDto>>();
-            }
+            //finally
+            //{
+            //    await cacheService.RefreshCache<List<StudentRegisterDto>>();
+            //}
         }
 
         public async Task<ActionResponse<StudentRegisterEntryInsertRequest>> PrepareForInsert(StudentRegisterEntryInsertRequest request)
         {
             try
             {
-                if ((await cacheService.GetFromCache<List<StudentRegisterEntryDto>>())
-                    .IsNotSuccess(out ActionResponse<List<StudentRegisterEntryDto>> registerEntryResponse, out List<StudentRegisterEntryDto> entries))
-                {
-                    if ((await GetAllEntries()).IsNotSuccess(out registerEntryResponse, out entries))
-                    {
-                        return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError("Greška prilikom dohvata postojećih zapisa matičnih knjiga.");
-                    }
-                }
-
-                var similarEntries = entries.Where(p => p.EducationProgramId == request.EducationProgramId);
-                var alreadyInserted = similarEntries.Any(sre => sre.StudentsInGroups.StudentId == request.StudentId);
+                var alreadyInserted = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(e => e.EducationProgramId == request.EducationProgramId)
+                    .Any(e => e.StudentsInGroups.StudentId == request.StudentId);
 
                 if (alreadyInserted)
                 {
                     return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnWarning("Ovaj student već je unuesen u matičnu knjigu za izabrani program. Molimo provjerite podatke.");
                 }
 
-                if ((await cacheService.GetFromCache<List<StudentRegisterDto>>())
-                    .IsNotSuccess(out ActionResponse<List<StudentRegisterDto>> registerResponse, out List<StudentRegisterDto> registers))
-                {
-                    if ((await GetAll()).IsNotSuccess(out registerResponse, out registers))
-                    {
-                        return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError("Greška prilikom dohvata postojećih matičnih knjiga.");
-                    }
-                }
+
+                ActionResponse<List<StudentRegisterDto>> registerResponse;
 
                 if (!request.BookNumber.HasValue)
                 {
@@ -339,13 +326,22 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                     if (notFullRegisters.Any(sr => sr.BookYear == request.BookYear))
                     {
-                        var selectedBook = registers.OrderByDescending(b => b.BookNumber).FirstOrDefault();
+                        var selectedBook = notFullRegisters.OrderByDescending(b => b.BookNumber).FirstOrDefault();
                         request.BookNumber = selectedBook.BookNumber;
                         request.BookYear = selectedBook.BookYear;
                         request.BookId = selectedBook.Id;
                     }
                     else
                     {
+                        if ((await cacheService.GetFromCache<List<StudentRegisterDto>>())
+                            .IsNotSuccess(out registerResponse, out List<StudentRegisterDto> registers))
+                        {
+                            if ((await GetAll()).IsNotSuccess(out registerResponse, out registers))
+                            {
+                                return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError("Greška prilikom dohvata postojećih matičnih knjiga.");
+                            }
+                        }
+
                         var minBookNumber = registers.Min(r => r.BookNumber) ?? 0;
                         var maxBookNumber = registers.Max(r => r.BookNumber) ?? 0;
                         List<int> fullList = Enumerable.Range(minBookNumber, maxBookNumber - minBookNumber + 1).ToList();
@@ -523,10 +519,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var insertedStudents = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
-                    .GetAll(sre => sre.EducationProgramId == request.EducationProgramId.Value
+                    .ReadAllActiveAsQueryable()
+                    .Where(sre => sre.EducationProgramId == request.EducationProgramId.Value
                         && sre.StudentsInGroups.StudentId == request.StudentId.Value
                         && sre.Status == DatabaseEntityStatusEnum.Active)
-                        .ToList();
+                    .ToList();
 
                 return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterEntryDto>>(insertedStudents));
             }
@@ -566,11 +563,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var insertedStudent = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
-                    .GetAll(sre => sre.StudentRegisterNumber == request.StudentRegisterNumber
+                    .ReadAllActiveAsQueryable()
+                    .Where(sre => sre.StudentRegisterNumber == request.StudentRegisterNumber
                         && sre.StudentRegister.BookNumber == request.BookNumber
                         && sre.StudentRegister.BookYear == request.BookYear
                         && sre.Status == DatabaseEntityStatusEnum.Active)
-                        .FirstOrDefault();
+                    .FirstOrDefault();
 
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntryDto>(insertedStudent));
             }
@@ -615,7 +613,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                var transactionOptions = new TransactionOptions
+                {
+                    IsolationLevel = IsolationLevel.ReadCommitted,
+                    Timeout = TransactionManager.MaximumTimeout
+                };
+
+                using (TransactionScope scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     if ((await GetEntriesForStudentAndProgram(request))
                         .IsNotSuccess(out ActionResponse<List<StudentRegisterEntryDto>> checkResponse, out List<StudentRegisterEntryDto> alreadyExisting))
@@ -726,13 +730,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom upisa u matičnu knjigu.");
             }
-            finally
-            {
-                var registerTask = cacheService.RefreshCache<List<StudentRegisterDto>>();
-                var entryTask = cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
+            //finally
+            //{
+                //var registerTask = cacheService.RefreshCache<List<StudentRegisterDto>>();
+                //var entryTask = cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
 
-                await Task.WhenAll(registerTask, entryTask);
-            }
+                //await Task.WhenAll(registerTask, entryTask);
+            //}
         }
 
         public async Task<ActionResponse<StudentRegisterEntryDto>> UpdateEntry(StudentRegisterEntryInsertRequest request)
@@ -760,7 +764,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
             finally
             {
-                await cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
+                //await cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
             }
         }
 
@@ -770,17 +774,19 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 unitOfWork.GetGenericRepository<StudentRegisterEntry>().Delete(id);
                 unitOfWork.Save();
-                await cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
+
+                //await cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
+
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(null, "Brisanje zapisa iz matične knjige uspješno.");
             }
             catch (Exception)
             {
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Greška prilikom brisanja zapisa u matičnoj knjizi.");
             }
-            finally
-            {
-                await cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
-            }
+            //finally
+            //{
+            //    await cacheService.RefreshCache<List<StudentRegisterEntryDto>>();
+            //}
         }
 
         #endregion Writers
