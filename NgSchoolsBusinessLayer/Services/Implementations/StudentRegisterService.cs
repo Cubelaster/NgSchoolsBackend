@@ -1,4 +1,10 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Transactions;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using NgSchoolsBusinessLayer.Enums.Common;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
@@ -12,11 +18,6 @@ using NgSchoolsBusinessLayer.Utilities.Attributes;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Transactions;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -58,7 +59,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entity = unitOfWork.GetGenericRepository<StudentRegister>()
-                    .FindBy(c => c.Id == id, includeProperties: registerIncludes);
+                    .ReadAllActiveAsQueryable()
+                    .Where(c => c.Id == id)
+                    .Include(e => e.StudentRegisterEntries)
+                        .ThenInclude(e => e.EducationProgram)
+                    .Include(e => e.StudentRegisterEntries)
+                        .ThenInclude(e => e.StudentsInGroups)
+                    .FirstOrDefault();
 
                 var entityDto = mapper.Map<StudentRegister, StudentRegisterDto>(entity);
 
@@ -90,7 +97,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<StudentRegister>()
-                    .GetAll(includeProperties: registerIncludes);
+                    .ReadAllActiveAsQueryable()
+                    .Include(e => e.StudentRegisterEntries)
+                        .ThenInclude(e => e.EducationProgram)
+                    .Include(e => e.StudentRegisterEntries)
+                        .ThenInclude(e => e.StudentsInGroups)
+                    .ToList();
+
                 return await ActionResponse<List<StudentRegisterDto>>
                     .ReturnSuccess(mapper.Map<List<StudentRegister>, List<StudentRegisterDto>>(entities));
             }
@@ -117,7 +130,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var entities = unitOfWork.GetGenericRepository<StudentRegister>()
-                    .GetAll(sr => !sr.Full, includeProperties: registerIncludes)
+                    .ReadAllActiveAsQueryable()
+                    .Where(sr => !sr.Full)
+                    .Include(e => e.StudentRegisterEntries)
+                        .ThenInclude(e => e.EducationProgram)
+                    .Include(e => e.StudentRegisterEntries)
+                        .ThenInclude(e => e.StudentsInGroups)
                     .ToList();
 
                 var entityDtos = mapper.Map<List<StudentRegister>, List<StudentRegisterDto>>(entities);
@@ -155,7 +173,12 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
 
                 var entities = unitOfWork.GetGenericRepository<StudentRegister>()
-                    .GetAll(includeProperties: registerIncludes);
+                    .ReadAllActiveAsQueryable()
+                    .Include(e => e.StudentRegisterEntries)
+                        .ThenInclude(e => e.EducationProgram)
+                    .Include(e => e.StudentRegisterEntries)
+                        .ThenInclude(e => e.StudentsInGroups)
+                    .ToList();
 
                 return await ActionResponse<List<StudentRegisterDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterDto>>(entities));
             }
@@ -193,11 +216,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entityToAdd = mapper.Map<StudentRegisterDto, StudentRegister>(entityDto);
-                unitOfWork.GetGenericRepository<StudentRegister>().Add(entityToAdd);
-                unitOfWork.Save();
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var entityToAdd = mapper.Map<StudentRegisterDto, StudentRegister>(entityDto);
+                    unitOfWork.GetGenericRepository<StudentRegister>().Add(entityToAdd);
+                    unitOfWork.Save();
 
-                return await ActionResponse<StudentRegisterDto>.ReturnSuccess(mapper.Map(entityToAdd, entityDto));
+                    scope.Complete();
+
+                    return await ActionResponse<StudentRegisterDto>.ReturnSuccess(mapper.Map(entityToAdd, entityDto));
+                }
             }
             catch (Exception)
             {
@@ -213,11 +241,16 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entityToUpdate = mapper.Map<StudentRegisterDto, StudentRegister>(entityDto);
-                unitOfWork.GetGenericRepository<StudentRegister>().Update(entityToUpdate);
-                unitOfWork.Save();
+                using (TransactionScope scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    var entityToUpdate = mapper.Map<StudentRegisterDto, StudentRegister>(entityDto);
+                    unitOfWork.GetGenericRepository<StudentRegister>().Update(entityToUpdate);
+                    unitOfWork.Save();
 
-                return await ActionResponse<StudentRegisterDto>.ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
+                    scope.Complete();
+
+                    return await ActionResponse<StudentRegisterDto>.ReturnSuccess(mapper.Map(entityToUpdate, entityDto));
+                }
             }
             catch (Exception)
             {
@@ -328,7 +361,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 else
                 {
                     var chosenBook = unitOfWork.GetGenericRepository<StudentRegister>()
-                        .FindBy(b => b.BookNumber == request.BookNumber && b.BookYear == request.BookYear);
+                        .ReadAllActiveAsQueryable()
+                        .Where(b => b.BookNumber == request.BookNumber && b.BookYear == request.BookYear)
+                        .FirstOrDefault();
 
                     if (chosenBook == null)
                     {
@@ -536,6 +571,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         && sre.StudentRegister.BookYear == request.BookYear
                         && sre.Status == DatabaseEntityStatusEnum.Active)
                         .FirstOrDefault();
+
                 return await ActionResponse<StudentRegisterEntryDto>.ReturnSuccess(mapper.Map<StudentRegisterEntryDto>(insertedStudent));
             }
             catch (Exception)
@@ -584,28 +620,33 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     if ((await GetEntriesForStudentAndProgram(request))
                         .IsNotSuccess(out ActionResponse<List<StudentRegisterEntryDto>> checkResponse, out List<StudentRegisterEntryDto> alreadyExisting))
                     {
+                        scope.Dispose();
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError(checkResponse.Message);
                     }
 
                     if (alreadyExisting.Any())
                     {
+                        scope.Dispose();
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Nemoguće unjeti novi zapis za kombinaciju studenta i edukacijskog programa, takav zapis već postoji.");
                     }
 
                     if ((await GetEntryForStudentNumberAndBookNumberAndBookYear(request))
                         .IsNotSuccess(out ActionResponse<StudentRegisterEntryDto> registerEntryResponse, out StudentRegisterEntryDto existingEntry))
                     {
+                        scope.Dispose();
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError(registerEntryResponse.Message);
                     }
 
                     if (alreadyExisting.Any())
                     {
+                        scope.Dispose();
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Nemoguće unjeti novi zapis jer zapis sa istim brojem studenta već postoji unutar izabrane knjige.");
                     }
 
                     if ((await PrepareForInsert(request))
                         .IsNotSuccess(out ActionResponse<StudentRegisterEntryInsertRequest> prepareResponse, out request))
                     {
+                        scope.Dispose();
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError(prepareResponse.Message);
                     }
 
@@ -619,17 +660,21 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                         if ((await Insert(entityDto)).IsNotSuccess(out ActionResponse<StudentRegisterDto> bookInsertResponse, out entityDto))
                         {
+                            scope.Dispose();
                             return await ActionResponse<StudentRegisterEntryDto>.ReturnError(bookInsertResponse.Message);
                         }
                         request.BookId = entityDto.Id;
                     }
 
                     var studentInGroup = unitOfWork.GetGenericRepository<StudentsInGroups>()
-                        .FindBy(sig => sig.StudentId == request.StudentId.Value
-                        && sig.StudentGroupId == request.StudentGroupId);
+                        .ReadAllActiveAsQueryable()
+                        .Where(sig => sig.StudentId == request.StudentId.Value
+                            && sig.StudentGroupId == request.StudentGroupId)
+                        .FirstOrDefault();
 
                     if (studentInGroup == null)
                     {
+                        scope.Dispose();
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError("Specificirani student još ne postoji u grupi. Molimo prvo spremite studenta u grupu.");
                     }
 
@@ -651,15 +696,25 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     if ((await GetById(request.BookId.Value))
                         .IsNotSuccess(out ActionResponse<StudentRegisterDto> bookResponse, out StudentRegisterDto registerDto))
                     {
+                        scope.Dispose();
                         return await ActionResponse<StudentRegisterEntryDto>.ReturnError(bookResponse.Message);
                     }
 
                     if (registerDto.NumberOfEntries >= 200)
                     {
-                        registerDto.Full = true;
-                        if ((await Update(registerDto)).IsNotSuccess(out bookResponse, out registerDto))
+                        if (request.CreateNewBook)
                         {
-                            return await ActionResponse<StudentRegisterEntryDto>.ReturnError(bookResponse.Message);
+                            entityToAdd.StudentRegister.Full = true;
+                            unitOfWork.Save();
+                        }
+                        else
+                        {
+                            registerDto.Full = true;
+                            if ((await Update(registerDto)).IsNotSuccess(out bookResponse, out registerDto))
+                            {
+                                scope.Dispose();
+                                return await ActionResponse<StudentRegisterEntryDto>.ReturnError(bookResponse.Message);
+                            }
                         }
                     }
 
