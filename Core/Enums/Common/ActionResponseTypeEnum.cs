@@ -1,4 +1,4 @@
-﻿namespace NgSchoolsBusinessLayer.Enums.Common
+﻿namespace Core.Enums.Common
 {
     public enum ActionResponseTypeEnum
     {

@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
-using NgSchoolsBusinessLayer.Enums.Common;
+using Core.Enums.Common;
 using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Requests.Base

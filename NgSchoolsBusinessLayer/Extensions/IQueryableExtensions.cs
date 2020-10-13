@@ -1,11 +1,11 @@
 ﻿using ExpressionPredicateBuilder;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
-using NgSchoolsBusinessLayer.Enums.Common;
+using Core.Enums.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Utilities;
-using NgSchoolsBusinessLayer.Utilities.Attributes;
+using Core.Utilities.Attributes;
 using NgSchoolsDataLayer.Models.BaseTypes;
 using System;
 using System.Collections.Generic;
@@ -13,6 +13,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using Core.Utilities.Attributes;
 
 namespace NgSchoolsBusinessLayer.Extensions
 {

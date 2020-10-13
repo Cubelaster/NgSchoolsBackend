@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NgSchoolsBusinessLayer.Utilities.Attributes
+namespace Core.Utilities.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class CacheRefreshSource : Attribute

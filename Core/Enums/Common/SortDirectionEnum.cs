@@ -1,6 +1,6 @@
-﻿using NgSchoolsBusinessLayer.Utilities.Attributes;
+﻿using Core.Utilities.Attributes;
 
-namespace NgSchoolsBusinessLayer.Enums.Common
+namespace Core.Enums.Common
 {
     public enum SortDirectionEnum
     {

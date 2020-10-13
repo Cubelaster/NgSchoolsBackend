@@ -6,7 +6,7 @@ using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Models.ViewModels.Locations;
 using NgSchoolsBusinessLayer.Services.Contracts;
-using NgSchoolsBusinessLayer.Utilities.Attributes;
+using Core.Utilities.Attributes;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
 using System;

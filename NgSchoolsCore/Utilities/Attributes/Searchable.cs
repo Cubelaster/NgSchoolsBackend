@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NgSchoolsBusinessLayer.Utilities.Attributes
+namespace NgSchoolsCore.Utilities.Attributes
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class Searchable : Attribute

@@ -1,4 +1,4 @@
-﻿using NgSchoolsBusinessLayer.Enums.Common;
+﻿using Core.Enums.Common;
 using System;
 using System.Collections;
 using System.Collections.Generic;

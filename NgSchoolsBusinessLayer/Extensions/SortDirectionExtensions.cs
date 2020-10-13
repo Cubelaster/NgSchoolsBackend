@@ -1,4 +1,4 @@
-﻿using NgSchoolsBusinessLayer.Enums.Common;
+﻿using Core.Enums.Common;
 
 namespace NgSchoolsBusinessLayer.Extensions
 {

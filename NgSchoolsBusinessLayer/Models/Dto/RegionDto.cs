@@ -1,5 +1,5 @@
-﻿using NgSchoolsBusinessLayer.Enums;
-using NgSchoolsBusinessLayer.Utilities.Attributes;
+﻿using Core.Enums;
+using Core.Utilities.Attributes;
 using System.Collections.Generic;
 
 namespace NgSchoolsBusinessLayer.Models.Dto

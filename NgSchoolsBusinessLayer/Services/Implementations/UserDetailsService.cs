@@ -18,13 +18,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         #region Ctors and Members
 
         private readonly IMapper mapper;
-        private readonly ICacheService cacheService;
         private readonly IUnitOfWork unitOfWork;
 
-        public UserDetailsService(IMapper mapper, ICacheService cacheService, IUnitOfWork unitOfWork)
+        public UserDetailsService(IMapper mapper, IUnitOfWork unitOfWork)
         {
             this.mapper = mapper;
-            this.cacheService = cacheService;
             this.unitOfWork = unitOfWork;
         }
 

@@ -1,5 +1,5 @@
 ﻿using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
-using NgSchoolsBusinessLayer.Utilities.Attributes;
+using Core.Utilities.Attributes;
 using System;
 using System.Collections.Generic;
 

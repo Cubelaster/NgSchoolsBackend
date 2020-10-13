@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using NgSchoolsBusinessLayer.Enums.Common;
+using Core.Enums.Common;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -14,7 +14,7 @@ using NgSchoolsBusinessLayer.Models.Requests;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Services.Contracts;
-using NgSchoolsBusinessLayer.Utilities.Attributes;
+using Core.Utilities.Attributes;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
@@ -37,15 +37,13 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         private readonly IStudentService studentService;
         private readonly IMapper mapper;
         private readonly IUnitOfWork unitOfWork;
-        private readonly ICacheService cacheService;
 
         public StudentRegisterService(IStudentService studentService, IMapper mapper,
-            IUnitOfWork unitOfWork, ICacheService cacheService)
+            IUnitOfWork unitOfWork)
         {
             this.studentService = studentService;
             this.mapper = mapper;
             this.unitOfWork = unitOfWork;
-            this.cacheService = cacheService;
         }
 
         #endregion Ctors and Members
@@ -96,16 +94,11 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entities = unitOfWork.GetGenericRepository<StudentRegister>()
-                    .ReadAllActiveAsQueryable()
-                    .Include(e => e.StudentRegisterEntries)
-                        .ThenInclude(e => e.EducationProgram)
-                    .Include(e => e.StudentRegisterEntries)
-                        .ThenInclude(e => e.StudentsInGroups)
-                    .ToList();
+                var query = unitOfWork.GetGenericRepository<StudentRegister>()
+                    .ReadAllActiveAsQueryable();
 
                 return await ActionResponse<List<StudentRegisterDto>>
-                    .ReturnSuccess(mapper.Map<List<StudentRegister>, List<StudentRegisterDto>>(entities));
+                    .ReturnSuccess(mapper.ProjectTo<StudentRegisterDto>(query).ToList());
             }
             catch (Exception)
             {
@@ -117,7 +110,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<StudentRegister>().GetAllAsQueryable().Count());
+                return await ActionResponse<int>.ReturnSuccess(unitOfWork.GetGenericRepository<StudentRegister>().ReadAllActiveAsQueryable().Count());
             }
             catch (Exception)
             {
@@ -166,41 +159,47 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        [CacheRefreshSource(typeof(StudentRegisterDto))]
-        public async Task<ActionResponse<List<StudentRegisterDto>>> GetAllForCache()
-        {
-            try
-            {
+        //[CacheRefreshSource(typeof(StudentRegisterDto))]
+        //public async Task<ActionResponse<List<StudentRegisterDto>>> GetAllForCache()
+        //{
+        //    try
+        //    {
 
-                var entities = unitOfWork.GetGenericRepository<StudentRegister>()
-                    .ReadAllActiveAsQueryable()
-                    .Include(e => e.StudentRegisterEntries)
-                        .ThenInclude(e => e.EducationProgram)
-                    .Include(e => e.StudentRegisterEntries)
-                        .ThenInclude(e => e.StudentsInGroups)
-                    .ToList();
+        //        var entities = unitOfWork.GetGenericRepository<StudentRegister>()
+        //            .ReadAllActiveAsQueryable()
+        //            .Include(e => e.StudentRegisterEntries)
+        //                .ThenInclude(e => e.EducationProgram)
+        //            .Include(e => e.StudentRegisterEntries)
+        //                .ThenInclude(e => e.StudentsInGroups)
+        //            .ToList();
 
-                return await ActionResponse<List<StudentRegisterDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterDto>>(entities));
-            }
-            catch (Exception)
-            {
-                return await ActionResponse<List<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata svih matičnih knjiga.");
-            }
-        }
+        //        return await ActionResponse<List<StudentRegisterDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterDto>>(entities));
+        //    }
+        //    catch (Exception)
+        //    {
+        //        return await ActionResponse<List<StudentRegisterDto>>.ReturnError("Greška prilikom dohvata svih matičnih knjiga.");
+        //    }
+        //}
 
         public async Task<ActionResponse<PagedResult<StudentRegisterDto>>> GetAllPaged(BasePagedRequest pagedRequest)
         {
             try
             {
-                List<StudentRegisterDto> studentRegisters = new List<StudentRegisterDto>();
-                var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterDto>>();
-                if (!cachedResponse.IsSuccessAndHasData(out studentRegisters))
-                {
-                    studentRegisters = (await GetAll()).GetData();
-                }
+                var query = unitOfWork.GetGenericRepository<StudentRegister>()
+                    .ReadAllActiveAsQueryable();
 
-                var pagedResult = await studentRegisters.AsQueryable().GetPaged(pagedRequest);
-                return await ActionResponse<PagedResult<StudentRegisterDto>>.ReturnSuccess(pagedResult);
+                var pagedResult = await query.GetPaged(pagedRequest, true);
+
+                var realResult = new PagedResult<StudentRegisterDto>
+                {
+                    CurrentPage = pagedResult.CurrentPage,
+                    PageCount = pagedResult.PageCount,
+                    PageSize = pagedResult.PageSize,
+                    RowCount = pagedResult.RowCount,
+                    Results = mapper.ProjectTo<StudentRegisterDto>(pagedResult.ResultQuery).ToList()
+                };
+
+                return await ActionResponse<PagedResult<StudentRegisterDto>>.ReturnSuccess(realResult);
             }
             catch (Exception)
             {
@@ -231,10 +230,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom upisa matične knjige.");
             }
-            //finally
-            //{
-            //    await cacheService.RefreshCache<List<StudentRegisterDto>>();
-            //}
         }
 
         public async Task<ActionResponse<StudentRegisterDto>> Update(StudentRegisterDto entityDto)
@@ -256,10 +251,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom upisa matične knjige.");
             }
-            //finally
-            //{
-            //    await cacheService.RefreshCache<List<StudentRegisterDto>>();
-            //}
         }
 
         public async Task<ActionResponse<StudentRegisterDto>> Delete(int id)
@@ -294,10 +285,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<StudentRegisterDto>.ReturnError("Greška prilikom brisanja matične knjige.");
             }
-            //finally
-            //{
-            //    await cacheService.RefreshCache<List<StudentRegisterDto>>();
-            //}
         }
 
         public async Task<ActionResponse<StudentRegisterEntryInsertRequest>> PrepareForInsert(StudentRegisterEntryInsertRequest request)
@@ -333,13 +320,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     }
                     else
                     {
-                        if ((await cacheService.GetFromCache<List<StudentRegisterDto>>())
-                            .IsNotSuccess(out registerResponse, out List<StudentRegisterDto> registers))
+                        if ((await GetAll()).IsNotSuccess(out registerResponse, out List<StudentRegisterDto> registers))
                         {
-                            if ((await GetAll()).IsNotSuccess(out registerResponse, out registers))
-                            {
-                                return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError("Greška prilikom dohvata postojećih matičnih knjiga.");
-                            }
+                            return await ActionResponse<StudentRegisterEntryInsertRequest>.ReturnError("Greška prilikom dohvata postojećih matičnih knjiga.");
                         }
 
                         var minBookNumber = registers.Min(r => r.BookNumber) ?? 0;
@@ -456,12 +439,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<StudentRegisterEntryDto> entityDtos = new List<StudentRegisterEntryDto>();
-                var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterEntryDto>>();
-                if (!cachedResponse.IsSuccessAndHasData(out entityDtos))
-                {
-                    entityDtos = (await GetAllEntries()).GetData();
-                }
+                var entityDtos = (await GetAllEntries()).GetData();
 
                 var pagedResult = await entityDtos.AsQueryable().GetPaged(pagedRequest);
                 return await ActionResponse<PagedResult<StudentRegisterEntryDto>>.ReturnSuccess(pagedResult);
@@ -476,12 +454,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<StudentRegisterEntryDto> entityDtos = new List<StudentRegisterEntryDto>();
-                var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterEntryDto>>();
-                if (!cachedResponse.IsSuccessAndHasData(out entityDtos))
-                {
-                    entityDtos = (await GetAllEntries()).GetData();
-                }
+                var entityDtos = (await GetAllEntries()).GetData();
 
                 var pagedResult = await entityDtos
                     .Where(e => e.StudentRegisterId == pagedRequest.AdditionalParams.Id)
@@ -499,12 +472,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                List<StudentRegisterEntryDto> entityDtos = new List<StudentRegisterEntryDto>();
-                var cachedResponse = await cacheService.GetFromCache<List<StudentRegisterEntryDto>>();
-                if (!cachedResponse.IsSuccessAndHasData(out entityDtos))
-                {
-                    entityDtos = (await GetAllEntries()).GetData();
-                }
+                var entityDtos = (await GetAllEntries()).GetData();
 
                 entityDtos = entityDtos.Where(sre => sre.StudentRegisterId == id).ToList();
                 return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(entityDtos);
@@ -527,31 +495,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .ToList();
 
                 return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterEntryDto>>(insertedStudents));
-            }
-            catch (Exception)
-            {
-                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnError("Greška prilikom dohvata zapisa koji sadrže traženi program i studenta.");
-            }
-        }
-
-        public async Task<ActionResponse<List<StudentRegisterEntryDto>>> GetEntriesByProgramId(int id)
-        {
-            try
-            {
-                if ((await cacheService.GetFromCache<List<StudentRegisterEntryDto>>())
-                    .IsNotSuccess(out ActionResponse<List<StudentRegisterEntryDto>> response, out List<StudentRegisterEntryDto> entries))
-                {
-                    var query = unitOfWork.GetGenericRepository<StudentRegisterEntry>()
-                        .ReadAllActiveAsQueryable()
-                        .Where(e => e.EducationProgramId == id);
-
-                    return await ActionResponse<List<StudentRegisterEntryDto>>
-                        .ReturnSuccess(mapper.ProjectTo<StudentRegisterEntryDto>(query).ToList());
-                }
-
-                var result = entries.Where(e => e.EducationProgramId == id).ToList();
-
-                return await ActionResponse<List<StudentRegisterEntryDto>>.ReturnSuccess(mapper.Map<List<StudentRegisterEntryDto>>(result));
             }
             catch (Exception)
             {

@@ -1,7 +1,7 @@
-﻿using NgSchoolsBusinessLayer.Enums;
+﻿using NgSchoolsCore.Enums;
 using System;
 
-namespace NgSchoolsBusinessLayer.Utilities.Attributes
+namespace NgSchoolsCore.Utilities.Attributes
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class Cached : Attribute
@@ -10,7 +10,7 @@ namespace NgSchoolsBusinessLayer.Utilities.Attributes
 
         public Cached(CacheKeysEnum key)
         {
-            this.Key = key.ToString();
+            Key = key.ToString();
         }
     }
 }

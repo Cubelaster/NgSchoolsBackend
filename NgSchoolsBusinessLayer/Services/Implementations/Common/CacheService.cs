@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
-using NgSchoolsBusinessLayer.Enums.Common;
+using Core.Enums.Common;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Services.Contracts;
-using NgSchoolsBusinessLayer.Utilities.Attributes;
+using Core.Utilities.Attributes;
 using System;
 using System.Linq;
 using System.Reflection;

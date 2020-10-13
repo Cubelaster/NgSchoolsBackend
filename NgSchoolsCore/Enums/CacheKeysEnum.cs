@@ -1,4 +1,4 @@
-﻿namespace NgSchoolsBusinessLayer.Enums
+﻿namespace NgSchoolsCore.Enums
 {
     public enum CacheKeysEnum
     {

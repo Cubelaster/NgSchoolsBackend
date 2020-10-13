@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace NgSchoolsBusinessLayer.Utilities.Attributes
+namespace Core.Utilities.Attributes
 {
     [AttributeUsage(AttributeTargets.All)]
     public sealed class StringValueAttribute : Attribute
     {
         public StringValueAttribute(string value)
         {
-            this.StringValue = value;
+            StringValue = value;
         }
 
         public string StringValue { get; private set; }

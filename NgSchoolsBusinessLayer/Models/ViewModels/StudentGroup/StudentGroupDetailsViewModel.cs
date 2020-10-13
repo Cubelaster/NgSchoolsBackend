@@ -2,7 +2,7 @@
 using NgSchoolsBusinessLayer.Models.Dto.StudentGroup;
 using NgSchoolsBusinessLayer.Models.ViewModels.Students;
 using NgSchoolsBusinessLayer.Models.ViewModels.User;
-using NgSchoolsBusinessLayer.Utilities.Attributes;
+using Core.Utilities.Attributes;
 using System;
 using System.Collections.Generic;
 

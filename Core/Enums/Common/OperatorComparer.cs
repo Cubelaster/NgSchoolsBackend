@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace NgSchoolsBusinessLayer.Enums.Common
+namespace Core.Enums.Common
 {
     public enum OperatorComparer
     {

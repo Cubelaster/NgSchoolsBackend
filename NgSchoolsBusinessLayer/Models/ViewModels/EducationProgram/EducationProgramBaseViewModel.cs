@@ -1,4 +1,4 @@
-﻿using NgSchoolsBusinessLayer.Utilities.Attributes;
+﻿using Core.Utilities.Attributes;
 
 namespace NgSchoolsBusinessLayer.Models.ViewModels.EducationProgram
 {
