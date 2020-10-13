@@ -619,7 +619,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 {
                     ThemeId = pds.ThemeId.Value,
                     PlanDaySubjectId = entity.Id,
-                    HoursNumber = pds.HoursNumber
+                    HoursNumber = pds.HoursNumber,
+                    ClassTypes = pds.ClassTypes,
+                    PerfomingType = pds.PerfomingType,
                 }).ToList();
 
             var themesToModify = entityDto.PlanDaySubjectThemes.Where(cd => currentThemes
