@@ -1,5 +1,10 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
+using Core.Utilities.Attributes;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -7,14 +12,9 @@ using NgSchoolsBusinessLayer.Models.Dto;
 using NgSchoolsBusinessLayer.Models.Requests.Base;
 using NgSchoolsBusinessLayer.Models.ViewModels;
 using NgSchoolsBusinessLayer.Services.Contracts;
-using Core.Utilities.Attributes;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -216,8 +216,8 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 entityDto.Files = null;
 
                 var entityToUpdate = unitOfWork.GetGenericRepository<Student>()
-                    .FindBy(c => c.Id == entityDto.Id,
-                    includeProperties: includeProperties);
+                    .ReadAll(c => c.Id == entityDto.Id, includeProperties: includeProperties)
+                    .FirstOrDefault();
 
                 mapper.Map(entityDto, entityToUpdate);
                 unitOfWork.GetGenericRepository<Student>().Update(entityToUpdate);
@@ -231,13 +231,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     return fileResponse;
                 }
 
-                await cacheService.RefreshCache<List<StudentDto>>();
+                entityToUpdate = unitOfWork.GetGenericRepository<Student>()
+                    .ReadAll(c => c.Id == entityDto.Id, includeProperties: includeProperties)
+                    .FirstOrDefault();
+
                 return await ActionResponse<StudentDto>
                     .ReturnSuccess(mapper.Map<Student, StudentDto>(entityToUpdate));
             }
             catch (Exception)
             {
                 return await ActionResponse<StudentDto>.ReturnError("Greška prilikom ažuriranja podataka za studenta.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<StudentDto>>();
             }
         }
 
@@ -368,7 +375,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var response = await ActionResponse<List<StudentFileDto>>.ReturnSuccess(null, "Datoteka uspješno dodani studentu.");
+                var response = await ActionResponse<List<StudentFileDto>>.ReturnSuccess(entities, "Datoteka uspješno dodani studentu.");
                 entities.ForEach(async s =>
                 {
                     if ((await AddFileToStudent(s))
@@ -393,9 +400,9 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToAdd = mapper.Map<StudentFileDto, StudentFiles>(file);
                 unitOfWork.GetGenericRepository<StudentFiles>().Add(entityToAdd);
                 unitOfWork.Save();
-                return await ActionResponse<StudentFileDto>
-                    .ReturnSuccess(mapper.Map<StudentFiles, StudentFileDto>(entityToAdd),
-                    "Datoteka uspješno dodana studentu.");
+                file.Id = entityToAdd.Id;
+
+                return await ActionResponse<StudentFileDto>.ReturnSuccess(file, "Datoteka uspješno dodana studentu.");
             }
             catch (Exception)
             {
