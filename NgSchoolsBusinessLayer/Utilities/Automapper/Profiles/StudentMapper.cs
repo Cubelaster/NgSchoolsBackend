@@ -19,7 +19,8 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
                 .ForMember(dest => dest.StudentRegisterEducationProgramIds, opt =>
                     opt.MapFrom(src => src.StudentsInGroups
                     .Where(sig => sig.Status == DatabaseEntityStatusEnum.Active && sig.StudentRegisterEntry != null)
-                    .Select(sig => sig.StudentRegisterEntry.EducationProgramId)));
+                    .Select(sig => sig.StudentRegisterEntry.EducationProgramId)))
+                .ForMember(dest => dest.CanBeDeleted, opt => opt.MapFrom(src => !(src.StudentsInGroups.Any() || src.StudentClassAttendances.Any())));
 
             CreateMap<StudentDto, Student>()
                 .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(src => src.Photo != null ? src.Photo.Id : null))

@@ -71,5 +71,7 @@ namespace NgSchoolsBusinessLayer.Models.Dto
 
         public List<FileDto> Files { get; set; }
         public List<int> StudentRegisterEducationProgramIds { get; set; }
+
+        public bool CanBeDeleted { get; set; } = true;
     }
 }

@@ -74,6 +74,7 @@ namespace NgSchoolsDataLayer.Models
         public virtual BusinessPartner Employer { get; set; }
 
         public virtual ICollection<StudentsInGroups> StudentsInGroups { get; set; }
+        public virtual ICollection<StudentClassAttendance> StudentClassAttendances { get; set; }
         public virtual ICollection<StudentFiles> Files { get; set; }
     }
 }
