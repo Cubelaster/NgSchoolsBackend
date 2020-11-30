@@ -1493,32 +1493,40 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     .FindBy(p => p.Id == entityDto.Id,
                     includeProperties: "StudentClassAttendances");
 
-                var currentStudents = mapper.Map<List<StudentClassAttendance>, List<StudentClassAttendanceDto>>(entity.StudentClassAttendances.ToList());
+                var currentAttendances = mapper.Map<List<StudentClassAttendance>, List<StudentClassAttendanceDto>>(entity.StudentClassAttendances.ToList());
 
-                var newStudents = entityDto.StudentClassAttendances;
+                var newAttendances = entityDto.StudentClassAttendances;
 
-                var studentsToAdd = newStudents
-                    .Where(nt => !currentStudents.Select(cd => cd.Id).Contains(nt.Id))
+                var attendancesToAdd = newAttendances
+                    .Where(nt => !currentAttendances.Select(cd => cd.Id).Contains(nt.Id))
                     .Select(ca =>
                     {
                         ca.StudentGroupClassAttendanceId = entityDto.Id;
                         return ca;
                     }).ToList();
 
-                var studentsToModify = newStudents
-                    .Where(cd => currentStudents.Select(nd => nd.Id).Contains(cd.Id))
+                var attendancesToModify = newAttendances
+                    .Where(cd => currentAttendances.Select(nd => nd.Id).Contains(cd.Id))
                     .Select(ca =>
                     {
                         ca.StudentGroupClassAttendanceId = entityDto.Id;
                         return ca;
                     }).ToList();
 
-                if ((await AddAttendances(studentsToAdd)).IsNotSuccess(out ActionResponse<List<StudentClassAttendanceDto>> actionResponse))
+                var attendancesToRemove = currentAttendances
+                    .Where(cd => !newAttendances.Select(nd => nd.Id).Contains(cd.Id)).ToList();
+
+                if ((await RemoveAttendances(attendancesToRemove)).IsNotSuccess(out ActionResponse<List<StudentClassAttendanceDto>> actionResponse))
+                {
+                    return await ActionResponse<StudentGroupClassAttendanceDto>.ReturnError("Neuspješno brisanje praćenja nastave za studente.");
+                }
+
+                if ((await AddAttendances(attendancesToAdd)).IsNotSuccess(out actionResponse))
                 {
                     return await ActionResponse<StudentGroupClassAttendanceDto>.ReturnError("Neuspješno ažuriranje praćenja nastave za studente.");
                 }
 
-                if ((await ModifyAttendances(studentsToModify)).IsNotSuccess(out actionResponse))
+                if ((await ModifyAttendances(attendancesToModify)).IsNotSuccess(out actionResponse))
                 {
                     return await ActionResponse<StudentGroupClassAttendanceDto>.ReturnError("Neuspješno ažuriranje praćenja nastave za studente.");
                 }
