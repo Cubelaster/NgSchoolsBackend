@@ -530,6 +530,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             {
                 return await ActionResponse<StudentGroupDto>.ReturnError("Greška prilikom ažuriranja grupe studenata.");
             }
+            finally
+            {
+                await cacheService.RefreshCache<List<StudentDto>>();
+            }
         }
 
         public async Task<ActionResponse<ModifyStudentsInGroupRequest>> ModifyStudentsInGroup(ModifyStudentsInGroupRequest request)
@@ -577,6 +581,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             catch (Exception)
             {
                 return await ActionResponse<ModifyStudentsInGroupRequest>.ReturnError("Greška prilikom ažuriranja grupe studenata.");
+            }
+            finally
+            {
+                await cacheService.RefreshCache<List<StudentDto>>();
             }
         }
 
