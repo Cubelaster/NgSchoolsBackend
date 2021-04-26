@@ -36,6 +36,8 @@ namespace NgSchoolsDataLayer.Repository.Base
 
         void Add(T toAdd);
 
+        void AddRange(List<T> toAdd);
+
         void Update(T toUpdate);
 
         void Delete(Guid id);

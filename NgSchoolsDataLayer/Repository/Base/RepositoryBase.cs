@@ -138,6 +138,11 @@ namespace NgSchoolsDataLayer.Repository.Base
             context.Set<T>().Add(toAdd);
         }
 
+        public virtual void AddRange(List<T> toAdd)
+        {
+            context.Set<T>().AddRange(toAdd);
+        }
+
         public virtual void Update(T toUpdate)
         {
             context.Entry(toUpdate).State = EntityState.Modified;
