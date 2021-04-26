@@ -77,10 +77,10 @@ namespace ExpressionPredicateBuilder
         private static Expression BuildComparsion(Expression left, OperatorComparer comparer, Expression right)
         {
             var mask = new List<OperatorComparer>{
-            OperatorComparer.Contains,
-            OperatorComparer.StartsWith,
-            OperatorComparer.EndsWith
-        };
+                OperatorComparer.Contains,
+                OperatorComparer.StartsWith,
+                OperatorComparer.EndsWith
+            };
             if (mask.Contains(comparer) && left.Type != typeof(string))
             {
                 comparer = OperatorComparer.Equals;

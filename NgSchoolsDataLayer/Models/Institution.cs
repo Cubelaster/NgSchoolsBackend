@@ -36,6 +36,9 @@ namespace NgSchoolsDataLayer.Models
         public virtual Municipality Municipality { get; set; }
         public ICollection<InstitutionFile> InstitutionFiles { get; set; }
 
+        public int? SealId { get; set; }
+        public UploadedFile Seal { get; set; }
+
         public virtual GoverningCouncil GoverningCouncil { get; set; }
     }
 }

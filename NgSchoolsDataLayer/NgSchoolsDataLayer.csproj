@@ -71,6 +71,8 @@
     <Compile Remove="Migrations\20201130184454_Test.Designer.cs" />
     <Compile Remove="Migrations\20201130184605_Test.cs" />
     <Compile Remove="Migrations\20201130184605_Test.Designer.cs" />
+    <Compile Remove="Migrations\20210426190921_Institution_Add_Seal.cs" />
+    <Compile Remove="Migrations\20210426190921_Institution_Add_Seal.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

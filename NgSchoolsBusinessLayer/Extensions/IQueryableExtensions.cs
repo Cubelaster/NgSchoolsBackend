@@ -1,19 +1,18 @@
-﻿using ExpressionPredicateBuilder;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
-using Core.Enums.Common;
-using NgSchoolsBusinessLayer.Models.Common.Paging;
-using NgSchoolsBusinessLayer.Models.Requests.Base;
-using NgSchoolsBusinessLayer.Utilities;
-using Core.Utilities.Attributes;
-using NgSchoolsDataLayer.Models.BaseTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using Core.Enums.Common;
 using Core.Utilities.Attributes;
+using ExpressionPredicateBuilder;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
+using NgSchoolsBusinessLayer.Models.Common.Paging;
+using NgSchoolsBusinessLayer.Models.Requests.Base;
+using NgSchoolsBusinessLayer.Utilities;
+using NgSchoolsDataLayer.Models.BaseTypes;
 
 namespace NgSchoolsBusinessLayer.Extensions
 {
@@ -32,7 +31,7 @@ namespace NgSchoolsBusinessLayer.Extensions
                     PageSize = pagedRequest.PageSize
                 };
 
-                var totalCount = query.Count();
+                //var totalCount = query.Count();
 
                 int skip = (currentPage - 1) * pagedRequest.PageSize;
 
@@ -224,7 +223,7 @@ namespace NgSchoolsBusinessLayer.Extensions
                 foreach (var sort in sorts.Skip(1))
                 {
                     methodName = sort.Value.GetOrderByNames(true);
-                    orderedQuery = orderedQuery.ThenOrderBy(firstSort.Key, methodName);
+                    orderedQuery = orderedQuery.ThenOrderBy(sort.Key, methodName);
                 }
 
                 return orderedQuery;
