@@ -1282,27 +1282,48 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<StudentGroup>()
-                    .FindBy(p => p.Id == request.Id,
-                    includeProperties: "StudentGroupClassAttendances.StudentClassAttendances");
+                //var entity = unitOfWork.GetGenericRepository<StudentGroup>()
+                //    .FindBy(p => p.Id == request.Id,
+                //    includeProperties: "StudentGroupClassAttendances.StudentClassAttendances");
 
-                var currentDays = mapper.Map<List<StudentGroupClassAttendance>, List<StudentGroupClassAttendanceDto>>(entity.StudentGroupClassAttendances.ToList());
+                var currentDayIds = unitOfWork.GetGenericRepository<StudentGroupClassAttendance>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(sgca => sgca.StudentGroupId == request.Id)
+                    .Select(sgca => sgca.Id)
+                    .ToList();
+
+                //var currentDays = mapper.Map<List<StudentGroupClassAttendance>, List<StudentGroupClassAttendanceDto>>(entity.StudentGroupClassAttendances.ToList());
 
                 var newDays = request.StudentGroupClassAttendances;
 
-                var daysToRemove = currentDays
-                    .Where(cd => !newDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
+                var daysToRemove = currentDayIds
+                    .Where(cdi => !newDays.Select(nd => nd.Id).Contains(cdi))
+                    .ToList();
+
+                //var daysToRemove = currentDays
+                //    .Where(cd => !newDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
 
                 var daysToAdd = newDays
-                    .Where(nt => !currentDays.Select(cd => cd.Id).Contains(nt.Id))
-                    .Select(nt =>
+                    .Where(nd => !currentDayIds.Contains(nd.Id ?? 0))
+                    .Select(nd =>
                     {
-                        nt.StudentGroupId = request.Id;
-                        return nt;
+                        nd.StudentGroupId = request.Id;
+                        return nd;
                     })
                     .ToList();
 
-                var daysToModify = newDays.Where(cd => currentDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
+                //var daysToAdd = newDays
+                //    .Where(nt => !currentDays.Select(cd => cd.Id).Contains(nt.Id))
+                //    .Select(nt =>
+                //    {
+                //        nt.StudentGroupId = request.Id;
+                //        return nt;
+                //    })
+                //    .ToList();
+
+                //var daysToModify = newDays.Where(cd => currentDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
+
+                var daysToModify = newDays.Where(cd => currentDayIds.Contains(cd.Id ?? 0)).ToList();
 
                 if ((await RemoveDaysFromAttendance(daysToRemove))
                     .IsNotSuccess(out ActionResponse<List<StudentGroupClassAttendanceDto>> actionResponse))
@@ -1315,10 +1336,10 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                     return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
                 }
 
-                if ((await ModifyDaysInAttendance(daysToModify)).IsNotSuccess(out actionResponse))
-                {
-                    return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
-                }
+                //if ((await ModifyDaysInAttendance(daysToModify)).IsNotSuccess(out actionResponse))
+                //{
+                //    return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
+                //}
 
                 return await ActionResponse<ModifyClassAttendanceRequest>.ReturnSuccess(request, "Uspješno izmijenjeni dani u praćenju nastave.");
             }
@@ -1330,7 +1351,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
         #region Remove Days
 
-        public async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> RemoveDaysFromAttendance(List<StudentGroupClassAttendanceDto> days)
+        private async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> RemoveDaysFromAttendance(List<StudentGroupClassAttendanceDto> days)
         {
             try
             {
@@ -1352,7 +1373,26 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<StudentGroupClassAttendanceDto>> RemoveDayFromAttendance(StudentGroupClassAttendanceDto entityDto)
+        private async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> RemoveDaysFromAttendance(List<int> dayIds)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnSuccess(null, "Dani uspješno maknuti iz plana.");
+
+                var days = unitOfWork.GetGenericRepository<StudentGroupClassAttendance>().GetAll(e => dayIds.Contains(e.Id));
+
+                unitOfWork.GetGenericRepository<StudentGroupClassAttendance>().DeleteRange(days);
+                unitOfWork.Save();
+
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError("Greška prilikom micanja dana iz plana.");
+            }
+        }
+
+        private async Task<ActionResponse<StudentGroupClassAttendanceDto>> RemoveDayFromAttendance(StudentGroupClassAttendanceDto entityDto)
         {
             try
             {
@@ -1375,15 +1415,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var response = await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnSuccess(null, "Dani uspješno dodani u plan.");
-                entityDtos.ForEach(async pd =>
-                {
-                    if ((await AddDayToAttendance(pd))
-                        .IsNotSuccess(out ActionResponse<StudentGroupClassAttendanceDto> actionResponse, out pd))
-                    {
-                        response = await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError(actionResponse.Message);
-                        return;
-                    }
-                });
+
+                var entitiesToAdd = mapper.Map<List<StudentGroupClassAttendance>>(entityDtos);
+                unitOfWork.GetGenericRepository<StudentGroupClassAttendance>().AddRange(entitiesToAdd);
+                unitOfWork.Save();
+
+                //entityDtos.ForEach(async pd =>
+                //{
+                //    if ((await AddDayToAttendance(pd))
+                //        .IsNotSuccess(out ActionResponse<StudentGroupClassAttendanceDto> actionResponse, out pd))
+                //    {
+                //        response = await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError(actionResponse.Message);
+                //        return;
+                //    }
+                //});
                 return response;
             }
             catch (Exception)

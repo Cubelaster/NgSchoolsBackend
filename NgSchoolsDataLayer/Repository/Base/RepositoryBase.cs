@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NgSchoolsDataLayer.Context;
-using NgSchoolsDataLayer.Models.BaseTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using NgSchoolsDataLayer.Context;
+using NgSchoolsDataLayer.Models.BaseTypes;
 
 namespace NgSchoolsDataLayer.Repository.Base
 {
@@ -163,6 +163,11 @@ namespace NgSchoolsDataLayer.Repository.Base
         {
             T entity = FindSingle(id);
             context.Set<T>().Remove(entity);
+        }
+
+        public void DeleteRange(List<T> entities)
+        {
+            context.Set<T>().RemoveRange(entities);
         }
     }
 }

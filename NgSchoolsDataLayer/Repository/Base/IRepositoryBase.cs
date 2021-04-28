@@ -45,5 +45,7 @@ namespace NgSchoolsDataLayer.Repository.Base
         void Delete(int id);
 
         void Delete(T entity);
+
+        void DeleteRange(List<T> entities);
     }
 }
