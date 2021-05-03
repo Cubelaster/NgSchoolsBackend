@@ -34,7 +34,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var institution = unitOfWork.GetGenericRepository<Institution>()
-                    .GetAll(includeProperties: "Principal.UserDetails.Signature,Country,Region,City,InstitutionFiles.File,GoverningCouncil.GoverningCouncilMembers.User.UserDetails.Signature").FirstOrDefault();
+                    .GetAll(includeProperties: "Principal.UserDetails.Signature,Country,Region,City,InstitutionFiles.File,GoverningCouncil.GoverningCouncilMembers.User.UserDetails.Signature,Seal,Logo").FirstOrDefault();
 
                 return await ActionResponse<InstitutionDto>
                     .ReturnSuccess(mapper.Map<Institution, InstitutionDto>(institution));
