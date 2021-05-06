@@ -89,7 +89,7 @@ namespace NgSchoolsWebApi.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpPost]
-        public async Task<ActionResponse<ModifyClassAttendanceRequest>> ModifyClassAttendance([FromBody]ModifyClassAttendanceRequest request)
+        public async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> ModifyClassAttendance([FromBody]ModifyClassAttendanceRequest request)
         {
             return await studentGroupService.ModifyClassAttendance(request);
         }
