@@ -16,11 +16,13 @@ namespace NgSchoolsBusinessLayer.Utilities.Automapper.Profiles
 
             CreateMap<InstitutionDto, Institution>()
                 .ForMember(dest => dest.LogoId, opt => opt.MapFrom(src => src.Logo != null ? src.Logo.Id : null))
+                .ForMember(dest => dest.SealId, opt => opt.MapFrom(src => src.Seal != null ? src.Seal.Id : null))
                 .ForMember(dest => dest.Country, opt => opt.Ignore())
                 .ForMember(dest => dest.City, opt => opt.Ignore())
                 .ForMember(dest => dest.Region, opt => opt.Ignore())
                 .ForMember(dest => dest.Municipality, opt => opt.Ignore())
                 .ForMember(dest => dest.Logo, opt => opt.Ignore())
+                .ForMember(dest => dest.Seal, opt => opt.Ignore())
                 .ForMember(dest => dest.Principal, opt => opt.Ignore())
                 .ForMember(dest => dest.InstitutionFiles, opt => opt.Ignore())
                 .ForMember(dest => dest.GoverningCouncil, opt => opt.Ignore());

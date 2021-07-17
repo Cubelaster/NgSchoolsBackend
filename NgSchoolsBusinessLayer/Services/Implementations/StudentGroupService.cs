@@ -1,4 +1,9 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Transactions;
+using AutoMapper;
 using NgSchoolsBusinessLayer.Extensions;
 using NgSchoolsBusinessLayer.Models.Common;
 using NgSchoolsBusinessLayer.Models.Common.Paging;
@@ -14,11 +19,6 @@ using NgSchoolsBusinessLayer.Services.Contracts;
 using NgSchoolsDataLayer.Enums;
 using NgSchoolsDataLayer.Models;
 using NgSchoolsDataLayer.Repository.UnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Transactions;
 
 namespace NgSchoolsBusinessLayer.Services.Implementations
 {
@@ -1278,59 +1278,68 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<ModifyClassAttendanceRequest>> ModifyClassAttendance(ModifyClassAttendanceRequest request)
+        public async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> ModifyClassAttendance(ModifyClassAttendanceRequest request)
         {
             try
             {
-                var entity = unitOfWork.GetGenericRepository<StudentGroup>()
-                    .FindBy(p => p.Id == request.Id,
-                    includeProperties: "StudentGroupClassAttendances.StudentClassAttendances");
+                var response = await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnSuccess(null, "Uspješno izmijenjeni dani u praćenju nastave.");
 
-                var currentDays = mapper.Map<List<StudentGroupClassAttendance>, List<StudentGroupClassAttendanceDto>>(entity.StudentGroupClassAttendances.ToList());
+                var currentDayIds = unitOfWork.GetGenericRepository<StudentGroupClassAttendance>()
+                    .ReadAllActiveAsQueryable()
+                    .Where(sgca => sgca.StudentGroupId == request.Id)
+                    .Select(sgca => sgca.Id)
+                    .ToList();
 
                 var newDays = request.StudentGroupClassAttendances;
 
-                var daysToRemove = currentDays
-                    .Where(cd => !newDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
+                var daysToRemove = currentDayIds
+                    .Where(cdi => !newDays.Select(nd => nd.Id).Contains(cdi))
+                    .ToList();
 
                 var daysToAdd = newDays
-                    .Where(nt => !currentDays.Select(cd => cd.Id).Contains(nt.Id))
-                    .Select(nt =>
+                    .Where(nd => !currentDayIds.Contains(nd.Id ?? 0))
+                    .Select(nd =>
                     {
-                        nt.StudentGroupId = request.Id;
-                        return nt;
+                        nd.StudentGroupId = request.Id;
+                        return nd;
                     })
                     .ToList();
 
-                var daysToModify = newDays.Where(cd => currentDays.Select(nd => nd.Id).Contains(cd.Id)).ToList();
+                var daysToModify = newDays.Where(cd => currentDayIds.Contains(cd.Id ?? 0)).ToList();
 
-                if ((await RemoveDaysFromAttendance(daysToRemove))
-                    .IsNotSuccess(out ActionResponse<List<StudentGroupClassAttendanceDto>> actionResponse))
+                if ((await RemoveDaysFromAttendance(daysToRemove)).IsNotSuccess(out var actionResponse))
                 {
-                    return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
+                    return await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
                 }
 
                 if ((await AddDaysToAttendance(daysToAdd)).IsNotSuccess(out actionResponse))
                 {
-                    return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
+                    return await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
                 }
 
                 if ((await ModifyDaysInAttendance(daysToModify)).IsNotSuccess(out actionResponse))
                 {
-                    return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
+                    return await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError("Neuspješno ažuriranje dana u praćenju nastave.");
                 }
 
-                return await ActionResponse<ModifyClassAttendanceRequest>.ReturnSuccess(request, "Uspješno izmijenjeni dani u praćenju nastave.");
+                if ((await GetClassAttendancesByGroupId(request.Id.Value)).IsNotSuccess(out actionResponse, out var data))
+                {
+                    return actionResponse;
+                }
+
+                response.Data = data;
+                return response;
+
             }
             catch (Exception)
             {
-                return await ActionResponse<ModifyClassAttendanceRequest>.ReturnError($"Greška prilikom upisa pohađanja nastave.");
+                return await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError($"Greška prilikom upisa pohađanja nastave.");
             }
         }
 
         #region Remove Days
 
-        public async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> RemoveDaysFromAttendance(List<StudentGroupClassAttendanceDto> days)
+        private async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> RemoveDaysFromAttendance(List<StudentGroupClassAttendanceDto> days)
         {
             try
             {
@@ -1352,7 +1361,26 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             }
         }
 
-        public async Task<ActionResponse<StudentGroupClassAttendanceDto>> RemoveDayFromAttendance(StudentGroupClassAttendanceDto entityDto)
+        private async Task<ActionResponse<List<StudentGroupClassAttendanceDto>>> RemoveDaysFromAttendance(List<int> dayIds)
+        {
+            try
+            {
+                var response = await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnSuccess(null, "Dani uspješno maknuti iz plana.");
+
+                var days = unitOfWork.GetGenericRepository<StudentGroupClassAttendance>().GetAll(e => dayIds.Contains(e.Id));
+
+                unitOfWork.GetGenericRepository<StudentGroupClassAttendance>().DeleteRange(days);
+                unitOfWork.Save();
+
+                return response;
+            }
+            catch (Exception)
+            {
+                return await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError("Greška prilikom micanja dana iz plana.");
+            }
+        }
+
+        private async Task<ActionResponse<StudentGroupClassAttendanceDto>> RemoveDayFromAttendance(StudentGroupClassAttendanceDto entityDto)
         {
             try
             {
@@ -1375,15 +1403,20 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
             try
             {
                 var response = await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnSuccess(null, "Dani uspješno dodani u plan.");
-                entityDtos.ForEach(async pd =>
-                {
-                    if ((await AddDayToAttendance(pd))
-                        .IsNotSuccess(out ActionResponse<StudentGroupClassAttendanceDto> actionResponse, out pd))
-                    {
-                        response = await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError(actionResponse.Message);
-                        return;
-                    }
-                });
+
+                var entitiesToAdd = mapper.Map<List<StudentGroupClassAttendance>>(entityDtos);
+                unitOfWork.GetGenericRepository<StudentGroupClassAttendance>().AddRange(entitiesToAdd);
+                unitOfWork.Save();
+
+                //entityDtos.ForEach(async pd =>
+                //{
+                //    if ((await AddDayToAttendance(pd))
+                //        .IsNotSuccess(out ActionResponse<StudentGroupClassAttendanceDto> actionResponse, out pd))
+                //    {
+                //        response = await ActionResponse<List<StudentGroupClassAttendanceDto>>.ReturnError(actionResponse.Message);
+                //        return;
+                //    }
+                //});
                 return response;
             }
             catch (Exception)
@@ -1441,6 +1474,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                         return;
                     }
                 });
+                unitOfWork.Save();
                 return response;
             }
             catch (Exception)
@@ -1458,7 +1492,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToUpdate = unitOfWork.GetGenericRepository<StudentGroupClassAttendance>().FindSingle(entityDto.Id.Value);
                 mapper.Map(entityDto, entityToUpdate);
                 unitOfWork.GetGenericRepository<StudentGroupClassAttendance>().Update(entityToUpdate);
-                unitOfWork.Save();
 
                 entityDto.StudentClassAttendances = studentAttendance
                     .Select(pd =>
@@ -1507,6 +1540,7 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
 
                 var attendancesToModify = newAttendances
                     .Where(cd => currentAttendances.Select(nd => nd.Id).Contains(cd.Id))
+                    .Where(cd => currentAttendances.First(ca => ca.Id == cd.Id).Attendance != cd.Attendance)
                     .Select(ca =>
                     {
                         ca.StudentGroupClassAttendanceId = entityDto.Id;
@@ -1606,7 +1640,6 @@ namespace NgSchoolsBusinessLayer.Services.Implementations
                 var entityToUpdate = unitOfWork.GetGenericRepository<StudentClassAttendance>().FindSingle(entityDto.Id.Value);
                 mapper.Map(entityDto, entityToUpdate);
                 unitOfWork.GetGenericRepository<StudentClassAttendance>().Update(entityToUpdate);
-                unitOfWork.Save();
                 return await ActionResponse<StudentClassAttendanceDto>
                     .ReturnSuccess(mapper.Map(entityToUpdate, entityDto), "Zapis prisustva uspješno izmijenjen.");
             }
